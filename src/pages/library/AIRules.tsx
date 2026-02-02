@@ -5,8 +5,11 @@ import {
   ArrowUpDown,
   MessageSquare,
   Heart,
-  BrainCircuit } from
+  BrainCircuit,
+  Plus } from
 'lucide-react';
+import { Button } from '../../components/ui/Button';
+
 interface AIRule {
   id: string;
   name: string;
@@ -15,7 +18,14 @@ interface AIRule {
   triggers: number;
   lastUpdated: string;
   createdOn: string;
+  content?: string;
 }
+
+interface AIRulesProps {
+  onAddRule: () => void;
+  onEditRule: (rule: AIRule) => void;
+}
+
 const rules: AIRule[] = [
 {
   id: 'RULE-0001',
@@ -24,7 +34,8 @@ const rules: AIRule[] = [
   status: 'Active',
   triggers: 3,
   lastUpdated: '2d ago',
-  createdOn: '02-02-2026 09:00:00'
+  createdOn: '02-02-2026 09:00:00',
+  content: '<h2>Condition</h2><p>IF patient message contains keywords: <code>["emergency", "suicide", "chest pain", "severe bleeding"]</code></p><h2>Actions</h2><ul><li>Immediately flag conversation as URGENT</li><li>Notify on-call healthcare provider</li><li>Display crisis helpline resources to patient</li><li>Log incident in safety monitoring system</li></ul>'
 },
 {
   id: 'RULE-0002',
@@ -33,7 +44,8 @@ const rules: AIRule[] = [
   status: 'Active',
   triggers: 1,
   lastUpdated: '5d ago',
-  createdOn: '28-01-2026 14:30:00'
+  createdOn: '28-01-2026 14:30:00',
+  content: '<h2>Condition</h2><p>IF patient misses medication reminder for <strong>3 consecutive days</strong></p><h2>Actions</h2><ul><li>Send escalated reminder with importance explanation</li><li>Notify assigned care coordinator</li><li>Offer to schedule medication review appointment</li></ul>'
 },
 {
   id: 'RULE-0003',
@@ -42,7 +54,8 @@ const rules: AIRule[] = [
   status: 'Testing',
   triggers: 2,
   lastUpdated: '1w ago',
-  createdOn: '20-01-2026 11:15:00'
+  createdOn: '20-01-2026 11:15:00',
+  content: '<h2>Condition</h2><p>IF patient completes <strong>3+ daily check-ins</strong> in a week</p><h2>Actions</h2><ul><li>Send encouraging message acknowledging progress</li><li>Update progress streak counter</li><li>Offer optional wellness tip or resource</li></ul>'
 },
 {
   id: 'RULE-0004',
@@ -51,7 +64,8 @@ const rules: AIRule[] = [
   status: 'Active',
   triggers: 1,
   lastUpdated: '3d ago',
-  createdOn: '15-01-2026 16:45:00'
+  createdOn: '15-01-2026 16:45:00',
+  content: '<h2>Condition</h2><p>IF patient reports pain level <strong>&gt;= 8 out of 10</strong></p><h2>Actions</h2><ul><li>Ask follow-up questions about pain characteristics</li><li>Suggest immediate pain management strategies</li><li>Flag for clinical review within 2 hours</li><li>Document in patient health record</li></ul>'
 },
 {
   id: 'RULE-0005',
@@ -60,10 +74,11 @@ const rules: AIRule[] = [
   status: 'Disabled',
   triggers: 2,
   lastUpdated: '2w ago',
-  createdOn: '10-01-2026 10:00:00'
+  createdOn: '10-01-2026 10:00:00',
+  content: '<h2>Condition</h2><p>IF appointment scheduled within next <strong>24 hours</strong></p><h2>Actions</h2><ul><li>Send reminder notification 1 day before</li><li>Send reminder notification 2 hours before</li><li>Include appointment details and preparation instructions</li></ul>'
 }];
 
-export function AIRules() {
+export function AIRules({ onAddRule, onEditRule }: AIRulesProps) {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [filterActive, setFilterActive] = useState(false);
   const toggleRow = (id: string) => {
@@ -105,6 +120,14 @@ export function AIRules() {
             Created On
           </button>
         </div>
+        
+        <Button
+          onClick={onAddRule}
+          size="sm"
+          className="bg-gray-900 hover:bg-gray-800 text-white">
+          <Plus size={16} />
+          Add AI Rule
+        </Button>
       </div>
 
       {/* Table */}
@@ -145,13 +168,15 @@ export function AIRules() {
             {rules.map((rule) =>
             <tr
               key={rule.id}
-              className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors group">
+              onClick={() => onEditRule(rule)}
+              className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors group cursor-pointer">
 
                 <td className="py-3 px-3">
                   <input
                   type="checkbox"
                   checked={selectedRows.includes(rule.id)}
                   onChange={() => toggleRow(rule.id)}
+                  onClick={(e) => e.stopPropagation()}
                   className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
 
                 </td>
@@ -191,11 +216,15 @@ export function AIRules() {
                       {rule.lastUpdated}
                     </span>
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="flex items-center gap-1 text-xs hover:text-gray-600">
+                      <button 
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-1 text-xs hover:text-gray-600">
                         <MessageSquare size={14} />
                         <span>0</span>
                       </button>
-                      <button className="hover:text-red-500">
+                      <button 
+                        onClick={(e) => e.stopPropagation()}
+                        className="hover:text-red-500">
                         <Heart size={14} />
                       </button>
                     </div>

@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { Filter, X, ArrowUpDown, MessageSquare, Heart, Bot, Copy, Edit, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Filter, X, ArrowUpDown, MessageSquare, Bot, Copy, Trash2, Send } from 'lucide-react';
+import { Button } from '../../components/ui/Button';
+
 interface Companion {
   id: string;
   name: string;
@@ -8,6 +10,13 @@ interface Companion {
   users: number;
   createdBy: string;
   createdOn: string;
+}
+
+interface Message {
+  id: string;
+  sender: 'user' | 'bot';
+  content: string;
+  timestamp: string;
 }
 const companions: Companion[] = [
 {
@@ -59,6 +68,9 @@ const companions: Companion[] = [
 export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void }) {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [filterActive, setFilterActive] = useState(false);
+  const [testingCompanion, setTestingCompanion] = useState<Companion | null>(null);
+  const [testMessages, setTestMessages] = useState<Message[]>([]);
+  const [testInput, setTestInput] = useState('');
   const toggleRow = (id: string) => {
     setSelectedRows((prev) =>
     prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
@@ -68,6 +80,50 @@ export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void
     setSelectedRows((prev) =>
     prev.length === companions.length ? [] : companions.map((c) => c.id)
     );
+  };
+
+  const handleTestCompanion = (companion: Companion) => {
+    setTestingCompanion(companion);
+    // Initialize with a welcome message
+    setTestMessages([
+      {
+        id: '1',
+        sender: 'bot',
+        content: `Hello! I'm ${companion.name}, your ${companion.role} companion. How can I help you today?`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    ]);
+  };
+
+  const handleSendTestMessage = () => {
+    if (!testInput.trim() || !testingCompanion) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      sender: 'user',
+      content: testInput,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setTestMessages((prev) => [...prev, userMessage]);
+    setTestInput('');
+
+    // Simulate bot response
+    setTimeout(() => {
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: 'bot',
+        content: `This is a simulated response from ${testingCompanion.name}. In the real implementation, this would be an AI-generated response based on the companion's configuration and rules.`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setTestMessages((prev) => [...prev, botMessage]);
+    }, 1000);
+  };
+
+  const handleCloseTest = () => {
+    setTestingCompanion(null);
+    setTestMessages([]);
+    setTestInput('');
   };
   return (
     <div className="space-y-4">
@@ -144,7 +200,15 @@ export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void
             {companions.map((companion) =>
             <tr
               key={companion.id}
-              className={`border-b border-gray-100 last:border-0 hover:bg-gray-50/80 transition-all duration-200 group ${selectedRows.includes(companion.id) ? 'bg-blue-50/30' : ''}`}>
+              onClick={(e) => {
+                // Don't trigger row click if clicking on checkbox or action buttons
+                const target = e.target as HTMLElement;
+                if (target.closest('input[type="checkbox"]') || target.closest('button')) {
+                  return;
+                }
+                onEdit?.(companion);
+              }}
+              className={`border-b border-gray-100 last:border-0 hover:bg-blue-50/50 transition-all duration-200 group cursor-pointer ${selectedRows.includes(companion.id) ? 'bg-blue-50/30' : ''}`}>
                 <td className="py-4 px-4">
                   <input
                   type="checkbox"
@@ -203,17 +267,13 @@ export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void
                 <td className="py-4 px-4">
                   <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
+                      onClick={(e) => e.stopPropagation()}
                       className="p-1.5 hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-200 rounded-md text-gray-400 hover:text-gray-600 transition-all"
                       title="Copy">
                       <Copy size={16} />
                     </button>
                     <button
-                      onClick={() => onEdit?.(companion)}
-                      className="p-1.5 hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-200 rounded-md text-gray-400 hover:text-blue-600 transition-all"
-                      title="Edit">
-                      <Edit size={16} />
-                    </button>
-                    <button
+                      onClick={(e) => e.stopPropagation()}
                       className="p-1.5 hover:bg-white hover:shadow-sm border border-transparent hover:border-red-100 rounded-md text-gray-400 hover:text-red-500 transition-all"
                       title="Delete">
                       <Trash2 size={16} />
@@ -225,6 +285,95 @@ export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void
           </tbody>
         </table>
       </div>
+
+      {/* Test Chatbot Modal */}
+      {testingCompanion && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[85vh]">
+            {/* Modal Header */}
+            <div className="p-5 border-b border-gray-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                  <Bot size={20} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Test: {testingCompanion.name}
+                  </h3>
+                  <p className="text-xs text-gray-500">{testingCompanion.role}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleCloseTest}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+
+            {/* Chat Messages */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+              {testMessages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex items-start gap-3 ${message.sender === 'user' ? 'flex-row-reverse' : ''}`}
+                >
+                  {/* Avatar */}
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    message.sender === 'bot' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-gray-900 text-white'
+                  }`}>
+                    {message.sender === 'bot' ? (
+                      <Bot size={16} />
+                    ) : (
+                      <span className="text-xs font-semibold">U</span>
+                    )}
+                  </div>
+
+                  {/* Message Bubble */}
+                  <div className={`max-w-[70%] ${message.sender === 'user' ? 'items-end' : ''}`}>
+                    <div className={`rounded-2xl px-4 py-3 ${
+                      message.sender === 'bot'
+                        ? 'bg-white text-gray-900 border border-gray-200'
+                        : 'bg-gray-900 text-white'
+                    }`}>
+                      <p className="text-sm leading-relaxed">{message.content}</p>
+                    </div>
+                    <span className="text-xs text-gray-400 mt-1 block px-1">
+                      {message.timestamp}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Input Area */}
+            <div className="p-4 border-t border-gray-200 bg-white">
+              <div className="flex items-center gap-3">
+                <input
+                  type="text"
+                  value={testInput}
+                  onChange={(e) => setTestInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendTestMessage()}
+                  placeholder="Type a message to test the companion..."
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm transition-all"
+                />
+                <Button
+                  onClick={handleSendTestMessage}
+                  disabled={!testInput.trim()}
+                  className="h-11 px-5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Send size={16} />
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                This is a simulation. Real responses will be generated based on the companion's AI rules and configuration.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>);
 
 }

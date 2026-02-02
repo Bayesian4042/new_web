@@ -47,22 +47,6 @@ export function Header({
       {/* Right: Actions */}
       <div className="flex items-center gap-3">
         {/* Role Switcher (Demo) */}
-        {showAdminToggle && (
-          <div className="flex items-center gap-1 bg-gray-100/80 p-1 rounded-lg mr-2 border border-gray-200/50">
-            <button
-              onClick={() => setUserRole('admin')}
-              className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-200 ${userRole === 'admin' ? 'bg-white text-gray-900 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-900'}`}
-            >
-              Admin
-            </button>
-            <button
-              onClick={() => setUserRole('clinic')}
-              className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-200 ${userRole === 'clinic' ? 'bg-white text-gray-900 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-900'}`}
-            >
-              Clinic
-            </button>
-          </div>
-        )}
 
         <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg border border-transparent hover:border-gray-200 transition-all duration-200">
           <RefreshCw size={18} />

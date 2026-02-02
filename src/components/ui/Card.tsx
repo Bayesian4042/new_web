@@ -54,5 +54,17 @@ export function CardContent({
     <div className={`p-6 pt-4 ${className}`} {...props}>
       {children}
     </div>);
+}
 
+export function CardDescription({
+  className = '',
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLParagraphElement>) {
+  return (
+    <p
+      className={`text-sm text-gray-500 ${className}`}
+      {...props}>
+      {children}
+    </p>);
 }

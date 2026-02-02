@@ -1,25 +1,16 @@
-import React, { useState, Children } from 'react';
+import React, { useState } from 'react';
 import {
-  LayoutDashboard,
   Briefcase,
   Users,
   Library,
-  Bot,
   ChevronDown,
   ChevronRight,
-  Search,
-  Bell,
   Home,
-  Target,
-  UserCircle,
-  FileText,
   Settings,
   PanelLeftClose,
-  Sparkles,
-  FolderOpen,
-  Layers,
-  Activity } from
+  Sparkles } from
 'lucide-react';
+
 interface SidebarProps {
   activeView: string;
   setActiveView: (view: string) => void;
@@ -46,8 +37,8 @@ export function Sidebar({
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     workspace: true,
     patients: true,
-    library: false,
-    ai: false,
+    library: true,
+    ai: true,
     setup: true
   });
   const toggleSection = (section: string) => {
@@ -86,10 +77,11 @@ export function Sidebar({
       id: 'all-patients',
       label: 'All Patients'
     },
-    {
-      id: 'patient-groups',
-      label: 'Patient Groups'
-    }]
+    // {
+    //   id: 'patient-groups',
+    //   label: 'Patient Groups'
+    // }
+  ]
 
   },
   {
@@ -108,6 +100,10 @@ export function Sidebar({
     {
       id: 'followups',
       label: 'Followups'
+    },
+    {
+      id: 'knowledge-base',
+      label: 'Knowledge Base'
     }]
 
   },
@@ -119,6 +115,10 @@ export function Sidebar({
     {
       id: 'health-assistant',
       label: 'Health Assistant'
+    },
+    {
+      id: 'conversations',
+      label: 'Conversations'
     }]
 
   },
@@ -195,24 +195,7 @@ export function Sidebar({
         <ChevronDown size={14} className="text-gray-400" />
       </div>
 
-      {/* Search */}
-      <div className="px-3 py-2 border-b border-gray-100">
-        <button className="w-full flex items-center gap-2 px-2.5 py-1.5 text-sm text-gray-500 hover:bg-gray-50 rounded-md transition-colors">
-          <Search size={14} />
-          <span className="flex-1 text-left">Search</span>
-          <kbd className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
-            ⌘K
-          </kbd>
-        </button>
-      </div>
 
-      {/* Notification */}
-      <div className="px-3 py-1">
-        <button className="w-full flex items-center gap-2 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md transition-colors">
-          <Bell size={14} />
-          <span>Notification</span>
-        </button>
-      </div>
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-0.5">

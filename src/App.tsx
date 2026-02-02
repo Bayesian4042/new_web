@@ -9,7 +9,10 @@ import { AIRules } from './pages/library/AIRules';
 import { Plans } from './pages/library/Plans';
 import { Followups } from './pages/library/Followups';
 import { HealthAssistant } from './pages/ai-system/HealthAssistant';
+import { Conversations } from './pages/ai-system/Conversations';
+import { Settings } from './pages/setup/Settings';
 import { CompanionForm } from './pages/workspace/CompanionForm';
+import { AIRuleForm } from './pages/library/AIRuleForm';
 import { Button } from './components/ui/Button';
 export function App() {
   const [activeView, setActiveView] = useState('dashboard');
@@ -17,9 +20,14 @@ export function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showCompanionForm, setShowCompanionForm] = useState(false);
   const [editingCompanion, setEditingCompanion] = useState<any>(null);
+  const [showAIRuleForm, setShowAIRuleForm] = useState(false);
+  const [editingAIRule, setEditingAIRule] = useState<any>(null);
+  
   const handleAddClick = () => {
     if (activeView === 'companions') {
       setShowCompanionForm(true);
+    } else if (activeView === 'ai-rules') {
+      setShowAIRuleForm(true);
     }
   };
   const renderContent = () => {
@@ -37,9 +45,20 @@ export function App() {
           }}
           initialData={editingCompanion} />
       );
-
-
     }
+    
+    // Show AI Rule form when active
+    if (showAIRuleForm && activeView === 'ai-rules') {
+      return (
+        <AIRuleForm
+          onClose={() => {
+            setShowAIRuleForm(false);
+            setEditingAIRule(null);
+          }}
+          initialData={editingAIRule} />
+      );
+    }
+    
     switch (activeView) {
       case 'dashboard':
         return <Dashboard />;
@@ -54,13 +73,25 @@ export function App() {
       case 'all-patients':
         return <PatientList />;
       case 'ai-rules':
-        return <AIRules />;
+        return <AIRules
+          onAddRule={() => {
+            setEditingAIRule(null);
+            setShowAIRuleForm(true);
+          }}
+          onEditRule={(rule) => {
+            setEditingAIRule(rule);
+            setShowAIRuleForm(true);
+          }} />;
       case 'plans':
         return <Plans />;
       case 'followups':
         return <Followups />;
       case 'health-assistant':
         return <HealthAssistant />;
+      case 'conversations':
+        return <Conversations />;
+      case 'settings':
+        return <Settings />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-[60vh] text-gray-400">
@@ -120,9 +151,21 @@ export function App() {
         title: 'Followups',
         breadcrumb: 'Library'
       },
+      'knowledge-base': {
+        title: 'Knowledge Base',
+        breadcrumb: 'Library'
+      },
       'health-assistant': {
         title: 'Health Assistant',
         breadcrumb: 'AI System'
+      },
+      conversations: {
+        title: 'Conversations',
+        breadcrumb: 'AI System'
+      },
+      settings: {
+        title: 'Settings',
+        breadcrumb: 'Setup'
       }
     };
     return (
@@ -143,9 +186,15 @@ export function App() {
             <span className="text-gray-300">/</span>
             <span className="text-gray-500 font-medium">Companions</span>
             <span className="text-gray-300">/</span>
-            <span className="font-semibold text-gray-900">
-              {editingCompanion ? 'Edit Companion' : 'New Companion'}
-            </span>
+            {editingCompanion ? (
+              <>
+                <span className="text-gray-500 font-medium">{editingCompanion.name}</span>
+                <span className="text-gray-300">/</span>
+                <span className="font-semibold text-gray-900">Edit</span>
+              </>
+            ) : (
+              <span className="font-semibold text-gray-900">New Companion</span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -157,20 +206,88 @@ export function App() {
 
               Cancel
             </button>
-            <Button
-              size="sm"
-              className="h-9 px-5 bg-gray-900 hover:bg-gray-800 text-white shadow-sm hover:shadow transition-all rounded-lg"
-              onClick={() => {
-                setShowCompanionForm(false);
-                setEditingCompanion(null);
-              }}>
+            {editingCompanion ? (
+              <Button
+                size="sm"
+                className="h-9 px-5 bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow transition-all rounded-lg"
+                onClick={() => {
+                  setShowCompanionForm(false);
+                  setEditingCompanion(null);
+                }}>
 
-              Save
-            </Button>
+                Save Changes
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow transition-all rounded-lg"
+                onClick={() => {
+                  setShowCompanionForm(false);
+                  setEditingCompanion(null);
+                }}>
+
+                Create Companion
+              </Button>
+            )}
           </div>
         </header>);
 
     }
+    
+    // Custom header for AI Rule form
+    if (showAIRuleForm && activeView === 'ai-rules') {
+      return (
+        <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20 shadow-sm">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-500 font-medium">Library</span>
+            <span className="text-gray-300">/</span>
+            <span className="text-gray-500 font-medium">AI Rules</span>
+            <span className="text-gray-300">/</span>
+            {editingAIRule ? (
+              <>
+                <span className="text-gray-500 font-medium">{editingAIRule.name}</span>
+                <span className="text-gray-300">/</span>
+                <span className="font-semibold text-gray-900">Edit</span>
+              </>
+            ) : (
+              <span className="font-semibold text-gray-900">New AI Rule</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setShowAIRuleForm(false);
+                setEditingAIRule(null);
+              }}
+              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">
+              Cancel
+            </button>
+            {editingAIRule ? (
+              <Button
+                size="sm"
+                className="h-9 px-5 bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow transition-all rounded-lg"
+                onClick={() => {
+                  setShowAIRuleForm(false);
+                  setEditingAIRule(null);
+                }}>
+                Save Changes
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow transition-all rounded-lg"
+                onClick={() => {
+                  setShowAIRuleForm(false);
+                  setEditingAIRule(null);
+                }}>
+                Create AI Rule
+              </Button>
+            )}
+          </div>
+        </header>);
+
+    }
+    
     return (
       <Header
         title={pageInfo.title}
@@ -179,7 +296,7 @@ export function App() {
         setUserRole={setUserRole}
         onAddClick={handleAddClick}
         showAdminToggle={activeView !== 'dashboard'}
-        showAddButton={activeView !== 'dashboard'}
+        showAddButton={activeView === 'companions' || activeView === 'ai-rules'}
       />);
 
 
@@ -206,7 +323,7 @@ export function App() {
         {renderHeader()}
 
         <main
-          className={`flex-1 overflow-y-auto bg-white ${showCompanionForm ? '' : 'p-6'}`}>
+          className={`flex-1 min-h-0 bg-white ${showCompanionForm ? 'overflow-hidden' : 'overflow-y-auto p-6'}`}>
 
           <div className={showCompanionForm ? 'h-full' : 'max-w-screen-3xl mx-auto'}>
             {renderContent()}

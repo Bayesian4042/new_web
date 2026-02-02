@@ -138,9 +138,9 @@ export function Followups() {
               <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">
                 Frequency
               </th>
-              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">
+              {/* <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">
                 Protocols
-              </th>
+              </th> */}
               <th className="py-3 px-3 text-right text-sm font-medium text-gray-500"></th>
             </tr>
           </thead>
@@ -192,11 +192,11 @@ export function Followups() {
                     {followup.frequency}
                   </span>
                 </td>
-                <td className="py-3 px-3">
+                {/* <td className="py-3 px-3">
                   <span className="text-sm text-gray-600">
                     {followup.linkedProtocols}
                   </span>
-                </td>
+                </td> */}
                 <td className="py-3 px-3">
                   <div className="flex items-center justify-end gap-3 text-gray-400">
                     <span className="text-xs text-gray-400">
