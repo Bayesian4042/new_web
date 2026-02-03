@@ -31,7 +31,7 @@ export function TiptapEditor({ content, onChange, placeholder = 'Start writing..
     content,
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-[400px] px-4 py-3',
+        class: 'prose prose-sm max-w-none focus:outline-none min-h-[250px] px-4 py-3',
         'data-placeholder': placeholder
       }
     },
@@ -49,9 +49,8 @@ export function TiptapEditor({ content, onChange, placeholder = 'Start writing..
       onClick={onClick}
       type="button"
       title={title}
-      className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-        active ? 'bg-gray-200 text-gray-900' : 'text-gray-600'
-      }`}>
+      className={`p-2 rounded hover:bg-gray-100 transition-colors ${active ? 'bg-gray-200 text-gray-900' : 'text-gray-600'
+        }`}>
       {children}
     </button>
   );

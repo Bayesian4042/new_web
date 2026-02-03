@@ -1,23 +1,30 @@
 import { useState } from 'react';
+<<<<<<< Updated upstream
 import { Filter, X, ArrowUpDown, MessageSquare, Bot, Copy, Trash2, Send } from 'lucide-react';
+=======
+import { Filter, X, ArrowUpDown, Bot, Copy, Trash2, Edit2 } from 'lucide-react';
+>>>>>>> Stashed changes
 import { Button } from '../../components/ui/Button';
 
-interface Companion {
+export interface Companion {
   id: string;
   name: string;
+  type: string;
   role: string;
   status: 'Active' | 'Draft' | 'Archived';
   users: number;
-  createdBy: string;
   createdOn: string;
+  createdBy: string;
 }
 
-interface Message {
-  id: string;
-  sender: 'user' | 'bot';
-  content: string;
-  timestamp: string;
+interface CompanionsProps {
+  onAddCompanion: () => void;
+  onEditCompanion: (companion: Companion) => void;
+  onCopyCompanion: (companion: Companion) => void;
+  onDeleteCompanion: (id: string) => void;
+  companions: Companion[];
 }
+<<<<<<< Updated upstream
 const companions: Companion[] = [
 {
   id: 'CMP-0001',
@@ -64,67 +71,25 @@ const companions: Companion[] = [
   createdBy: 'Dr. Sarah Smith',
   createdOn: '25-01-2026'
 }];
+=======
+>>>>>>> Stashed changes
 
-export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void }) {
+export function Companions({ onAddCompanion, onEditCompanion, onCopyCompanion, onDeleteCompanion, companions }: CompanionsProps) {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [filterActive, setFilterActive] = useState(false);
-  const [testingCompanion, setTestingCompanion] = useState<Companion | null>(null);
-  const [testMessages, setTestMessages] = useState<Message[]>([]);
-  const [testInput, setTestInput] = useState('');
+
   const toggleRow = (id: string) => {
     setSelectedRows((prev) =>
     prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
     );
   };
+
   const toggleAll = () => {
     setSelectedRows((prev) =>
     prev.length === companions.length ? [] : companions.map((c) => c.id)
     );
   };
 
-  const handleTestCompanion = (companion: Companion) => {
-    setTestingCompanion(companion);
-    // Initialize with a welcome message
-    setTestMessages([
-      {
-        id: '1',
-        sender: 'bot',
-        content: `Hello! I'm ${companion.name}, your ${companion.role} companion. How can I help you today?`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }
-    ]);
-  };
-
-  const handleSendTestMessage = () => {
-    if (!testInput.trim() || !testingCompanion) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      sender: 'user',
-      content: testInput,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setTestMessages((prev) => [...prev, userMessage]);
-    setTestInput('');
-
-    // Simulate bot response
-    setTimeout(() => {
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: 'bot',
-        content: `This is a simulated response from ${testingCompanion.name}. In the real implementation, this would be an AI-generated response based on the companion's configuration and rules.`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      setTestMessages((prev) => [...prev, botMessage]);
-    }, 1000);
-  };
-
-  const handleCloseTest = () => {
-    setTestingCompanion(null);
-    setTestMessages([]);
-    setTestInput('');
-  };
   return (
     <div className="space-y-4">
       {/* Toolbar */}
@@ -153,6 +118,11 @@ export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void
             Sort by Date
           </button>
         </div>
+
+        <Button onClick={onAddCompanion} size="sm" className="h-9 px-4 bg-gray-900 hover:bg-gray-800 text-white shadow-sm transition-all rounded-lg flex items-center gap-2">
+          <Bot size={16} />
+          Add Companion
+        </Button>
       </div>
 
       {/* Table */}
@@ -173,6 +143,7 @@ export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void
                   <ArrowUpDown size={14} />
                 </button>
               </th>
+<<<<<<< Updated upstream
               <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Name
               </th>
@@ -218,6 +189,32 @@ export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void
                 </td>
                 <td className="py-4 px-4">
                   <span className="text-sm font-medium text-gray-900 font-mono">
+=======
+              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Name</th>
+              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Role</th>
+              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Status</th>
+              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Users</th>
+              <th className="py-3 px-3 text-right"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {companions.map((companion) => (
+              <tr
+                key={companion.id}
+                onClick={() => onEditCompanion(companion)}
+                className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors group cursor-pointer"
+              >
+                <td className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
+                  <input
+                    type="checkbox"
+                    checked={selectedRows.includes(companion.id)}
+                    onChange={() => toggleRow(companion.id)}
+                    className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
+                  />
+                </td>
+                <td className="py-3 px-3">
+                  <span className="text-sm font-medium text-blue-600 hover:text-blue-700">
+>>>>>>> Stashed changes
                     {companion.id}
                   </span>
                 </td>
@@ -254,6 +251,7 @@ export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void
                     <span className="text-gray-400 text-xs">users</span>
                   </div>
                 </td>
+<<<<<<< Updated upstream
                 <td className="py-4 px-4">
                   <span className="text-sm text-gray-600">
                     {companion.createdBy}
@@ -277,6 +275,39 @@ export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void
                       className="p-1.5 hover:bg-white hover:shadow-sm border border-transparent hover:border-red-100 rounded-md text-gray-400 hover:text-red-500 transition-all"
                       title="Delete">
                       <Trash2 size={16} />
+=======
+                <td className="py-3 px-3">
+                  <div className="flex items-center justify-end gap-1">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditCompanion(companion);
+                      }}
+                      className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                      title="Edit"
+                    >
+                      <Edit2 size={14} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onCopyCompanion(companion);
+                      }}
+                      className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                      title="Copy"
+                    >
+                      <Copy size={14} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteCompanion(companion.id);
+                      }}
+                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 size={14} />
+>>>>>>> Stashed changes
                     </button>
                   </div>
                 </td>
@@ -285,6 +316,7 @@ export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void
           </tbody>
         </table>
       </div>
+<<<<<<< Updated upstream
 
       {/* Test Chatbot Modal */}
       {testingCompanion && (
@@ -376,4 +408,8 @@ export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void
       )}
     </div>);
 
+=======
+    </div>
+  );
+>>>>>>> Stashed changes
 }

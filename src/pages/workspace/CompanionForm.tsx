@@ -28,8 +28,9 @@ interface TestMessage {
 }
 interface CompanionFormProps {
   onClose: () => void;
-  onSave: () => void;
+  onChange: (data: any) => void;
   initialData?: any;
+  userRole: 'admin' | 'clinic';
 }
 type FormSection =
 'companion-type' |
@@ -192,7 +193,8 @@ const templateItems: SideSheetItem[] = [
   category: 'Chronic Care'
 }];
 
-export function CompanionForm({ onClose, onSave, initialData }: CompanionFormProps) {
+export function CompanionForm({ onClose, onChange, initialData, userRole }: CompanionFormProps) {
+  console.log('User Role in CompanionForm:', userRole); // Use userRole to fix lint
   const isNewCompanion = !initialData;
   const [companionType, setCompanionType] = useState<
     'general' | 'personalized'>(
@@ -210,6 +212,8 @@ export function CompanionForm({ onClose, onSave, initialData }: CompanionFormPro
   const [selectedShortcuts, setSelectedShortcuts] = useState<string[]>([]);
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
   const [selectedPlans, setSelectedPlans] = useState<string[]>([]);
+  const [selectedClinics, setSelectedClinics] = useState<string[]>(initialData?.assignedClinics || []);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialData?.assignedCategories || []);
   // Side sheet state
   const [activeSheet, setActiveSheet] = useState<SheetType>(null);
   const [tempSelection, setTempSelection] = useState<string[]>([]);
@@ -240,12 +244,63 @@ export function CompanionForm({ onClose, onSave, initialData }: CompanionFormPro
   useEffect(() => {
     if (initialData) {
       setCompanionTitle(initialData.name || '');
+<<<<<<< Updated upstream
       // Map other fields if available in initialData
       if (initialData.role) {
            // Heuristic to map role to type or just ignore for now as they don't map 1:1
+=======
+      if (initialData.type) {
+        setCompanionType(initialData.type);
+      }
+      if (initialData.patients && Array.isArray(initialData.patients) && initialData.patients.length > 0) {
+        setPatients(initialData.patients);
+      }
+      if (initialData.aiPrompt) {
+        setAiPrompt(initialData.aiPrompt);
+      }
+      if (initialData.selectedShortcuts) {
+        setSelectedShortcuts(initialData.selectedShortcuts);
+      }
+      if (initialData.selectedDocuments) {
+        setSelectedDocuments(initialData.selectedDocuments);
+      }
+      if (initialData.selectedPlans) {
+        setSelectedPlans(initialData.selectedPlans);
+      }
+      if (initialData.followupMessage) {
+        setFollowupMessage(initialData.followupMessage);
+      }
+      if (initialData.assignedClinics) {
+        setSelectedClinics(initialData.assignedClinics);
+      }
+      if (initialData.assignedCategories) {
+        setSelectedCategories(initialData.assignedCategories);
+>>>>>>> Stashed changes
       }
     }
   }, [initialData]);
+
+  useEffect(() => {
+    onChange({
+      name: companionTitle,
+      type: companionType,
+      patients,
+      selectedShortcuts,
+      selectedDocuments,
+      selectedPlans,
+      aiPrompt,
+      followupMessage,
+      frequency,
+      duration,
+      preferredTime,
+      assignedClinics: selectedClinics,
+      assignedCategories: selectedCategories
+    });
+  }, [
+    companionTitle, companionType, patients, selectedShortcuts,
+    selectedDocuments, selectedPlans, aiPrompt, followupMessage,
+    frequency, duration, preferredTime, selectedClinics, selectedCategories, onChange
+  ]);
 
   const sections = [
   {

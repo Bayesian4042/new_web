@@ -8,8 +8,15 @@ import {
   Home,
   Settings,
   PanelLeftClose,
+<<<<<<< Updated upstream
   Sparkles } from
 'lucide-react';
+=======
+  Sparkles,
+  Building2
+} from
+  'lucide-react';
+>>>>>>> Stashed changes
 
 interface SidebarProps {
   activeView: string;
@@ -47,6 +54,7 @@ export function Sidebar({
       [section]: !prev[section]
     }));
   };
+<<<<<<< Updated upstream
   const navItems: NavItem[] = [
   {
     id: 'dashboard',
@@ -58,11 +66,15 @@ export function Sidebar({
     label: 'Workspace',
     icon: <Briefcase size={16} />,
     children: [
+=======
+  const clinicNavItems: NavItem[] = [
+>>>>>>> Stashed changes
     {
       id: 'companions',
       label: 'Companions'
     },
     {
+<<<<<<< Updated upstream
       id: 'protocols',
       label: 'Protocols'
     }]
@@ -141,6 +153,141 @@ export function Sidebar({
     }]
 
   }];
+=======
+      id: 'workspace',
+      label: 'Workspace',
+      icon: <Briefcase size={16} />,
+      children: [
+        {
+          id: 'companions',
+          label: 'Companions'
+        },
+        {
+          id: 'protocols',
+          label: 'Protocols'
+        }]
+    },
+    {
+      id: 'patients',
+      label: 'Patient Management',
+      icon: <Users size={16} />,
+      children: [
+        {
+          id: 'all-patients',
+          label: 'All Patients'
+        }
+      ]
+    },
+    {
+      id: 'library',
+      label: 'Library',
+      icon: <Library size={16} />,
+      children: [
+        {
+          id: 'ai-rules',
+          label: 'AI Rules'
+        },
+        {
+          id: 'plans',
+          label: 'Plans'
+        },
+        {
+          id: 'followups',
+          label: 'Followups'
+        },
+        {
+          id: 'knowledge-base',
+          label: 'Knowledge Base'
+        }]
+    },
+    {
+      id: 'ai',
+      label: 'AI System',
+      icon: <Sparkles size={16} />,
+      children: [
+        {
+          id: 'health-assistant',
+          label: 'Health Assistant'
+        },
+        {
+          id: 'conversations',
+          label: 'Conversations'
+        }]
+    },
+    {
+      id: 'setup',
+      label: 'Setup',
+      icon: <Settings size={16} />,
+      children: [
+        {
+          id: 'settings',
+          label: 'Settings'
+        },
+        {
+          id: 'users',
+          label: 'Users'
+        }
+      ]
+    }];
+
+  const adminNavItems: NavItem[] = [
+    {
+      id: 'dashboard',
+      label: 'Home',
+      icon: <Home size={16} />
+    },
+    {
+      id: 'protocols',
+      label: 'Protocols',
+      icon: <Briefcase size={16} />
+    },
+    {
+      id: 'patients',
+      label: 'Patient Management',
+      icon: <Users size={16} />,
+      children: [
+        {
+          id: 'all-patients',
+          label: 'All Patients'
+        }
+      ]
+    },
+    {
+      id: 'library',
+      label: 'Library',
+      icon: <Library size={16} />,
+      children: [
+        {
+          id: 'ai-rules',
+          label: 'AI Rules'
+        },
+        {
+          id: 'plans',
+          label: 'Plans'
+        },
+        {
+          id: 'followups',
+          label: 'Followups'
+        },
+        {
+          id: 'knowledge-base',
+          label: 'Knowledge Base'
+        }]
+    },
+    {
+      id: 'conversations',
+      label: 'Conversations',
+      icon: <Sparkles size={16} />
+    },
+    {
+      id: 'clinics',
+      label: 'Clinics',
+      icon: <Building2 size={16} />
+    }
+  ];
+
+  const navItems = userRole === 'admin' ? adminNavItems : clinicNavItems;
+>>>>>>> Stashed changes
 
   if (collapsed) {
     return (
@@ -151,6 +298,7 @@ export function Sidebar({
           </div>
         </div>
         <nav className="flex-1 py-3 flex flex-col items-center gap-1">
+<<<<<<< Updated upstream
           {navItems.slice(0, 5).map((item) =>
           <button
             key={item.id}
@@ -159,6 +307,16 @@ export function Sidebar({
             }
             className={`p-2.5 rounded-md transition-colors ${activeView === item.id || item.children?.some((c) => c.id === activeView) ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'}`}
             title={item.label}>
+=======
+          {navItems.map((item) =>
+            <button
+              key={item.id}
+              onClick={() =>
+                item.children ? toggleSection(item.id) : setActiveView(item.id)
+              }
+              className={`p-2.5 rounded-md transition-colors ${activeView === item.id || item.children?.some((c) => c.id === activeView) ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'}`}
+              title={item.label}>
+>>>>>>> Stashed changes
 
               {item.icon}
             </button>
@@ -270,11 +428,19 @@ export function Sidebar({
             className="h-8 w-8 rounded-full bg-gray-100" />
 
           <div className="flex-1 min-w-0">
+<<<<<<< Updated upstream
             <p className="text-sm font-medium text-gray-900 truncate">
               {userRole === 'admin' ? 'Abhilasha' : 'Clinic Staff'}
             </p>
             <p className="text-xs text-gray-400 truncate">
               {userRole === 'admin' ? 'abhilasha@gm...' : 'staff@clinic.com'}
+=======
+            <p className="text-sm font-semibold text-gray-900 truncate">
+              {userRole === 'admin' ? 'Super Admin' : 'Clinic'}
+            </p>
+            <p className="text-[10px] text-gray-400 truncate font-medium">
+              {userRole === 'admin' ? 'admin@platform.com' : 'staff@clinic.com'}
+>>>>>>> Stashed changes
             </p>
           </div>
         </div>
