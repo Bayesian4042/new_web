@@ -290,6 +290,7 @@ export function App() {
   const [followupDraft, setFollowupDraft] = useState<any>(null);
   const [kbDraft, setKbDraft] = useState<any>(null);
   const [companionDraft, setCompanionDraft] = useState<any>(null);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
 
   const [rules, setRules] = useState<AIRule[]>(INITIAL_RULES);
   const [plans, setPlans] = useState<Plan[]>(INITIAL_PLANS);
@@ -639,6 +640,7 @@ export function App() {
             setActiveView('conversations');
           }}
           userRole={userRole}
+          initialPatientId={selectedPatientId}
         />;
       case 'ai-rules':
         return <AIRules
@@ -700,6 +702,10 @@ export function App() {
           userRole={userRole}
           initialConversationId={selectedConversationId}
           onConversationChange={() => setSelectedConversationId(null)}
+          onNavigateToPatient={(patientId) => {
+            setSelectedPatientId(patientId);
+            setActiveView('all-patients');
+          }}
         />;
       case 'clinics':
         return <Clinics

@@ -14,8 +14,7 @@ import {
   User,
   Edit2,
   Filter,
-  Building2,
-  ExternalLink
+  Building2
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
@@ -61,12 +60,14 @@ interface ConversationsProps {
   userRole?: 'admin' | 'clinic';
   initialConversationId?: string | null;
   onConversationChange?: () => void;
+  onNavigateToPatient?: (patientId: string) => void;
 }
 
 export function Conversations({
   userRole = 'clinic',
   initialConversationId = null,
-  onConversationChange
+  onConversationChange,
+  onNavigateToPatient
 }: ConversationsProps) {
   const [view, setView] = useState<'list' | 'detail' | 'profile'>('list');
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
@@ -576,12 +577,30 @@ export function Conversations({
                   <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Next Appointment</label>
                   <p className="text-sm text-gray-900 font-bold">{selectedConv.nextAppointment}</p>
                 </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Clinic</label>
+                  <div className="flex items-center gap-1.5">
+                    <Building2 className="text-gray-400" size={14} />
+                    <p className="text-sm font-bold text-gray-900">{selectedConv.clinicName || 'Main Clinic'}</p>
+                  </div>
+                </div>
               </div>
 
               <Button
                 variant="outline"
                 className="w-full mt-5 rounded-xl font-bold text-gray-600 border-gray-100 py-3.5 h-auto text-xs"
-                onClick={() => setView('profile')}
+                onClick={() => {
+                  if (onNavigateToPatient && selectedConv.id) {
+                    // Mapping mock conversation ID to patient ID for demo
+                    // In a real app, selectedConv would have a patientId field
+                    const patientId = selectedConv.patientName === 'Michael Chen' ? 'PAT-0002' :
+                      selectedConv.patientName === 'Sarah Johnson' ? 'PAT-0001' :
+                        selectedConv.patientName === 'Emma Wilson' ? 'PAT-0003' : 'PAT-0001';
+                    onNavigateToPatient(patientId);
+                  } else {
+                    setView('profile');
+                  }
+                }}
               >
                 View Full Profile
               </Button>
@@ -640,6 +659,15 @@ export function Conversations({
                 <div>
                   <p className="text-[11px] text-gray-400 font-bold uppercase">Next Appointment</p>
                   <p className="text-sm font-bold text-gray-900">{selectedConv.nextAppointment}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                  <Building2 size={16} />
+                </div>
+                <div>
+                  <p className="text-[11px] text-gray-400 font-bold uppercase">Clinic</p>
+                  <p className="text-sm font-bold text-gray-900">{selectedConv.clinicName || 'Main Clinic'}</p>
                 </div>
               </div>
             </div>
