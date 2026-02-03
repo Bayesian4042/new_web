@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Search,
   MessageSquare,
@@ -12,7 +12,10 @@ import {
   Send,
   Calendar,
   User,
-  Edit2
+  Edit2,
+  Filter,
+  Building2,
+  ExternalLink
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
@@ -40,6 +43,10 @@ interface Conversation {
   context: string;
   nextAppointment: string;
   messages: Message[];
+  clinicName?: string;
+  clinicId?: string;
+  protocolName?: string;
+  companionName?: string;
 }
 
 const sentimentConfig = {
@@ -50,10 +57,41 @@ const sentimentConfig = {
   anxious: { label: 'Concern', color: 'bg-amber-50 text-amber-700 border-amber-100', dot: 'bg-amber-500' },
 };
 
-export function Conversations() {
+interface ConversationsProps {
+  userRole?: 'admin' | 'clinic';
+  initialConversationId?: string | null;
+  onConversationChange?: () => void;
+}
+
+export function Conversations({
+  userRole = 'clinic',
+  initialConversationId = null,
+  onConversationChange
+}: ConversationsProps) {
   const [view, setView] = useState<'list' | 'detail' | 'profile'>('list');
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedClinic, setSelectedClinic] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [selectedPatient, setSelectedPatient] = useState<string>('all');
+  const [selectedProtocol, setSelectedProtocol] = useState<string>('all');
+  const [selectedCompanion, setSelectedCompanion] = useState<string>('all');
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Auto-open conversation when navigating from patient details
+  useEffect(() => {
+    if (initialConversationId) {
+      const conversation = mockConversations.find(c => c.id === initialConversationId);
+      if (conversation) {
+        setSelectedConv(conversation);
+        setView('detail');
+      }
+      // Clear the initial conversation ID after opening
+      if (onConversationChange) {
+        onConversationChange();
+      }
+    }
+  }, [initialConversationId, onConversationChange]);
 
   const mockConversations: Conversation[] = [
     {
@@ -69,6 +107,10 @@ export function Conversations() {
       sentiment: 'angry',
       context: 'Regular checkup patient. Diabetic, monitors blood sugar.',
       nextAppointment: 'Feb 20, 2024 11:00 AM',
+      clinicName: 'Downtown Medical Center',
+      clinicId: 'clinic-1',
+      protocolName: 'Diabetes Management',
+      companionName: 'Diabetes Care Companion',
       messages: [
         { id: 'm1', sender: 'bot', content: 'Hello Michael! How can I help you today?', timestamp: '12:00 PM' },
         { id: 'm2', sender: 'user', content: "I've been waiting 30 minutes for a callback. This is unacceptable!", timestamp: '12:30 PM' },
@@ -89,17 +131,122 @@ export function Conversations() {
       sentiment: 'happy',
       context: 'Post-surgery recovery. Needs periodic check-ins.',
       nextAppointment: 'Mar 05, 2024 2:00 PM',
+      clinicName: 'Westside Health Clinic',
+      clinicId: 'clinic-2',
+      protocolName: 'Post-Surgery Recovery',
+      companionName: 'Recovery Support Bot',
       messages: [
         { id: 's1', sender: 'bot', content: 'Hi Sarah, how is your recovery going?', timestamp: '4:15 PM' },
         { id: 's2', sender: 'user', content: 'Doing well, pain is manageable now.', timestamp: '4:20 PM' },
         { id: 's3', sender: 'bot', content: "That's great to hear! Remember to continue taking your medication as prescribed.", timestamp: '4:30 PM' },
       ]
+    },
+    {
+      id: '3',
+      patientName: 'James Rodriguez',
+      patientPhone: '+1 (555) 987-6543',
+      patientEmail: 'jrodriguez@email.com',
+      lastMessage: 'Thank you for the quick response!',
+      timestamp: 'Jan 24, 2:15 PM',
+      messageCount: 5,
+      assistantName: 'General Health Assistant',
+      status: 'resolved',
+      sentiment: 'happy',
+      context: 'Follow-up after physical therapy session.',
+      nextAppointment: 'Feb 15, 2024 3:00 PM',
+      clinicName: 'Downtown Medical Center',
+      clinicId: 'clinic-1',
+      protocolName: 'Physical Therapy Follow-up',
+      companionName: 'PT Recovery Assistant',
+      messages: [
+        { id: 'j1', sender: 'bot', content: 'Hi James, how did your therapy session go?', timestamp: '2:00 PM' },
+        { id: 'j2', sender: 'user', content: 'It went well, feeling much better!', timestamp: '2:10 PM' },
+        { id: 'j3', sender: 'bot', content: 'That\'s wonderful to hear!', timestamp: '2:15 PM' },
+      ]
+    },
+    {
+      id: '4',
+      patientName: 'Emily Davis',
+      patientPhone: '+1 (555) 456-7890',
+      patientEmail: 'edavis@email.com',
+      lastMessage: 'I have some questions about my medication.',
+      timestamp: 'Jan 26, 9:30 AM',
+      messageCount: 2,
+      assistantName: 'Medication Support Bot',
+      status: 'active',
+      sentiment: 'neutral',
+      context: 'New patient, starting medication regimen.',
+      nextAppointment: 'Feb 10, 2024 10:00 AM',
+      clinicName: 'Westside Health Clinic',
+      clinicId: 'clinic-2',
+      protocolName: 'Medication Management',
+      companionName: 'Med Adherence Helper',
+      messages: [
+        { id: 'e1', sender: 'user', content: 'I have some questions about my medication.', timestamp: '9:30 AM' },
+        { id: 'e2', sender: 'bot', content: 'Of course! I\'m here to help. What would you like to know?', timestamp: '9:31 AM' },
+      ]
+    },
+    {
+      id: '5',
+      patientName: 'Robert Martinez',
+      patientPhone: '+1 (555) 321-6547',
+      patientEmail: 'rmartinez@email.com',
+      lastMessage: 'I need to reschedule my appointment urgently!',
+      timestamp: 'Jan 26, 11:45 AM',
+      messageCount: 6,
+      assistantName: 'Scheduling Assistant',
+      status: 'Needs Attention',
+      sentiment: 'anxious',
+      context: 'Urgent appointment rescheduling needed.',
+      nextAppointment: 'Jan 28, 2024 2:00 PM',
+      clinicName: 'Downtown Medical Center',
+      clinicId: 'clinic-1',
+      protocolName: 'Appointment Management',
+      companionName: 'Scheduling Bot',
+      messages: [
+        { id: 'r1', sender: 'user', content: 'I need to reschedule my appointment urgently!', timestamp: '11:45 AM' },
+        { id: 'r2', sender: 'bot', content: 'I understand. Let me help you find a new time.', timestamp: '11:46 AM' },
+      ]
+    },
+    {
+      id: '6',
+      patientName: 'Lisa Anderson',
+      patientPhone: '+1 (555) 789-0123',
+      patientEmail: 'landerson@email.com',
+      lastMessage: 'Everything is going well, thank you!',
+      timestamp: 'Jan 23, 3:20 PM',
+      messageCount: 4,
+      assistantName: 'Wellness Coach',
+      status: 'resolved',
+      sentiment: 'happy',
+      context: 'Wellness program participant, regular check-ins.',
+      nextAppointment: 'Mar 01, 2024 1:00 PM',
+      clinicName: 'Westside Health Clinic',
+      clinicId: 'clinic-2',
+      protocolName: 'Wellness Program',
+      companionName: 'Wellness Guide',
+      messages: [
+        { id: 'l1', sender: 'bot', content: 'How are you feeling today?', timestamp: '3:15 PM' },
+        { id: 'l2', sender: 'user', content: 'Everything is going well, thank you!', timestamp: '3:20 PM' },
+      ]
     }
   ];
 
-  const filteredConversations = mockConversations.filter(c =>
-    c.patientName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Get unique values for filters
+  const clinics = Array.from(new Set(mockConversations.map(c => c.clinicName).filter(Boolean)));
+  const patients = Array.from(new Set(mockConversations.map(c => c.patientName)));
+  const protocols = Array.from(new Set(mockConversations.map(c => c.protocolName).filter(Boolean)));
+  const companions = Array.from(new Set(mockConversations.map(c => c.companionName).filter(Boolean)));
+
+  const filteredConversations = mockConversations.filter(c => {
+    const matchesSearch = c.patientName.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesClinic = selectedClinic === 'all' || c.clinicId === selectedClinic;
+    const matchesStatus = selectedStatus === 'all' || c.status.toLowerCase() === selectedStatus.toLowerCase();
+    const matchesPatient = selectedPatient === 'all' || c.patientName === selectedPatient;
+    const matchesProtocol = selectedProtocol === 'all' || c.protocolName === selectedProtocol;
+    const matchesCompanion = selectedCompanion === 'all' || c.companionName === selectedCompanion;
+    return matchesSearch && matchesClinic && matchesStatus && matchesPatient && matchesProtocol && matchesCompanion;
+  });
 
   const needsAttentionCount = mockConversations.filter(c => c.status === 'Needs Attention').length;
 
@@ -109,19 +256,149 @@ export function Conversations() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Patient Conversations</h2>
-          <p className="text-sm text-gray-500 mt-1">Monitor and respond to patient interactions</p>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {userRole === 'admin' ? 'All Conversations' : 'Patient Conversations'}
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            {userRole === 'admin'
+              ? 'Monitor platform-wide patient interactions across all clinics'
+              : 'Monitor and respond to patient interactions'}
+          </p>
         </div>
-        <div className="relative w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Search patients..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-10 bg-white"
-          />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all ${showFilters ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+              }`}
+          >
+            <Filter size={16} />
+            Filters
+          </button>
+          <div className="relative w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search patients..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-10 bg-white"
+            />
+          </div>
         </div>
       </div>
+
+      {/* Filters Panel */}
+      {showFilters && (
+        <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-4 animate-in slide-in-from-top-2 duration-200">
+          <div className="grid grid-cols-2 gap-4">
+            {/* Clinic Filter - Only for Super Admin */}
+            {userRole === 'admin' && (
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
+                  Filter by Clinic
+                </label>
+                <div className="relative">
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <select
+                    value={selectedClinic}
+                    onChange={(e) => setSelectedClinic(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  >
+                    <option value="all">All Clinics</option>
+                    {clinics.map((clinic, idx) => (
+                      <option key={idx} value={`clinic-${idx + 1}`}>{clinic}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* Status Filter - Both Roles */}
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
+                Filter by Status
+              </label>
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              >
+                <option value="all">All Statuses</option>
+                <option value="needs attention">🔴 Needs Attention (Red)</option>
+                <option value="active">🔵 Active (Blue)</option>
+                <option value="resolved">🟢 Resolved (Green)</option>
+              </select>
+            </div>
+
+            {/* Patient Filter - Both Roles */}
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
+                Filter by Patient
+              </label>
+              <select
+                value={selectedPatient}
+                onChange={(e) => setSelectedPatient(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              >
+                <option value="all">All Patients</option>
+                {patients.map((patient, idx) => (
+                  <option key={idx} value={patient}>{patient}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Protocol Filter - Both Roles */}
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
+                Filter by Protocol
+              </label>
+              <select
+                value={selectedProtocol}
+                onChange={(e) => setSelectedProtocol(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              >
+                <option value="all">All Protocols</option>
+                {protocols.map((protocol, idx) => (
+                  <option key={idx} value={protocol}>{protocol}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Companion Filter - Both Roles */}
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
+                Filter by Companion
+              </label>
+              <select
+                value={selectedCompanion}
+                onChange={(e) => setSelectedCompanion(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              >
+                <option value="all">All Companions</option>
+                {companions.map((companion, idx) => (
+                  <option key={idx} value={companion}>{companion}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+            <p className="text-xs text-gray-500">
+              Showing <span className="font-bold text-gray-900">{filteredConversations.length}</span> of <span className="font-bold text-gray-900">{mockConversations.length}</span> conversations
+            </p>
+            <button
+              onClick={() => {
+                setSelectedClinic('all');
+                setSelectedStatus('all');
+                setSelectedPatient('all');
+                setSelectedProtocol('all');
+                setSelectedCompanion('all');
+              }}
+              className="text-xs font-medium text-blue-600 hover:text-blue-700"
+            >
+              Clear All Filters
+            </button>
+          </div>
+        </div>
+      )}
 
       {needsAttentionCount > 0 && (
         <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-center gap-3">
@@ -155,9 +432,13 @@ export function Conversations() {
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
                     <h3 className="text-[15px] font-bold text-gray-900 truncate">{conv.patientName}</h3>
-                    <Badge className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${conv.status === 'Needs Attention' ? 'bg-red-100 text-red-700' : 'bg-amber-50 text-amber-700 border-amber-100'
+                    <Badge className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${conv.status === 'Needs Attention'
+                      ? 'bg-red-100 text-red-700 border border-red-200'
+                      : conv.status === 'active'
+                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                        : 'bg-green-100 text-green-700 border border-green-200'
                       }`}>
-                      {conv.status === 'active' ? 'active' : conv.status}
+                      {conv.status === 'Needs Attention' ? '🔴 Needs Attention' : conv.status === 'active' ? '🔵 Active' : '🟢 Resolved'}
                     </Badge>
                     <Badge className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border flex items-center gap-1.5 ${sentimentConfig[conv.sentiment].color}`}>
                       <span className={`h-1 w-1 rounded-full ${sentimentConfig[conv.sentiment].dot}`} />
@@ -174,6 +455,12 @@ export function Conversations() {
                 </div>
 
                 <p className="text-xs text-gray-500 font-medium mb-2">with {conv.assistantName}</p>
+                {userRole === 'admin' && conv.clinicName && (
+                  <div className="flex items-center gap-1.5 text-gray-500 mb-2">
+                    <Building2 size={12} className="text-gray-400" />
+                    <span className="text-xs font-medium">{conv.clinicName}</span>
+                  </div>
+                )}
 
                 <div className="flex items-center gap-2 text-gray-600 bg-gray-50/50 p-2 rounded-lg border border-gray-100/50 max-w-2xl">
                   <User size={12} className="text-gray-400 shrink-0" />

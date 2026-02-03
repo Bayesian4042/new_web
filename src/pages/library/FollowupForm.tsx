@@ -1,30 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-    Bell,
-    Calendar,
     Clock,
-    ChevronDown
+    ChevronDown,
+    Calendar
 } from 'lucide-react';
 import { TiptapEditor } from '../../components/ui/TiptapEditor';
+import { ClinicSelector } from '../../components/ui/ClinicSelector';
 
 interface FollowupFormProps {
     initialData?: {
         id: string;
         name: string;
-        type: string;
         content?: string;
         frequency?: string;
         duration?: string;
         time?: string;
+        assignedClinics?: string[];
+        type?: 'Scheduled' | 'Triggered' | 'Manual';
     } | null;
+    userRole: 'admin' | 'clinic';
+    onChange: (data: any) => void;
 }
 
-export function FollowupForm({ initialData }: FollowupFormProps) {
+export function FollowupForm({ initialData, userRole, onChange }: FollowupFormProps) {
     const [name, setName] = useState(initialData?.name || '');
     const [message, setMessage] = useState(initialData?.content || '');
     const [frequency, setFrequency] = useState(initialData?.frequency || 'Daily');
     const [duration, setDuration] = useState(initialData?.duration || '7');
     const [sendTime, setSendTime] = useState(initialData?.time || '9:00 AM');
+    const [selectedClinics, setSelectedClinics] = useState<string[]>(initialData?.assignedClinics || []);
+
+    useEffect(() => {
+        onChange({
+            name,
+            content: message,
+            frequency,
+            duration,
+            time: sendTime,
+            assignedClinics: selectedClinics,
+            type: initialData?.type || 'Scheduled'
+        });
+    }, [name, message, frequency, duration, sendTime, selectedClinics, onChange, initialData?.type]);
 
     const generateTimeOptions = () => {
         const times = [];
@@ -42,18 +58,8 @@ export function FollowupForm({ initialData }: FollowupFormProps) {
     const timeOptions = generateTimeOptions();
 
     return (
-        <div className="bg-gray-50/50 min-h-full">
-            <div className="max-w-4xl mx-auto space-y-6 pb-12">
-                {/* Header Section (Matching AI Rules feel but with pink theme) */}
-                <div className="flex items-center gap-4 mb-2">
-                    <div className="h-12 w-12 rounded-2xl bg-pink-50 flex items-center justify-center">
-                        <Bell size={24} className="text-pink-500" />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Follow-up Message</h1>
-                        <p className="text-gray-500 text-sm">Automated patient check-ins</p>
-                    </div>
-                </div>
+        <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="grid grid-cols-1 gap-8">
 
                 {/* Name Field */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
@@ -152,6 +158,13 @@ export function FollowupForm({ initialData }: FollowupFormProps) {
                         </div>
                     </div>
                 </div>
+
+                {/* Clinic Selector - Only for Super Admin */}
+                <ClinicSelector
+                    selectedClinics={selectedClinics}
+                    onSelectionChange={setSelectedClinics}
+                    userRole={userRole}
+                />
             </div>
         </div>
     );

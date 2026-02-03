@@ -1,34 +1,51 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-    BookOpen,
     FileText,
     Link as LinkIcon,
     Plus,
     Trash2,
     ExternalLink,
-    Globe,
     PlusCircle,
     FileUp,
-    Files
+    Files,
+    Globe
 } from 'lucide-react';
 import { TiptapEditor } from '../../components/ui/TiptapEditor';
+import { ClinicSelector } from '../../components/ui/ClinicSelector';
 
 interface KBFormProps {
     initialData?: {
         id: string;
         name: string;
+        content?: string;
         documents?: { name: string; size: string }[];
         links?: string[];
-        content?: string;
+        assignedClinics?: string[];
+        assignedCategories?: string[];
     } | null;
+    userRole: 'admin' | 'clinic';
+    onChange: (data: any) => void;
 }
 
-export function KnowledgeBaseForm({ initialData }: KBFormProps) {
+export function KnowledgeBaseForm({ initialData, userRole, onChange }: KBFormProps) {
     const [name, setName] = useState(initialData?.name || '');
     const [content, setContent] = useState(initialData?.content || '');
     const [documents, setDocuments] = useState<{ name: string; size: string }[]>(initialData?.documents || []);
     const [links, setLinks] = useState<string[]>(initialData?.links || []);
     const [newLink, setNewLink] = useState('');
+    const [selectedClinics, setSelectedClinics] = useState<string[]>(initialData?.assignedClinics || []);
+    const [selectedCategories, setSelectedCategories] = useState<string[]>(initialData?.assignedCategories || []);
+
+    useEffect(() => {
+        onChange({
+            name,
+            content,
+            documents,
+            links,
+            assignedClinics: selectedClinics,
+            assignedCategories: selectedCategories
+        });
+    }, [name, content, documents, links, selectedClinics, selectedCategories, onChange]);
 
     const handleAddLink = () => {
         if (newLink && !links.includes(newLink)) {
@@ -37,13 +54,8 @@ export function KnowledgeBaseForm({ initialData }: KBFormProps) {
         }
     };
 
-    const removeLink = (index: number) => {
-        setLinks(links.filter((_, i) => i !== index));
-    };
-
-    const removeDocument = (index: number) => {
-        setDocuments(documents.filter((_, i) => i !== index));
-    };
+    const removeDocument = (index: number) => setDocuments(documents.filter((_, i) => i !== index));
+    const removeLink = (index: number) => setLinks(links.filter((_, i) => i !== index));
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
@@ -57,19 +69,8 @@ export function KnowledgeBaseForm({ initialData }: KBFormProps) {
     };
 
     return (
-        <div className="bg-gray-50/50 min-h-full">
-            <div className="max-w-4xl mx-auto space-y-8 pb-12">
-                {/* Header Section */}
-                <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                        <BookOpen size={24} />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Knowledge Base Item</h1>
-                        <p className="text-gray-500 text-sm">Create clinical resources with attached documents and links</p>
-                    </div>
-                </div>
-
+        <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="grid grid-cols-1 gap-8">
                 {/* 1. Basic Information Card */}
                 <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                     <div className="p-8 space-y-6">
@@ -208,6 +209,15 @@ export function KnowledgeBaseForm({ initialData }: KBFormProps) {
                         </div>
                     </div>
                 </div>
+
+                {/* Clinic Selector - Only for Super Admin */}
+                <ClinicSelector
+                    selectedClinics={selectedClinics}
+                    onSelectionChange={setSelectedClinics}
+                    selectedCategories={selectedCategories}
+                    onCategoriesChange={setSelectedCategories}
+                    userRole={userRole}
+                />
             </div>
         </div>
     );
