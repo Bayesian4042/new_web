@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Filter,
   X,
   ArrowUpDown,
   MessageSquare,
   Heart,
-  FileText } from
-'lucide-react';
+  FileText
+} from
+  'lucide-react';
 interface Protocol {
   id: string;
   name: string;
@@ -17,63 +18,63 @@ interface Protocol {
   createdOn: string;
 }
 const protocols: Protocol[] = [
-{
-  id: 'PRT-0001',
-  name: 'Post-Op Knee Recovery',
-  category: 'Orthopedics',
-  status: 'Active',
-  enrolled: 45,
-  duration: '6 weeks',
-  createdOn: '02-02-2026 08:00:00'
-},
-{
-  id: 'PRT-0002',
-  name: 'Type 2 Diabetes Management',
-  category: 'Chronic Care',
-  status: 'Active',
-  enrolled: 128,
-  duration: 'Ongoing',
-  createdOn: '01-02-2026 12:30:22'
-},
-{
-  id: 'PRT-0003',
-  name: 'Anxiety CBT Module 1',
-  category: 'Mental Health',
-  status: 'Review',
-  enrolled: 32,
-  duration: '4 weeks',
-  createdOn: '30-01-2026 15:45:00'
-},
-{
-  id: 'PRT-0004',
-  name: 'Hypertension Monitoring',
-  category: 'Cardiology',
-  status: 'Draft',
-  enrolled: 0,
-  duration: '12 weeks',
-  createdOn: '28-01-2026 10:15:10'
-},
-{
-  id: 'PRT-0005',
-  name: 'Prenatal Care - Trimester 1',
-  category: 'Obstetrics',
-  status: 'Active',
-  enrolled: 67,
-  duration: '12 weeks',
-  createdOn: '25-01-2026 09:00:55'
-}];
+  {
+    id: 'PRT-0001',
+    name: 'Post-Op Knee Recovery',
+    category: 'Orthopedics',
+    status: 'Active',
+    enrolled: 45,
+    duration: '6 weeks',
+    createdOn: '02-02-2026 08:00:00'
+  },
+  {
+    id: 'PRT-0002',
+    name: 'Type 2 Diabetes Management',
+    category: 'Chronic Care',
+    status: 'Active',
+    enrolled: 128,
+    duration: 'Ongoing',
+    createdOn: '01-02-2026 12:30:22'
+  },
+  {
+    id: 'PRT-0003',
+    name: 'Anxiety CBT Module 1',
+    category: 'Mental Health',
+    status: 'Review',
+    enrolled: 32,
+    duration: '4 weeks',
+    createdOn: '30-01-2026 15:45:00'
+  },
+  {
+    id: 'PRT-0004',
+    name: 'Hypertension Monitoring',
+    category: 'Cardiology',
+    status: 'Draft',
+    enrolled: 0,
+    duration: '12 weeks',
+    createdOn: '28-01-2026 10:15:10'
+  },
+  {
+    id: 'PRT-0005',
+    name: 'Prenatal Care - Trimester 1',
+    category: 'Obstetrics',
+    status: 'Active',
+    enrolled: 67,
+    duration: '12 weeks',
+    createdOn: '25-01-2026 09:00:55'
+  }];
 
-export function Protocols() {
+export function Protocols({ onEdit }: { onEdit?: (protocol: Protocol) => void }) {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [filterActive, setFilterActive] = useState(false);
   const toggleRow = (id: string) => {
     setSelectedRows((prev) =>
-    prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
     );
   };
   const toggleAll = () => {
     setSelectedRows((prev) =>
-    prev.length === protocols.length ? [] : protocols.map((p) => p.id)
+      prev.length === protocols.length ? [] : protocols.map((p) => p.id)
     );
   };
   return (
@@ -82,18 +83,18 @@ export function Protocols() {
       <div className="flex items-center justify-between py-3 border-b border-gray-100">
         <div className="flex items-center gap-2">
           {filterActive ?
-          <button
-            onClick={() => setFilterActive(false)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md border border-gray-200">
+            <button
+              onClick={() => setFilterActive(false)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md border border-gray-200">
 
               <Filter size={14} />
               Filter
               <X size={14} className="text-gray-400 hover:text-gray-600" />
             </button> :
 
-          <button
-            onClick={() => setFilterActive(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md border border-gray-200">
+            <button
+              onClick={() => setFilterActive(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md border border-gray-200">
 
               <Filter size={14} />
               Filter
@@ -146,20 +147,20 @@ export function Protocols() {
           </thead>
           <tbody>
             {protocols.map((protocol) =>
-            <tr
-              key={protocol.id}
-              className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors group">
+              <tr
+                key={protocol.id}
+                onClick={() => onEdit?.(protocol)}
+                className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors group cursor-pointer">
 
-                <td className="py-3 px-3">
+                <td className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
                   <input
-                  type="checkbox"
-                  checked={selectedRows.includes(protocol.id)}
-                  onChange={() => toggleRow(protocol.id)}
-                  className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
-
+                    type="checkbox"
+                    checked={selectedRows.includes(protocol.id)}
+                    onChange={() => toggleRow(protocol.id)}
+                    className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
                 </td>
                 <td className="py-3 px-3">
-                  <span className="text-sm font-medium text-blue-600 hover:text-blue-700 cursor-pointer">
+                  <span className="text-sm font-medium text-blue-600 hover:text-blue-700">
                     {protocol.id}
                   </span>
                 </td>
@@ -180,7 +181,7 @@ export function Protocols() {
                 </td>
                 <td className="py-3 px-3">
                   <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${protocol.status === 'Active' ? 'bg-green-50 text-green-700' : protocol.status === 'Review' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>
+                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${protocol.status === 'Active' ? 'bg-green-50 text-green-700' : protocol.status === 'Review' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>
 
                     {protocol.status}
                   </span>
