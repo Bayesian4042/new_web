@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Filter, X, ArrowUpDown, MessageSquare, Bot, Copy, Trash2, Send } from 'lucide-react';
+import { Filter, X, ArrowUpDown, Bot, Copy, Trash2, Send, Play } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
 interface Companion {
@@ -19,51 +19,51 @@ interface Message {
   timestamp: string;
 }
 const companions: Companion[] = [
-{
-  id: 'CMP-0001',
-  name: 'Recovery Coach',
-  role: 'Post-Op Support',
-  status: 'Active',
-  users: 124,
-  createdBy: 'Dr. Sarah Smith',
-  createdOn: '02-02-2026'
-},
-{
-  id: 'CMP-0002',
-  name: 'Medication Reminder',
-  role: 'Adherence',
-  status: 'Active',
-  users: 856,
-  createdBy: 'Nurse Johnson',
-  createdOn: '01-02-2026'
-},
-{
-  id: 'CMP-0003',
-  name: 'Anxiety Support',
-  role: 'Mental Health',
-  status: 'Draft',
-  users: 0,
-  createdBy: 'Dr. Mike Wilson',
-  createdOn: '31-01-2026'
-},
-{
-  id: 'CMP-0004',
-  name: 'Dietary Assistant',
-  role: 'Nutrition',
-  status: 'Archived',
-  users: 45,
-  createdBy: 'Nutritionist Jane',
-  createdOn: '28-01-2026'
-},
-{
-  id: 'CMP-0005',
-  name: 'Symptom Checker',
-  role: 'Triage',
-  status: 'Active',
-  users: 342,
-  createdBy: 'Dr. Sarah Smith',
-  createdOn: '25-01-2026'
-}];
+  {
+    id: 'CMP-0001',
+    name: 'Recovery Coach',
+    role: 'Post-Op Support',
+    status: 'Active',
+    users: 124,
+    createdBy: 'Dr. Sarah Smith',
+    createdOn: '02-02-2026'
+  },
+  {
+    id: 'CMP-0002',
+    name: 'Medication Reminder',
+    role: 'Adherence',
+    status: 'Active',
+    users: 856,
+    createdBy: 'Nurse Johnson',
+    createdOn: '01-02-2026'
+  },
+  {
+    id: 'CMP-0003',
+    name: 'Anxiety Support',
+    role: 'Mental Health',
+    status: 'Draft',
+    users: 0,
+    createdBy: 'Dr. Mike Wilson',
+    createdOn: '31-01-2026'
+  },
+  {
+    id: 'CMP-0004',
+    name: 'Dietary Assistant',
+    role: 'Nutrition',
+    status: 'Archived',
+    users: 45,
+    createdBy: 'Nutritionist Jane',
+    createdOn: '28-01-2026'
+  },
+  {
+    id: 'CMP-0005',
+    name: 'Symptom Checker',
+    role: 'Triage',
+    status: 'Active',
+    users: 342,
+    createdBy: 'Dr. Sarah Smith',
+    createdOn: '25-01-2026'
+  }];
 
 export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void }) {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
@@ -73,12 +73,12 @@ export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void
   const [testInput, setTestInput] = useState('');
   const toggleRow = (id: string) => {
     setSelectedRows((prev) =>
-    prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
     );
   };
   const toggleAll = () => {
     setSelectedRows((prev) =>
-    prev.length === companions.length ? [] : companions.map((c) => c.id)
+      prev.length === companions.length ? [] : companions.map((c) => c.id)
     );
   };
 
@@ -126,162 +126,158 @@ export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void
     setTestInput('');
   };
   return (
-    <div className="space-y-4">
+    <div className="space-y-0">
       {/* Toolbar */}
-      <div className="flex items-center justify-between py-4 border-b border-gray-100 bg-white">
-        <h2 className="text-lg font-semibold text-gray-900">All Companions</h2>
+      <div className="flex items-center justify-between py-3 border-b border-gray-100">
         <div className="flex items-center gap-2">
-          {filterActive ?
-          <button
-            onClick={() => setFilterActive(false)}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border border-transparent">
-              <Filter size={16} />
+          {filterActive ? (
+            <button
+              onClick={() => setFilterActive(false)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md border border-gray-200"
+            >
+              <Filter size={14} />
               Filter
-              <X size={16} className="text-gray-500 hover:text-gray-900 ml-1" />
-            </button> :
-
-          <button
-            onClick={() => setFilterActive(true)}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 rounded-lg border border-gray-200 transition-all shadow-sm">
-              <Filter size={16} />
+              <X size={14} className="text-gray-400 hover:text-gray-600" />
+            </button>
+          ) : (
+            <button
+              onClick={() => setFilterActive(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md border border-gray-200"
+            >
+              <Filter size={14} />
               Filter
             </button>
-          }
+          )}
 
-          <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 rounded-lg border border-gray-200 transition-all shadow-sm">
-            <ArrowUpDown size={16} />
+          <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md border border-gray-200">
+            <ArrowUpDown size={14} />
             Sort by Date
           </button>
         </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-gray-50/80 border-b border-gray-200">
-              <th className="w-12 py-4 px-4">
+            <tr className="border-b border-gray-200">
+              <th className="w-10 py-3 px-3">
                 <input
                   type="checkbox"
                   checked={selectedRows.length === companions.length}
                   onChange={toggleAll}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors cursor-pointer" />
+                  className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
+                />
               </th>
-              <th className="py-4 px-4 text-left">
-                <button className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700">
-                  Code
-                  <ArrowUpDown size={14} />
+              <th className="py-3 px-3 text-left">
+                <button className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                  ID
+                  <ArrowUpDown size={12} />
                 </button>
               </th>
-              <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">
                 Name
               </th>
-              <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">
                 Role
               </th>
-              <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">
                 Status
               </th>
-              <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">
                 Users
               </th>
-              <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Created By
-              </th>
-              <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Date
-              </th>
-              <th className="py-4 px-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
+              <th className="py-3 px-3 text-right"></th>
             </tr>
           </thead>
           <tbody>
-            {companions.map((companion) =>
-            <tr
-              key={companion.id}
-              onClick={(e) => {
-                // Don't trigger row click if clicking on checkbox or action buttons
-                const target = e.target as HTMLElement;
-                if (target.closest('input[type="checkbox"]') || target.closest('button')) {
-                  return;
-                }
-                onEdit?.(companion);
-              }}
-              className={`border-b border-gray-100 last:border-0 hover:bg-blue-50/50 transition-all duration-200 group cursor-pointer ${selectedRows.includes(companion.id) ? 'bg-blue-50/30' : ''}`}>
-                <td className="py-4 px-4">
+            {companions.map((companion) => (
+              <tr
+                key={companion.id}
+                onClick={(e) => {
+                  const target = e.target as HTMLElement;
+                  if (target.closest('input[type="checkbox"]') || target.closest('button')) {
+                    return;
+                  }
+                  onEdit?.(companion);
+                }}
+                className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors group cursor-pointer"
+              >
+                <td className="py-3 px-3">
                   <input
-                  type="checkbox"
-                  checked={selectedRows.includes(companion.id)}
-                  onChange={() => toggleRow(companion.id)}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors cursor-pointer" />
+                    type="checkbox"
+                    checked={selectedRows.includes(companion.id)}
+                    onChange={() => toggleRow(companion.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
+                  />
                 </td>
-                <td className="py-4 px-4">
-                  <span className="text-sm font-medium text-gray-900 font-mono">
+                <td className="py-3 px-3">
+                  <span className="text-sm font-medium text-blue-600 hover:text-blue-700 cursor-pointer">
                     {companion.id}
                   </span>
                 </td>
-                <td className="py-4 px-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm border border-blue-100">
-                      <Bot size={18} />
+                <td className="py-3 px-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 w-6 rounded bg-gray-100 flex items-center justify-center">
+                      <Bot size={14} className="text-gray-500" />
                     </div>
-                    <div>
-                      <span className="text-sm font-medium text-gray-900 block">
-                        {companion.name}
-                      </span>
-                    </div>
+                    <span className="text-sm text-gray-900">{companion.name}</span>
                   </div>
                 </td>
-                <td className="py-4 px-4">
-                  <span className="text-sm text-gray-600 bg-gray-100/50 px-2.5 py-1 rounded-md border border-gray-200/50">
-                    {companion.role}
-                  </span>
+                <td className="py-3 px-3">
+                  <span className="text-sm text-gray-600">{companion.role}</span>
                 </td>
-                <td className="py-4 px-4">
+                <td className="py-3 px-3">
                   <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${companion.status === 'Active' ?
-                  'bg-green-50 text-green-700 border-green-200' :
-                  companion.status === 'Draft' ?
-                  'bg-yellow-50 text-yellow-700 border-yellow-200' :
-                  'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${companion.status === 'Active'
+                      ? 'bg-green-50 text-green-700'
+                      : companion.status === 'Draft'
+                        ? 'bg-yellow-50 text-yellow-700'
+                        : 'bg-gray-100 text-gray-600'
+                      }`}
+                  >
                     {companion.status}
                   </span>
                 </td>
-                <td className="py-4 px-4">
-                  <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                    <span className="font-medium">{companion.users}</span>
-                    <span className="text-gray-400 text-xs">users</span>
-                  </div>
+                <td className="py-3 px-3">
+                  <span className="text-sm text-gray-600">{companion.users}</span>
                 </td>
-                <td className="py-4 px-4">
-                  <span className="text-sm text-gray-600">
-                    {companion.createdBy}
-                  </span>
-                </td>
-                <td className="py-4 px-4">
-                  <span className="text-sm text-gray-500 tabular-nums">
-                    {companion.createdOn}
-                  </span>
-                </td>
-                <td className="py-4 px-4">
-                  <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={(e) => e.stopPropagation()}
-                      className="p-1.5 hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-200 rounded-md text-gray-400 hover:text-gray-600 transition-all"
-                      title="Copy">
-                      <Copy size={16} />
-                    </button>
-                    <button
-                      onClick={(e) => e.stopPropagation()}
-                      className="p-1.5 hover:bg-white hover:shadow-sm border border-transparent hover:border-red-100 rounded-md text-gray-400 hover:text-red-500 transition-all"
-                      title="Delete">
-                      <Trash2 size={16} />
-                    </button>
+                <td className="py-3 px-3">
+                  <div className="flex items-center justify-end gap-3 text-gray-400">
+                    <span className="text-xs text-gray-400">
+                      {companion.createdOn}
+                    </span>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTestCompanion(companion);
+                        }}
+                        className="p-1 hover:text-blue-600"
+                        title="Test Companion"
+                      >
+                        <Play size={14} />
+                      </button>
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-1 hover:text-gray-600"
+                        title="Copy"
+                      >
+                        <Copy size={14} />
+                      </button>
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-1 hover:text-red-500"
+                        title="Delete"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
                 </td>
               </tr>
-            )}
+            ))}
           </tbody>
         </table>
       </div>
@@ -319,11 +315,10 @@ export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void
                   className={`flex items-start gap-3 ${message.sender === 'user' ? 'flex-row-reverse' : ''}`}
                 >
                   {/* Avatar */}
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    message.sender === 'bot' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-900 text-white'
-                  }`}>
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 ${message.sender === 'bot'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-900 text-white'
+                    }`}>
                     {message.sender === 'bot' ? (
                       <Bot size={16} />
                     ) : (
@@ -333,11 +328,10 @@ export function Companions({ onEdit }: { onEdit?: (companion: Companion) => void
 
                   {/* Message Bubble */}
                   <div className={`max-w-[70%] ${message.sender === 'user' ? 'items-end' : ''}`}>
-                    <div className={`rounded-2xl px-4 py-3 ${
-                      message.sender === 'bot'
-                        ? 'bg-white text-gray-900 border border-gray-200'
-                        : 'bg-gray-900 text-white'
-                    }`}>
+                    <div className={`rounded-2xl px-4 py-3 ${message.sender === 'bot'
+                      ? 'bg-white text-gray-900 border border-gray-200'
+                      : 'bg-gray-900 text-white'
+                      }`}>
                       <p className="text-sm leading-relaxed">{message.content}</p>
                     </div>
                     <span className="text-xs text-gray-400 mt-1 block px-1">

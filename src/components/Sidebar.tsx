@@ -8,8 +8,9 @@ import {
   Home,
   Settings,
   PanelLeftClose,
-  Sparkles } from
-'lucide-react';
+  Sparkles
+} from
+  'lucide-react';
 
 interface SidebarProps {
   activeView: string;
@@ -17,6 +18,8 @@ interface SidebarProps {
   userRole: 'admin' | 'clinic';
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
+  language: 'en' | 'es';
+  setLanguage: (lang: 'en' | 'es') => void;
 }
 type NavItem = {
   id: string;
@@ -32,7 +35,9 @@ export function Sidebar({
   setActiveView,
   userRole,
   collapsed,
-  setCollapsed
+  setCollapsed,
+  language,
+  setLanguage
 }: SidebarProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     workspace: true,
@@ -48,99 +53,99 @@ export function Sidebar({
     }));
   };
   const navItems: NavItem[] = [
-  {
-    id: 'dashboard',
-    label: 'Home',
-    icon: <Home size={16} />
-  },
-  {
-    id: 'workspace',
-    label: 'Workspace',
-    icon: <Briefcase size={16} />,
-    children: [
     {
-      id: 'companions',
-      label: 'Companions'
+      id: 'dashboard',
+      label: 'Home',
+      icon: <Home size={16} />
     },
     {
-      id: 'protocols',
-      label: 'Protocols'
-    }]
+      id: 'workspace',
+      label: 'Workspace',
+      icon: <Briefcase size={16} />,
+      children: [
+        {
+          id: 'companions',
+          label: 'Companions'
+        },
+        {
+          id: 'protocols',
+          label: 'Protocols'
+        }]
 
-  },
-  {
-    id: 'patients',
-    label: 'Patient Management',
-    icon: <Users size={16} />,
-    children: [
-    {
-      id: 'all-patients',
-      label: 'All Patients'
     },
-    // {
-    //   id: 'patient-groups',
-    //   label: 'Patient Groups'
-    // }
-  ]
+    {
+      id: 'patients',
+      label: 'Patient Management',
+      icon: <Users size={16} />,
+      children: [
+        {
+          id: 'all-patients',
+          label: 'All Patients'
+        },
+        // {
+        //   id: 'patient-groups',
+        //   label: 'Patient Groups'
+        // }
+      ]
 
-  },
-  {
-    id: 'library',
-    label: 'Library',
-    icon: <Library size={16} />,
-    children: [
-    {
-      id: 'ai-rules',
-      label: 'AI Rules'
     },
     {
-      id: 'plans',
-      label: 'Plans'
-    },
-    {
-      id: 'followups',
-      label: 'Followups'
-    },
-    {
-      id: 'knowledge-base',
-      label: 'Knowledge Base'
-    }]
+      id: 'library',
+      label: 'Library',
+      icon: <Library size={16} />,
+      children: [
+        {
+          id: 'ai-rules',
+          label: 'AI Rules'
+        },
+        {
+          id: 'plans',
+          label: 'Plans'
+        },
+        {
+          id: 'followups',
+          label: 'Followups'
+        },
+        {
+          id: 'knowledge-base',
+          label: 'Knowledge Base'
+        }]
 
-  },
-  {
-    id: 'ai',
-    label: 'AI System',
-    icon: <Sparkles size={16} />,
-    children: [
-    {
-      id: 'health-assistant',
-      label: 'Health Assistant'
     },
     {
-      id: 'conversations',
-      label: 'Conversations'
-    }]
+      id: 'ai',
+      label: 'AI System',
+      icon: <Sparkles size={16} />,
+      children: [
+        {
+          id: 'health-assistant',
+          label: 'Health Assistant'
+        },
+        {
+          id: 'conversations',
+          label: 'Conversations'
+        }]
 
-  },
-  {
-    id: 'setup',
-    label: 'Setup',
-    icon: <Settings size={16} />,
-    children: [
-    {
-      id: 'settings',
-      label: 'Settings'
     },
     {
-      id: 'users',
-      label: 'Users'
-    },
-    {
-      id: 'roles',
-      label: 'Roles'
-    }]
+      id: 'setup',
+      label: 'Setup',
+      icon: <Settings size={16} />,
+      children: [
+        {
+          id: 'settings',
+          label: 'Settings'
+        },
+        {
+          id: 'users',
+          label: 'Users'
+        },
+        {
+          id: 'roles',
+          label: 'Roles'
+        }]
 
-  }];
+    }];
 
   if (collapsed) {
     return (
@@ -152,23 +157,30 @@ export function Sidebar({
         </div>
         <nav className="flex-1 py-3 flex flex-col items-center gap-1">
           {navItems.slice(0, 5).map((item) =>
-          <button
-            key={item.id}
-            onClick={() =>
-            item.children ? toggleSection(item.id) : setActiveView(item.id)
-            }
-            className={`p-2.5 rounded-md transition-colors ${activeView === item.id || item.children?.some((c) => c.id === activeView) ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'}`}
-            title={item.label}>
+            <button
+              key={item.id}
+              onClick={() =>
+                item.children ? toggleSection(item.id) : setActiveView(item.id)
+              }
+              className={`p-2.5 rounded-md transition-colors ${activeView === item.id || item.children?.some((c) => c.id === activeView) ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'}`}
+              title={item.label}>
 
               {item.icon}
             </button>
           )}
         </nav>
-        <div className="p-3 border-t border-gray-100">
+
+        <div className="p-3 border-t border-gray-100 space-y-3">
+          <button
+            onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
+            className="h-9 w-9 m-auto rounded-xl flex items-center justify-center text-[10px] font-black border border-gray-200 bg-white text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-all uppercase"
+            title={language === 'en' ? 'Switch to Spanish' : 'Switch to English'}>
+            {language}
+          </button>
+
           <button
             onClick={() => setCollapsed(false)}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md w-full flex justify-center">
-
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md w-full flex justify-center transition-all">
             <PanelLeftClose size={16} className="rotate-180" />
           </button>
         </div>
@@ -195,15 +207,13 @@ export function Sidebar({
         <ChevronDown size={14} className="text-gray-400" />
       </div>
 
-
-
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-0.5">
         {navItems.map((item) => {
           const isExpanded = expanded[item.id];
           const hasChildren = item.children && item.children.length > 0;
           const isParentActive =
-          hasChildren && item.children.some((c) => c.id === activeView);
+            hasChildren && item.children?.some((c) => c.id === activeView);
           if (!hasChildren) {
             return (
               <button
@@ -233,16 +243,16 @@ export function Sidebar({
               </button>
 
               {isExpanded &&
-              <div className="ml-6 space-y-0.5 border-l border-gray-100 pl-2">
+                <div className="ml-6 space-y-0.5 border-l border-gray-100 pl-2">
                   {item.children?.map((child) =>
-                <button
-                  key={child.id}
-                  onClick={() => setActiveView(child.id)}
-                  className={`w-full flex items-center px-2.5 py-1.5 rounded-md text-sm transition-colors ${activeView === child.id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
+                    <button
+                      key={child.id}
+                      onClick={() => setActiveView(child.id)}
+                      className={`w-full flex items-center px-2.5 py-1.5 rounded-md text-sm transition-colors ${activeView === child.id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
 
                       {child.label}
                     </button>
-                )}
+                  )}
                 </div>
               }
             </div>);
@@ -250,8 +260,33 @@ export function Sidebar({
         })}
       </nav>
 
+      {/* Language Switcher */}
+      <div className="px-3 pt-3 pb-2 border-t border-gray-100 bg-gray-50/30 font-sans">
+        <p className="text-[9px] font-bold text-gray-400 mb-2 uppercase tracking-[0.15em] px-1">Preference</p>
+        <div className="relative h-8 bg-gray-200/50 rounded-lg p-0.5 flex items-center">
+          <div
+            className={`absolute h-[26px] w-[calc(50%-2px)] bg-white rounded-md shadow-sm transition-all duration-300 ease-out ${language === 'en' ? 'translate-x-0' : 'translate-x-full'
+              }`}
+          />
+          <button
+            onClick={() => setLanguage('en')}
+            className={`relative z-10 flex-1 flex items-center justify-center gap-1.5 h-full text-[10px] font-bold transition-colors duration-200 ${language === 'en' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'
+              }`}>
+            <span className="text-xs">🇺🇸</span>
+            EN
+          </button>
+          <button
+            onClick={() => setLanguage('es')}
+            className={`relative z-10 flex-1 flex items-center justify-center gap-1.5 h-full text-[10px] font-bold transition-colors duration-200 ${language === 'es' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'
+              }`}>
+            <span className="text-xs">🇪🇸</span>
+            ES
+          </button>
+        </div>
+      </div>
+
       {/* Collapse Button */}
-      <div className="px-3 py-2 border-t border-gray-100">
+      <div className="px-3 py-1 border-t border-gray-100">
         <button
           onClick={() => setCollapsed(true)}
           className="w-full flex items-center gap-2 px-2.5 py-1.5 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 rounded-md transition-colors">
@@ -262,7 +297,7 @@ export function Sidebar({
       </div>
 
       {/* User Profile */}
-      <div className="px-3 py-3 border-t border-gray-100">
+      <div className="px-3 py-3 border-t border-gray-100 bg-gray-50/30">
         <div className="flex items-center gap-2.5">
           <img
             src="https://api.dicebear.com/7.x/avataaars/svg?seed=medicore"
@@ -270,10 +305,10 @@ export function Sidebar({
             className="h-8 w-8 rounded-full bg-gray-100" />
 
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">
+            <p className="text-sm font-semibold text-gray-900 truncate">
               {userRole === 'admin' ? 'Abhilasha' : 'Clinic Staff'}
             </p>
-            <p className="text-xs text-gray-400 truncate">
+            <p className="text-[10px] text-gray-400 truncate font-medium">
               {userRole === 'admin' ? 'abhilasha@gm...' : 'staff@clinic.com'}
             </p>
           </div>
