@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import {
-  Filter,
-  ArrowUpDown,
-  RefreshCw,
-  ChevronLeft,
-  Calendar,
-  Edit,
   Folder,
   Search,
   Building2,
-  MoreHorizontal
+  MoreHorizontal,
+  ChevronRight,
+  User as UserIcon,
+  Phone,
+  MessageSquare,
+  Zap,
+  ArrowLeft,
+  Calendar,
+  Edit,
+  AlertCircle
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
@@ -104,12 +107,17 @@ const patients: Patient[] = [
 interface PatientListProps {
   onNavigateToConversations?: (conversationId?: string) => void;
   userRole: 'admin' | 'clinic';
+  initialPatientId?: string | null;
 }
 
-export function PatientList({ onNavigateToConversations, userRole }: PatientListProps) {
+export function PatientList({ onNavigateToConversations, userRole, initialPatientId }: PatientListProps) {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [filterActive, setFilterActive] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(() => {
+    if (initialPatientId) {
+      return patients.find(p => p.id === initialPatientId) || null;
+    }
+    return null;
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedClinic, setSelectedClinic] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -140,6 +148,193 @@ export function PatientList({ onNavigateToConversations, userRole }: PatientList
   const toggleAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedRows(e.target.checked ? patients.map((p) => p.id) : []);
   };
+
+  const renderPatientDetail = (patient: Patient) => (
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelectedPatient(null)}
+            className="rounded-xl border border-gray-200"
+          >
+            <ArrowLeft size={18} />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{patient.name}</h1>
+            <p className="text-gray-500 mt-1">User details and overview</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            className="rounded-xl font-bold text-gray-600 px-6"
+            onClick={() => setSelectedPatient(null)}
+          >
+            Back
+          </Button>
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold px-8 flex items-center gap-2">
+            <Edit size={16} />
+            Edit
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Contact Info */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-6">
+          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Contact Information</h3>
+          <div className="space-y-5">
+            <div className="flex items-center gap-4 text-gray-600">
+              <div className="h-10 w-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400">
+                <Phone size={18} />
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Phone</p>
+                <p className="text-sm font-bold text-gray-900">{patient.phone || 'No phone'}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 text-gray-600">
+              <div className="h-10 w-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400">
+                <Calendar size={18} />
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Next Appointment</p>
+                <p className="text-sm font-bold text-gray-900">Feb 20, 2026 11:00 AM</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 text-gray-600">
+              <div className="h-10 w-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400">
+                <Building2 size={18} />
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Clinic</p>
+                <p className="text-sm font-bold text-gray-900">{patient.clinicName || 'Unassigned'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Context */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col">
+          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">Context</h3>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="h-2 w-2 rounded-full bg-blue-500" />
+              <p className="text-sm font-bold text-gray-900">{patient.condition}</p>
+            </div>
+            <p className="text-sm text-gray-500 leading-relaxed">
+              Regular checkup patient. Currently monitoring daily vitals and adherence to treatment plan.
+            </p>
+          </div>
+        </div>
+
+        {/* Active Care */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-4">
+          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Active Care</h3>
+          <div className="space-y-3">
+            {patient.protocol ? (
+              <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/50">
+                    <Zap size={18} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">{patient.protocol.name}</p>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase">Protocol</p>
+                  </div>
+                </div>
+                <ChevronRight size={16} className="text-gray-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all" />
+              </div>
+            ) : (
+              <div className="text-center py-4 border border-dashed border-gray-200 rounded-xl">
+                <p className="text-xs text-gray-400">No protocol assigned</p>
+              </div>
+            )}
+
+            {patient.companion ? (
+              <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100/50">
+                    <UserIcon size={18} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">{patient.companion.name}</p>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase">Companion</p>
+                  </div>
+                </div>
+                <ChevronRight size={16} className="text-gray-300 group-hover:text-purple-500 group-hover:translate-x-0.5 transition-all" />
+              </div>
+            ) : (
+              <div className="text-center py-4 border border-dashed border-gray-200 rounded-xl">
+                <p className="text-xs text-gray-400">No companion assigned</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Conversations Card */}
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="px-6 py-5 border-b border-gray-50 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <MessageSquare className="text-gray-400" size={20} />
+            <h3 className="text-lg font-bold text-gray-900">Recent Conversations</h3>
+            <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold">
+              {patient.recentConversations?.length || 0}
+            </span>
+          </div>
+        </div>
+        <div className="p-6 space-y-4">
+          {patient.recentConversations && patient.recentConversations.length > 0 ? (
+            patient.recentConversations.map((conv, idx) => (
+              <div
+                key={idx}
+                onClick={() => onNavigateToConversations?.(conv.id)}
+                className="group flex items-center justify-between p-4 bg-gray-50/30 border border-gray-100 rounded-2xl cursor-pointer hover:bg-white hover:border-blue-100 hover:shadow-md transition-all duration-300"
+              >
+                <div className="flex items-center gap-4">
+                  <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${conv.sentiment === 'anxious' ? 'bg-orange-50 text-orange-600 border border-orange-100' :
+                    conv.sentiment === 'happy' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                      'bg-blue-50 text-blue-600 border border-blue-100'
+                    }`}>
+                    {conv.sentiment === 'anxious' ? <AlertCircle size={20} /> : <MessageSquare size={20} />}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">{conv.lastMessage}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{patient.name}</span>
+                      <span className="text-gray-300 text-xs">•</span>
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{conv.date}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${conv.sentiment === 'happy' ? 'bg-emerald-50 text-emerald-700' :
+                    conv.sentiment === 'anxious' ? 'bg-orange-50 text-orange-700' :
+                      'bg-blue-50 text-blue-700'
+                    }`}>
+                    {conv.sentiment.toUpperCase()}
+                  </span>
+                  <ChevronRight size={18} className="text-gray-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-10">
+              <MessageSquare size={32} className="mx-auto text-gray-200 mb-3" />
+              <p className="text-sm text-gray-400 font-medium">No recent conversations</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  if (selectedPatient) {
+    return renderPatientDetail(selectedPatient);
+  }
 
   return (
     <div className="space-y-4">
@@ -194,11 +389,12 @@ export function PatientList({ onNavigateToConversations, userRole }: PatientList
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                 </th>
+                <th className="p-4">ID</th>
                 <th className="p-4">Patient</th>
                 <th className="p-4">Condition</th>
                 <th className="p-4">Status</th>
                 <th className="p-4">Clinic</th>
-                <th className="p-4">Last Active</th>
+                <th className="p-4 text-center">Last Active</th>
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -218,28 +414,42 @@ export function PatientList({ onNavigateToConversations, userRole }: PatientList
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                   </td>
+                  <td className="p-4 whitespace-nowrap">
+                    <span className="text-blue-600 font-bold hover:underline cursor-pointer">{patient.id}</span>
+                  </td>
                   <td className="p-4">
-                    <div>
-                      <div className="font-medium text-gray-900">{patient.name}</div>
-                      <div className="text-xs text-gray-500">{patient.id}</div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 overflow-hidden">
+                        <UserIcon size={16} />
+                      </div>
+                      <div className="font-bold text-gray-900">{patient.name}</div>
                     </div>
                   </td>
-                  <td className="p-4 text-gray-600">{patient.condition}</td>
+                  <td className="p-4 text-gray-600 font-medium">{patient.condition}</td>
                   <td className="p-4">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${patient.status === 'Active' ? 'bg-green-50 text-green-700' :
-                        patient.status === 'Warning' ? 'bg-orange-50 text-orange-700' :
-                          'bg-gray-100 text-gray-600'
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${patient.status === 'Active' ? 'bg-green-50 text-green-700' :
+                      patient.status === 'Warning' ? 'bg-orange-50 text-orange-700' :
+                        'bg-gray-100 text-gray-600'
                       }`}>
                       {patient.status}
                     </span>
                   </td>
                   <td className="p-4 text-gray-600">
-                    <div className="flex items-center gap-1.5">
-                      <Building2 size={14} className="text-gray-400" />
-                      {patient.clinicName || '-'}
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 rounded-full bg-gray-50 flex items-center justify-center">
+                        <Folder size={12} className="text-gray-400" />
+                      </div>
+                      <span className="text-xs font-bold text-gray-500">{patient.clinicName || 'Unassigned'}</span>
                     </div>
                   </td>
-                  <td className="p-4 text-gray-500">{patient.lastActive}</td>
+                  <td className="p-4 text-center">
+                    <div className="text-gray-900 font-bold text-sm leading-none">{patient.lastActive}</div>
+                    {patient.recentConversations && patient.recentConversations.length > 0 && (
+                      <div className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter mt-1">
+                        Conversations: {patient.recentConversations.length}
+                      </div>
+                    )}
+                  </td>
                   <td className="p-4 text-right">
                     <Button
                       variant="ghost"
