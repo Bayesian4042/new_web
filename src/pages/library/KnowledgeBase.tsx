@@ -7,7 +7,8 @@ import {
     FileText,
     Link as LinkIcon,
     Plus,
-    Download,
+    Copy,
+    Pencil,
     Trash2,
     Paperclip
 } from 'lucide-react';
@@ -23,50 +24,15 @@ export interface KBItem {
     content?: string;
 }
 
-const kbItems: KBItem[] = [
-    {
-        id: 'KB-0001',
-        name: 'Post-Op Recovery Guide',
-        addedOn: '02-02-2026',
-        lastUpdated: '2h ago',
-        documents: [
-            { name: 'Recovery_Basic.pdf', size: '1.2 MB' },
-            { name: 'Exercises.pdf', size: '2.4 MB' }
-        ],
-        links: ['https://med.edu/post-op'],
-        content: '<h2>Introduction</h2><p>This guide covers essential recovery steps.</p>'
-    },
-    {
-        id: 'KB-0002',
-        name: 'Diabetes Management Protocol',
-        addedOn: '01-02-2026',
-        lastUpdated: '1d ago',
-        links: ['https://clinical-docs.med/diabetes'],
-        content: 'Official protocol for type 2 diabetes management at MediCore.'
-    },
-    {
-        id: 'KB-0003',
-        name: 'Mental Health Assessment FAQ',
-        addedOn: '28-01-2026',
-        lastUpdated: '1w ago',
-        documents: [{ name: 'MH_FAQ_2026.pdf', size: '1.1 MB' }]
-    },
-    {
-        id: 'KB-0004',
-        name: 'General Policy Handbook',
-        addedOn: '25-01-2026',
-        lastUpdated: '2w ago',
-        documents: [{ name: 'Handbook_V1.pdf', size: '4.5 MB' }],
-        links: ['https://internal.portal/handbook']
-    }
-];
-
 interface KnowledgeBaseProps {
     onAddItem: () => void;
     onEditItem: (item: KBItem) => void;
+    onCopyItem: (item: KBItem) => void;
+    onDeleteItem: (id: string) => void;
+    items: KBItem[];
 }
 
-export function KnowledgeBase({ onAddItem, onEditItem }: KnowledgeBaseProps) {
+export function KnowledgeBase({ onAddItem, onEditItem, onCopyItem, onDeleteItem, items }: KnowledgeBaseProps) {
     const [selectedRows, setSelectedRows] = useState<string[]>([]);
     const [filterActive, setFilterActive] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -79,7 +45,7 @@ export function KnowledgeBase({ onAddItem, onEditItem }: KnowledgeBaseProps) {
 
     const toggleAll = () => {
         setSelectedRows((prev) =>
-            prev.length === kbItems.length ? [] : kbItems.map((k) => k.id)
+            prev.length === items.length ? [] : items.map((k) => k.id)
         );
     };
 
@@ -99,36 +65,22 @@ export function KnowledgeBase({ onAddItem, onEditItem }: KnowledgeBaseProps) {
                         />
                     </div>
 
-                    {filterActive ? (
-                        <button
-                            onClick={() => setFilterActive(false)}
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md border border-gray-200"
-                        >
-                            <Filter size={14} />
-                            Filter
-                            <X size={14} className="text-gray-400 hover:text-gray-600" />
-                        </button>
-                    ) : (
-                        <button
-                            onClick={() => setFilterActive(true)}
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md border border-gray-200"
-                        >
-                            <Filter size={14} />
-                            Filter
-                        </button>
-                    )}
+                    <button
+                        onClick={() => setFilterActive(!filterActive)}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md border border-gray-200 ${filterActive ? 'bg-gray-50' : ''}`}
+                    >
+                        <Filter size={14} />
+                        Filter
+                        {filterActive && <X size={14} className="text-gray-400" />}
+                    </button>
 
                     <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md border border-gray-200">
                         <ArrowUpDown size={14} />
-                        Added On
+                        Sort by Date
                     </button>
                 </div>
 
-                <Button
-                    onClick={onAddItem}
-                    size="sm"
-                    className="bg-gray-900 hover:bg-gray-800 text-white"
-                >
+                <Button onClick={onAddItem} size="sm" className="bg-gray-900 hover:bg-gray-800 text-white">
                     <Plus size={16} />
                     Add To Library
                 </Button>
@@ -142,31 +94,19 @@ export function KnowledgeBase({ onAddItem, onEditItem }: KnowledgeBaseProps) {
                             <th className="w-10 py-3 px-3">
                                 <input
                                     type="checkbox"
-                                    checked={selectedRows.length === kbItems.length}
+                                    checked={items.length > 0 && selectedRows.length === items.length}
                                     onChange={toggleAll}
                                     className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
                                 />
                             </th>
-                            <th className="py-3 px-3 text-left">
-                                <button className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-700">
-                                    ID
-                                    <ArrowUpDown size={12} />
-                                </button>
-                            </th>
-                            <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">
-                                Resource Name
-                            </th>
-                            <th className="py-3 px-3 text-center text-sm font-medium text-gray-500">
-                                Attachments
-                            </th>
-                            <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">
-                                Added On
-                            </th>
-                            <th className="py-3 px-3 text-right text-sm font-medium text-gray-500"></th>
+                            <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">ID</th>
+                            <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Resource Name</th>
+                            <th className="py-3 px-3 text-center text-sm font-medium text-gray-500">Attachments</th>
+                            <th className="py-3 px-3 text-right text-sm font-medium text-gray-500">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {kbItems.map((item) => (
+                        {items.map((item) => (
                             <tr
                                 key={item.id}
                                 onClick={() => onEditItem(item)}
@@ -182,7 +122,7 @@ export function KnowledgeBase({ onAddItem, onEditItem }: KnowledgeBaseProps) {
                                     />
                                 </td>
                                 <td className="py-3 px-3">
-                                    <span className="text-sm font-medium text-blue-600 hover:text-blue-700 cursor-pointer">
+                                    <span className="text-sm font-medium text-blue-600 cursor-pointer">
                                         {item.id}
                                     </span>
                                 </td>
@@ -210,30 +150,29 @@ export function KnowledgeBase({ onAddItem, onEditItem }: KnowledgeBaseProps) {
                                         )}
                                     </div>
                                 </td>
-                                <td className="py-3 px-3 text-sm text-gray-500">
-                                    {item.addedOn}
-                                </td>
                                 <td className="py-3 px-3">
-                                    <div className="flex items-center justify-end gap-3 text-gray-400">
-                                        <span className="text-xs text-gray-400">
-                                            {item.lastUpdated}
-                                        </span>
-                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button
-                                                onClick={(e) => e.stopPropagation()}
-                                                className="p-1 hover:text-gray-600"
-                                                title="Download All"
-                                            >
-                                                <Download size={14} />
-                                            </button>
-                                            <button
-                                                onClick={(e) => e.stopPropagation()}
-                                                className="p-1 hover:text-red-500"
-                                                title="Delete"
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
+                                    <div className="flex items-center justify-end gap-2">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); onCopyItem(item); }}
+                                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                            title="Copy"
+                                        >
+                                            <Copy size={16} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); onEditItem(item); }}
+                                            className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                            title="Edit"
+                                        >
+                                            <Pencil size={16} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); onDeleteItem(item.id); }}
+                                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            title="Delete"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
                                     </div>
                                 </td>
                             </tr>

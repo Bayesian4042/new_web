@@ -9,8 +9,11 @@ import {
     Edit2,
     Shield,
     ShieldCheck,
-    X
+    X,
+    ChevronDown,
+    ArrowUpDown
 } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 interface User {
     id: string;
@@ -50,7 +53,7 @@ const initialUsers: User[] = [
 
 export function Users() {
     const [users, setUsers] = useState<User[]>(initialUsers);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [formData, setFormData] = useState({
         name: '',
@@ -58,7 +61,7 @@ export function Users() {
         role: 'Clinic Staff' as 'Clinic Admin' | 'Clinic Staff'
     });
 
-    const handleOpenModal = (user?: User) => {
+    const handleOpenDrawer = (user?: User) => {
         if (user) {
             setEditingUser(user);
             setFormData({
@@ -74,7 +77,7 @@ export function Users() {
                 role: 'Clinic Staff'
             });
         }
-        setIsModalOpen(true);
+        setIsDrawerOpen(true);
     };
 
     const handleSave = () => {
@@ -89,7 +92,7 @@ export function Users() {
             };
             setUsers([...users, newUser]);
         }
-        setIsModalOpen(false);
+        setIsDrawerOpen(false);
     };
 
     const handleDelete = (id: string) => {
@@ -106,7 +109,7 @@ export function Users() {
                     <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Users</h1>
                     <p className="text-gray-500 mt-1">Manage clinic staff and their roles</p>
                 </div>
-                <Button onClick={() => handleOpenModal()} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+                <Button onClick={() => handleOpenDrawer()} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
                     <Plus size={16} className="mr-2" />
                     Add User
                 </Button>
@@ -130,65 +133,87 @@ export function Users() {
             </div>
 
             {/* Table */}
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
                 <table className="w-full">
-                    <thead className="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">User</th>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Role</th>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
-                            <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Last Active</th>
-                            <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</th>
+                    <thead>
+                        <tr className="border-b border-gray-200">
+                            <th className="w-10 py-3 px-3">
+                                <input
+                                    type="checkbox"
+                                    className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
+                                />
+                            </th>
+                            <th className="py-3 px-3 text-left">
+                                <button className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                                    Name
+                                    <ArrowUpDown size={12} />
+                                </button>
+                            </th>
+                            <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">
+                                Email
+                            </th>
+                            <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">
+                                Role
+                            </th>
+                            <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">
+                                Last Active
+                            </th>
+                            <th className="py-3 px-3 text-right"></th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-gray-50">
                         {users.map((user) => (
-                            <tr key={user.id} className="hover:bg-gray-50/50 transition-colors group">
-                                <td className="px-6 py-4">
+                            <tr
+                                key={user.id}
+                                onClick={() => handleOpenDrawer(user)}
+                                className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors group cursor-pointer"
+                            >
+                                <td className="py-3 px-3">
+                                    <input
+                                        type="checkbox"
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
+                                    />
+                                </td>
+                                <td className="py-3 px-3">
                                     <div className="flex items-center gap-3">
-                                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold border border-blue-200">
+                                        <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 font-bold border border-blue-100 text-xs">
                                             {user.name.charAt(0)}
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-                                            <p className="text-xs text-gray-500 flex items-center gap-1">
-                                                <Mail size={12} className="text-gray-400" />
-                                                {user.email}
-                                            </p>
-                                        </div>
+                                        <span className="text-sm font-medium text-gray-900">{user.name}</span>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4">
-                                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${user.role === 'Clinic Admin'
-                                        ? 'bg-purple-50 text-purple-700 border-purple-100'
-                                        : 'bg-blue-50 text-blue-700 border-blue-100'
+                                <td className="py-3 px-3">
+                                    <div className="flex items-center gap-1.5 text-gray-500">
+                                        <Mail size={14} className="text-gray-400" />
+                                        <span className="text-sm">{user.email}</span>
+                                    </div>
+                                </td>
+                                <td className="py-3 px-3">
+                                    <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium ${user.role === 'Clinic Admin'
+                                        ? 'bg-purple-50 text-purple-700'
+                                        : 'bg-blue-50 text-blue-700'
                                         }`}>
                                         {user.role === 'Clinic Admin' ? <ShieldCheck size={12} /> : <Shield size={12} />}
                                         {user.role}
                                     </div>
                                 </td>
-                                <td className="px-6 py-4">
-                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${user.status === 'Active' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'
-                                        }`}>
-                                        {user.status}
-                                    </span>
+                                <td className="py-3 px-3">
+                                    <span className="text-sm text-gray-600">{user.lastActive}</span>
                                 </td>
-                                <td className="px-6 py-4 text-right text-sm text-gray-500 font-medium">
-                                    {user.lastActive}
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <td className="py-3 px-3">
+                                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button
-                                            onClick={() => handleOpenModal(user)}
-                                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                            onClick={(e) => { e.stopPropagation(); handleOpenDrawer(user); }}
+                                            className="p-1 text-gray-400 hover:text-blue-600 rounded transition-colors"
                                         >
-                                            <Edit2 size={16} />
+                                            <Edit2 size={14} />
                                         </button>
                                         <button
-                                            onClick={() => handleDelete(user.id)}
-                                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            onClick={(e) => { e.stopPropagation(); handleDelete(user.id); }}
+                                            className="p-1 text-gray-400 hover:text-red-600 rounded transition-colors"
                                         >
-                                            <Trash2 size={16} />
+                                            <Trash2 size={14} />
                                         </button>
                                     </div>
                                 </td>
@@ -198,80 +223,92 @@ export function Users() {
                 </table>
             </div>
 
-            {/* Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-gray-100 overflow-hidden transform transition-all scale-100 animate-in fade-in zoom-in-95 duration-200">
-                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                            <h3 className="font-bold text-gray-900">
+            {/* Side Drawer - Portaled to document.body to avoid z-index/clipping issues */}
+            {isDrawerOpen && createPortal(
+                <>
+                    <div
+                        className="fixed inset-0 bg-black/20 z-[100] transition-opacity backdrop-blur-sm"
+                        onClick={() => setIsDrawerOpen(false)}
+                    />
+                    <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-2xl z-[101] flex flex-col animate-in slide-in-from-right duration-300">
+                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
+                            <h3 className="font-bold text-gray-900 text-lg">
                                 {editingUser ? 'Edit User' : 'Add New User'}
                             </h3>
                             <button
-                                onClick={() => setIsModalOpen(false)}
-                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                                onClick={() => setIsDrawerOpen(false)}
+                                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
                             >
                                 <X size={20} />
                             </button>
                         </div>
 
-                        <div className="p-6 space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-gray-700 uppercase tracking-wide">
-                                    Full Name
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                                    placeholder="e.g. Dr. Sarah Smith"
-                                />
-                            </div>
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                            <div className="space-y-5">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                                        Full Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm shadow-sm"
+                                        placeholder="e.g. Dr. Sarah Smith"
+                                    />
+                                </div>
 
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-gray-700 uppercase tracking-wide">
-                                    Email Address
-                                </label>
-                                <input
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                                    placeholder="e.g. sarah@clinic.com"
-                                />
-                            </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                                        Email Address
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm shadow-sm"
+                                        placeholder="e.g. sarah@clinic.com"
+                                    />
+                                </div>
 
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-gray-700 uppercase tracking-wide">
-                                    Role
-                                </label>
-                                <select
-                                    value={formData.role}
-                                    onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
-                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                                >
-                                    <option value="Clinic Staff">Clinic Staff</option>
-                                    <option value="Clinic Admin">Clinic Admin</option>
-                                </select>
-                                <p className="text-xs text-gray-500">
-                                    Admins have full access to settings and user management.
-                                </p>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                                        Role
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            value={formData.role}
+                                            onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
+                                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm shadow-sm appearance-none"
+                                        >
+                                            <option value="Clinic Staff">Clinic Staff</option>
+                                            <option value="Clinic Admin">Clinic Admin</option>
+                                        </select>
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                            <ChevronDown size={14} />
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Admins have full access to settings and user management.
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
                         <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3">
                             <button
-                                onClick={() => setIsModalOpen(false)}
-                                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                                onClick={() => setIsDrawerOpen(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors hover:bg-gray-100 rounded-lg"
                             >
                                 Cancel
                             </button>
-                            <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+                            <Button onClick={handleSave} className="bg-gray-900 hover:bg-black text-white shadow-lg shadow-gray-900/10 px-6">
                                 {editingUser ? 'Save Changes' : 'Create User'}
                             </Button>
                         </div>
                     </div>
-                </div>
+                </>,
+                document.body
             )}
         </div>
     );

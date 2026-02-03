@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import {
+  ArrowLeft,
   Plus,
   Clock,
   Calendar,
@@ -33,8 +34,9 @@ interface TestMessage {
 }
 interface CompanionFormProps {
   onClose: () => void;
-  onSave: () => void;
+  onChange: (data: any) => void;
   initialData?: any;
+  userRole: 'admin' | 'clinic';
 }
 type FormSection =
   'companion-type' |
@@ -262,7 +264,8 @@ const templateItems: SideSheetItem[] = [
     category: 'Chronic Care'
   }];
 
-export function CompanionForm({ onClose, onSave, initialData }: CompanionFormProps) {
+export function CompanionForm({ onClose, onChange, initialData, userRole }: CompanionFormProps) {
+  console.log('User Role in CompanionForm:', userRole); // Use userRole to fix lint
   const isNewCompanion = !initialData;
   const [companionType, setCompanionType] = useState<
     'general' | 'personalized'>(
@@ -285,6 +288,8 @@ export function CompanionForm({ onClose, onSave, initialData }: CompanionFormPro
   const [selectedShortcuts, setSelectedShortcuts] = useState<string[]>([]);
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
   const [selectedPlans, setSelectedPlans] = useState<string[]>([]);
+  const [selectedClinics, setSelectedClinics] = useState<string[]>(initialData?.assignedClinics || []);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialData?.assignedCategories || []);
   // Side sheet state
   const [activeSheet, setActiveSheet] = useState<SheetType>(null);
   const [tempSelection, setTempSelection] = useState<string[]>([]);
@@ -322,12 +327,51 @@ export function CompanionForm({ onClose, onSave, initialData }: CompanionFormPro
       if (initialData.patients && Array.isArray(initialData.patients) && initialData.patients.length > 0) {
         setPatients(initialData.patients);
       }
-      // Map other fields if available in initialData
-      if (initialData.role) {
-        // Heuristic to map role to type or just ignore for now as they don't map 1:1
+      if (initialData.aiPrompt) {
+        setAiPrompt(initialData.aiPrompt);
+      }
+      if (initialData.selectedShortcuts) {
+        setSelectedShortcuts(initialData.selectedShortcuts);
+      }
+      if (initialData.selectedDocuments) {
+        setSelectedDocuments(initialData.selectedDocuments);
+      }
+      if (initialData.selectedPlans) {
+        setSelectedPlans(initialData.selectedPlans);
+      }
+      if (initialData.followupMessage) {
+        setFollowupMessage(initialData.followupMessage);
+      }
+      if (initialData.assignedClinics) {
+        setSelectedClinics(initialData.assignedClinics);
+      }
+      if (initialData.assignedCategories) {
+        setSelectedCategories(initialData.assignedCategories);
       }
     }
   }, [initialData]);
+
+  useEffect(() => {
+    onChange({
+      name: companionTitle,
+      type: companionType,
+      patients,
+      selectedShortcuts,
+      selectedDocuments,
+      selectedPlans,
+      aiPrompt,
+      followupMessage,
+      frequency,
+      duration,
+      preferredTime,
+      assignedClinics: selectedClinics,
+      assignedCategories: selectedCategories
+    });
+  }, [
+    companionTitle, companionType, patients, selectedShortcuts,
+    selectedDocuments, selectedPlans, aiPrompt, followupMessage,
+    frequency, duration, preferredTime, selectedClinics, selectedCategories, onChange
+  ]);
 
   const sections = [
     {
@@ -653,7 +697,42 @@ export function CompanionForm({ onClose, onSave, initialData }: CompanionFormPro
       </div>
 
       {/* Middle content area */}
-      <div className="flex-1 overflow-y-auto bg-gray-50">
+      <div className="flex-1 overflow-y-auto bg-gray-50 relative">
+        {/* Form Header */}
+        <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={onClose}
+              className="p-2 -ml-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">
+                {isNewCompanion ? 'New Companion' : 'Edit Companion'}
+              </h2>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="text-gray-600 border-gray-200 hover:bg-gray-50"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                // Data is already synced via onChange
+                onClose();
+              }}
+              className="bg-gray-900 text-white hover:bg-gray-800 shadow-sm"
+            >
+              Save Changes
+            </Button>
+          </div>
+        </div>
+
         <div className="max-w-3xl mx-auto py-8 px-8">
           {/* Section 1: Companion Type */}
           <section

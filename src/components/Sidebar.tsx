@@ -8,7 +8,8 @@ import {
   Home,
   Settings,
   PanelLeftClose,
-  Sparkles
+  Sparkles,
+  Building2
 } from
   'lucide-react';
 
@@ -52,7 +53,7 @@ export function Sidebar({
       [section]: !prev[section]
     }));
   };
-  const navItems: NavItem[] = [
+  const clinicNavItems: NavItem[] = [
     {
       id: 'dashboard',
       label: 'Home',
@@ -71,7 +72,6 @@ export function Sidebar({
           id: 'protocols',
           label: 'Protocols'
         }]
-
     },
     {
       id: 'patients',
@@ -81,13 +81,8 @@ export function Sidebar({
         {
           id: 'all-patients',
           label: 'All Patients'
-        },
-        // {
-        //   id: 'patient-groups',
-        //   label: 'Patient Groups'
-        // }
+        }
       ]
-
     },
     {
       id: 'library',
@@ -110,7 +105,6 @@ export function Sidebar({
           id: 'knowledge-base',
           label: 'Knowledge Base'
         }]
-
     },
     {
       id: 'ai',
@@ -125,7 +119,6 @@ export function Sidebar({
           id: 'conversations',
           label: 'Conversations'
         }]
-
     },
     {
       id: 'setup',
@@ -139,13 +132,67 @@ export function Sidebar({
         {
           id: 'users',
           label: 'Users'
+        }
+      ]
+    }];
+
+  const adminNavItems: NavItem[] = [
+    {
+      id: 'dashboard',
+      label: 'Home',
+      icon: <Home size={16} />
+    },
+    {
+      id: 'protocols',
+      label: 'Protocols',
+      icon: <Briefcase size={16} />
+    },
+    {
+      id: 'patients',
+      label: 'Patient Management',
+      icon: <Users size={16} />,
+      children: [
+        {
+          id: 'all-patients',
+          label: 'All Patients'
+        }
+      ]
+    },
+    {
+      id: 'library',
+      label: 'Library',
+      icon: <Library size={16} />,
+      children: [
+        {
+          id: 'ai-rules',
+          label: 'AI Rules'
         },
         {
-          id: 'roles',
-          label: 'Roles'
+          id: 'plans',
+          label: 'Plans'
+        },
+        {
+          id: 'followups',
+          label: 'Followups'
+        },
+        {
+          id: 'knowledge-base',
+          label: 'Knowledge Base'
         }]
+    },
+    {
+      id: 'conversations',
+      label: 'Conversations',
+      icon: <Sparkles size={16} />
+    },
+    {
+      id: 'clinics',
+      label: 'Clinics',
+      icon: <Building2 size={16} />
+    }
+  ];
 
-    }];
+  const navItems = userRole === 'admin' ? adminNavItems : clinicNavItems;
 
   if (collapsed) {
     return (
@@ -156,18 +203,19 @@ export function Sidebar({
           </div>
         </div>
         <nav className="flex-1 py-3 flex flex-col items-center gap-1">
-          {navItems.slice(0, 5).map((item) =>
+          {navItems.map((item) => (
             <button
               key={item.id}
-              onClick={() =>
-                item.children ? toggleSection(item.id) : setActiveView(item.id)
-              }
-              className={`p-2.5 rounded-md transition-colors ${activeView === item.id || item.children?.some((c) => c.id === activeView) ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'}`}
-              title={item.label}>
-
+              onClick={() => setActiveView(item.id)}
+              className={`h-9 w-9 flex items-center justify-center rounded-lg transition-colors ${activeView === item.id || (item.children?.some(c => c.id === activeView))
+                ? 'bg-gray-900 text-white shadow-sm'
+                : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
+                }`}
+              title={item.label}
+            >
               {item.icon}
             </button>
-          )}
+          ))}
         </nav>
 
         <div className="p-3 border-t border-gray-100 space-y-3">
@@ -306,14 +354,13 @@ export function Sidebar({
 
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-gray-900 truncate">
-              {userRole === 'admin' ? 'Abhilasha' : 'Clinic Staff'}
+              {userRole === 'admin' ? 'Super Admin' : 'Clinic'}
             </p>
             <p className="text-[10px] text-gray-400 truncate font-medium">
-              {userRole === 'admin' ? 'abhilasha@gm...' : 'staff@clinic.com'}
+              {userRole === 'admin' ? 'admin@platform.com' : 'staff@clinic.com'}
             </p>
           </div>
         </div>
       </div>
     </aside>);
-
 }
