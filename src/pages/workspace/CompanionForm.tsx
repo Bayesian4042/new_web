@@ -638,16 +638,16 @@ export function CompanionForm({ onClose, onChange, initialData, userRole }: Comp
   };
   return (
     <div className="flex h-full bg-gray-50">
-      {/* Left sidebar */}
-      <div className="w-60 bg-white border-r border-gray-200 py-6 flex-shrink-0 flex flex-col">
-        <div className="px-5 mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Progress</span>
-            <span className="text-sm font-bold text-gray-900">
+      {/* Left sidebar - Minimized */}
+      <div className="w-48 bg-white border-r border-gray-200 py-4 flex-shrink-0 flex flex-col">
+        <div className="px-3 mb-4">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-semibold text-gray-600 uppercase tracking-wide">Progress</span>
+            <span className="text-xs font-bold text-gray-900">
               {completedCount}/{sections.length}
             </span>
           </div>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500 ease-out"
               style={{
@@ -657,13 +657,13 @@ export function CompanionForm({ onClose, onChange, initialData, userRole }: Comp
           </div>
         </div>
 
-        <div className="px-5 mb-4">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            Setup Steps
+        <div className="px-3 mb-3">
+          <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+            Steps
           </h2>
         </div>
 
-        <nav className="flex-1 px-3 space-y-1">
+        <nav className="flex-1 px-2 space-y-1">
           {sections.map((section, index) => {
             const isComplete = isSectionComplete(section.id);
             const isVisited = visitedSections.has(section.id);
@@ -671,27 +671,27 @@ export function CompanionForm({ onClose, onChange, initialData, userRole }: Comp
               <button
                 key={section.id}
                 onClick={() => scrollToSection(section.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all ${isVisited ? 'text-gray-900 hover:bg-gray-100' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
+                className={`w-full flex items-center gap-2 px-2 py-2 text-xs rounded-lg transition-all ${isVisited ? 'text-gray-900 hover:bg-gray-100' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
 
                 <div
-                  className={`flex-shrink-0 h-8 w-8 rounded-lg flex items-center justify-center text-xs font-semibold transition-colors ${isComplete ? 'bg-green-100 text-green-700' : isVisited ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 text-gray-500'}`}>
+                  className={`flex-shrink-0 h-6 w-6 rounded-md flex items-center justify-center text-[10px] font-semibold transition-colors ${isComplete ? 'bg-green-100 text-green-700' : isVisited ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 text-gray-500'}`}>
 
-                  {isComplete ? <Check size={16} /> : index + 1}
+                  {isComplete ? <Check size={12} /> : index + 1}
                 </div>
-                <span className={`font-medium flex-1 text-left ${isComplete || isVisited ? 'text-gray-900' : 'text-gray-500'}`}>
+                <span className={`font-medium flex-1 text-left truncate ${isComplete || isVisited ? 'text-gray-900' : 'text-gray-500'}`}>
                   {section.label}
                 </span>
                 {section.required && !isComplete &&
-                  <span className="text-red-500 text-xs font-bold">*</span>
+                  <span className="text-red-500 text-[10px] font-bold">*</span>
                 }
               </button>);
 
           })}
         </nav>
 
-        <div className="px-5 pt-4 border-t border-gray-100 mt-4">
-          <p className="text-xs text-gray-500">
-            <span className="text-red-500 font-bold">*</span> Required fields
+        <div className="px-3 pt-3 border-t border-gray-100 mt-3">
+          <p className="text-[10px] text-gray-500">
+            <span className="text-red-500 font-bold">*</span> Required
           </p>
         </div>
       </div>
@@ -1492,52 +1492,45 @@ export function CompanionForm({ onClose, onChange, initialData, userRole }: Comp
         </div>
       </div>
 
-      {/* Right Test Panel */}
-      <div className="w-[420px] bg-white border-l border-gray-200 flex-shrink-0 flex flex-col">
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-gray-900">Live Preview</h3>
-            <p className="text-[10px] text-gray-500 mt-0.5">Test your companion's behavior in real-time</p>
+      {/* Right Test Panel - Minimized */}
+      <div className="w-64 bg-white border-l border-gray-200 flex-shrink-0 flex flex-col">
+        <div className="p-4 border-b border-gray-100">
+          <div className="flex items-center gap-2 mb-1">
+            {!isNewCompanion && <span className="flex h-1.5 w-1.5 rounded-full bg-green-500" />}
+            <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest">Preview</h3>
           </div>
-          {!isNewCompanion && (
-            <div className="flex items-center gap-2">
-              <span className="flex h-2 w-2 rounded-full bg-green-500" />
-              <span className="text-[10px] font-bold text-gray-700 uppercase tracking-wider">Active Workspace</span>
-            </div>
-          )}
+          <p className="text-[10px] text-gray-500">Test companion</p>
         </div>
 
         {/* Chat Area */}
         <div className="flex-1 bg-white overflow-y-auto overflow-x-hidden">
-          <div className="max-w-xl mx-auto py-8 px-6 space-y-8">
+          <div className="py-4 px-3 space-y-3">
             {testMessages.map((message) => (
               <div key={message.id} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                 {message.sender === 'bot' ? (
-                  <div className="flex gap-4 group">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0 bg-blue-600 shadow-sm">
-                      <Bot size={18} />
+                  <div className="flex gap-2 group">
+                    <div className="w-6 h-6 rounded-lg flex items-center justify-center text-white flex-shrink-0 bg-blue-600 shadow-sm">
+                      <Bot size={14} />
                     </div>
                     <div className="flex-1 space-y-1">
-                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                        {companionTitle || 'AI Assistant'}
+                      <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">
+                        AI
                       </p>
-                      <div className="prose prose-sm max-w-none text-gray-800 leading-relaxed bg-gray-50 p-4 rounded-2xl rounded-tl-none border border-gray-100">
+                      <div className="text-xs text-gray-800 leading-relaxed bg-gray-50 p-3 rounded-xl rounded-tl-none border border-gray-100">
                         {message.content}
                       </div>
-                      <p className="text-[9px] text-gray-400 font-medium">{message.timestamp}</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex gap-4 flex-row-reverse group">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0 bg-gray-900 shadow-sm">
-                      <UserIcon size={18} />
+                  <div className="flex gap-2 flex-row-reverse group">
+                    <div className="w-6 h-6 rounded-lg flex items-center justify-center text-white flex-shrink-0 bg-gray-900 shadow-sm">
+                      <UserIcon size={14} />
                     </div>
                     <div className="flex-1 space-y-1 text-right">
-                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">You</p>
-                      <div className="inline-block text-left max-w-full p-4 rounded-2xl rounded-tr-none bg-blue-600 text-white shadow-sm border border-blue-700/10">
-                        <p className="text-sm leading-relaxed">{message.content}</p>
+                      <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">You</p>
+                      <div className="inline-block text-left max-w-full p-3 rounded-xl rounded-tr-none bg-blue-600 text-white shadow-sm">
+                        <p className="text-xs leading-relaxed">{message.content}</p>
                       </div>
-                      <p className="text-[9px] text-gray-400 font-medium">{message.timestamp}</p>
                     </div>
                   </div>
                 )}
@@ -1547,9 +1540,9 @@ export function CompanionForm({ onClose, onChange, initialData, userRole }: Comp
         </div>
 
         {/* Input Area */}
-        <div className="p-6 bg-white border-t border-gray-100">
-          <div className="max-w-xl mx-auto relative">
-            <div className={`relative flex items-end gap-2 p-1.5 bg-gray-50 border border-gray-200 rounded-2xl transition-all focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 ${isNewCompanion ? 'opacity-50 grayscale pointer-events-none' : ''}`}>
+        <div className="p-3 bg-white border-t border-gray-100">
+          <div className="relative">
+            <div className={`relative flex items-end gap-1.5 p-1.5 bg-gray-50 border border-gray-200 rounded-xl transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/10 ${isNewCompanion ? 'opacity-50 grayscale pointer-events-none' : ''}`}>
               <textarea
                 rows={1}
                 value={testInput}
@@ -1564,27 +1557,17 @@ export function CompanionForm({ onClose, onChange, initialData, userRole }: Comp
                     handleSendTestMessage();
                   }
                 }}
-                placeholder={isNewCompanion ? 'Save companion to start testing' : 'Ask anything...'}
-                className="flex-1 max-h-32 bg-transparent border-none focus:ring-0 text-sm text-gray-900 placeholder:text-gray-400 py-2.5 px-3 resize-none scrollbar-hide focus:outline-none"
+                placeholder={isNewCompanion ? 'Save first' : 'Type...'}
+                className="flex-1 max-h-24 bg-transparent border-none focus:ring-0 text-xs text-gray-900 placeholder:text-gray-400 py-1.5 px-2 resize-none scrollbar-hide focus:outline-none"
               />
               <button
                 onClick={handleSendTestMessage}
                 disabled={!testInput.trim() || isNewCompanion}
-                className="h-10 w-10 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-600/20 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:shadow-none transition-all"
+                className="h-8 w-8 rounded-lg flex items-center justify-center text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:shadow-none transition-all flex-shrink-0"
               >
-                <Send size={18} />
+                <Send size={14} />
               </button>
             </div>
-            {isNewCompanion && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
-                  <p className="text-[10px] font-bold text-gray-900 uppercase tracking-widest">Form locked until save</p>
-                </div>
-              </div>
-            )}
-            <p className="text-[9px] text-gray-400 mt-3 text-center uppercase font-bold tracking-widest">
-              Shift + Enter for new line • Press Enter to send
-            </p>
           </div>
         </div>
       </div>

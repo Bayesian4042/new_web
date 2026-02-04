@@ -3,7 +3,6 @@ import {
   Users,
   FileText,
   Activity,
-  TrendingUp,
   ArrowUpRight,
   ChevronRight
 } from 'lucide-react';
@@ -25,49 +24,11 @@ export function Dashboard() {
       color: 'indigo'
     },
     {
-      label: 'Daily Interactions',
+      label: 'Conversations',
       value: '856',
       icon: Activity,
       trend: '+8%',
       color: 'emerald'
-    },
-    {
-      label: 'AI Consultations',
-      value: '128',
-      icon: TrendingUp,
-      trend: '+24%',
-      color: 'violet'
-    }
-  ];
-
-  const recentItems = [
-    {
-      type: 'Patient',
-      name: 'Sarah Johnson',
-      action: 'completed check-in',
-      time: '2m ago',
-      avatar: 'SJ'
-    },
-    {
-      type: 'Protocol',
-      name: 'Post-Op Recovery',
-      action: 'was updated',
-      time: '15m ago',
-      avatar: 'PR'
-    },
-    {
-      type: 'Companion',
-      name: 'Recovery Coach',
-      action: 'new interaction',
-      time: '1h ago',
-      avatar: 'RC'
-    },
-    {
-      type: 'Patient',
-      name: 'Michael Chen',
-      action: 'scheduled appointment',
-      time: '2h ago',
-      avatar: 'MC'
     }
   ];
 
@@ -92,7 +53,7 @@ export function Dashboard() {
     },
     {
       label: 'AI Rules',
-      icon: TrendingUp,
+      icon: FileText,
       path: 'ai-rules',
       description: 'Configure reasoning'
     }
@@ -107,7 +68,7 @@ export function Dashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6">
         {stats.map((stat, i) => (
           <div
             key={i}
@@ -136,76 +97,33 @@ export function Dashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 xl:gap-8">
-        {/* Quick Access */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Quick Access</h3>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            {shortcuts.map((item, i) => (
-              <button
-                key={i}
-                className="group flex flex-col items-start gap-3 p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300 text-left h-full"
-              >
-                <div className="flex items-center justify-between w-full">
-                    <div className="h-10 w-10 rounded-lg bg-gray-50 group-hover:bg-blue-50 flex items-center justify-center transition-colors">
-                    <item.icon size={20} className="text-gray-500 group-hover:text-blue-600 transition-colors" />
-                    </div>
-                    <ChevronRight size={16} className="text-gray-300 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
-                </div>
-                <div>
-                  <span className="block text-sm font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
-                    {item.label}
-                  </span>
-                  <span className="text-xs text-gray-500 mt-0.5 block">
-                    {item.description}
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
+      {/* Quick Access */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">Quick Access</h3>
         </div>
-
-        {/* Recent Activity */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-          <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-            <div className="divide-y divide-gray-50">
-              {recentItems.map((item, i) => (
-                <div
-                  key={i}
-                  className="group flex items-center justify-between p-4 hover:bg-gray-50/50 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-600 ring-2 ring-white">
-                      {item.avatar}
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-900">
-                        <span className="font-medium">
-                          {item.name}
-                        </span>{' '}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                        {item.action}
-                      </p>
-                    </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {shortcuts.map((item, i) => (
+            <button
+              key={i}
+              className="group flex flex-col items-start gap-3 p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300 text-left h-full"
+            >
+              <div className="flex items-center justify-between w-full">
+                  <div className="h-10 w-10 rounded-lg bg-gray-50 group-hover:bg-blue-50 flex items-center justify-center transition-colors">
+                  <item.icon size={20} className="text-gray-500 group-hover:text-blue-600 transition-colors" />
                   </div>
-                  <div className="text-right">
-                    <span className="text-xs font-medium text-gray-400 block">{item.time}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="p-3 border-t border-gray-50 bg-gray-50/50">
-                <button className="w-full py-2 text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors flex items-center justify-center gap-1">
-                    View All Activity
-                    <ChevronRight size={12} />
-                </button>
-            </div>
-          </div>
+                  <ChevronRight size={16} className="text-gray-300 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
+              </div>
+              <div>
+                <span className="block text-sm font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+                  {item.label}
+                </span>
+                <span className="text-xs text-gray-500 mt-0.5 block">
+                  {item.description}
+                </span>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     </div>

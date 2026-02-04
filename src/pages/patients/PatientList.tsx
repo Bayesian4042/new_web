@@ -12,7 +12,8 @@ import {
   ArrowLeft,
   Calendar,
   Edit,
-  AlertCircle
+  AlertCircle,
+  Plus
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
@@ -181,7 +182,7 @@ export function PatientList({ onNavigateToConversations, userRole, initialPatien
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Contact Info */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-6">
           <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Contact Information</h3>
@@ -216,23 +217,15 @@ export function PatientList({ onNavigateToConversations, userRole, initialPatien
           </div>
         </div>
 
-        {/* Context */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col">
-          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">Context</h3>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="h-2 w-2 rounded-full bg-blue-500" />
-              <p className="text-sm font-bold text-gray-900">{patient.condition}</p>
-            </div>
-            <p className="text-sm text-gray-500 leading-relaxed">
-              Regular checkup patient. Currently monitoring daily vitals and adherence to treatment plan.
-            </p>
-          </div>
-        </div>
-
         {/* Active Care */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-4">
-          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Active Care</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Active Care</h3>
+            <button className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
+              <Plus size={12} />
+              Add
+            </button>
+          </div>
           <div className="space-y-3">
             {patient.protocol ? (
               <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
@@ -248,8 +241,13 @@ export function PatientList({ onNavigateToConversations, userRole, initialPatien
                 <ChevronRight size={16} className="text-gray-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all" />
               </div>
             ) : (
-              <div className="text-center py-4 border border-dashed border-gray-200 rounded-xl">
-                <p className="text-xs text-gray-400">No protocol assigned</p>
+              <div className="flex flex-col items-center justify-center py-4 border border-dashed border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50/30 transition-colors group cursor-pointer">
+                <Zap size={20} className="text-gray-300 mb-2 group-hover:text-blue-500 transition-colors" />
+                <p className="text-xs text-gray-400 mb-2">No protocol assigned</p>
+                <button className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                  <Plus size={12} />
+                  Assign Protocol
+                </button>
               </div>
             )}
 
@@ -267,8 +265,13 @@ export function PatientList({ onNavigateToConversations, userRole, initialPatien
                 <ChevronRight size={16} className="text-gray-300 group-hover:text-purple-500 group-hover:translate-x-0.5 transition-all" />
               </div>
             ) : (
-              <div className="text-center py-4 border border-dashed border-gray-200 rounded-xl">
-                <p className="text-xs text-gray-400">No companion assigned</p>
+              <div className="flex flex-col items-center justify-center py-4 border border-dashed border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50/30 transition-colors group cursor-pointer">
+                <UserIcon size={20} className="text-gray-300 mb-2 group-hover:text-purple-500 transition-colors" />
+                <p className="text-xs text-gray-400 mb-2">No companion assigned</p>
+                <button className="text-xs font-bold text-purple-600 hover:text-purple-700 flex items-center gap-1">
+                  <Plus size={12} />
+                  Assign Companion
+                </button>
               </div>
             )}
           </div>

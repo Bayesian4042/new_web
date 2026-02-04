@@ -153,7 +153,7 @@ export function ProtocolForm({ onClose, onSave, initialData, userRole }: Protoco
         }
     }, [initialData]);
 
-    const sections = [
+    const allSections = [
         {
             id: 'protocol-type' as const,
             label: 'Protocol Style',
@@ -197,6 +197,11 @@ export function ProtocolForm({ onClose, onSave, initialData, userRole }: Protoco
             required: false
         }
     ];
+
+    // Filter out patient-details for admin users
+    const sections = userRole === 'admin' 
+        ? allSections.filter(s => s.id !== 'patient-details')
+        : allSections;
 
     const isSectionComplete = (sectionId: FormSection): boolean => {
         switch (sectionId) {
@@ -390,19 +395,19 @@ export function ProtocolForm({ onClose, onSave, initialData, userRole }: Protoco
 
     return (
         <div className="flex h-full bg-gray-50">
-            {/* Sidebar */}
-            <div className="w-64 bg-white border-r border-gray-200 py-6 flex-shrink-0 flex flex-col">
-                <div className="px-5 mb-6">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Progress</span>
-                        <span className="text-sm font-bold text-gray-900">{completedCount}/{sections.length}</span>
+            {/* Sidebar - Minimized */}
+            <div className="w-48 bg-white border-r border-gray-200 py-4 flex-shrink-0 flex flex-col">
+                <div className="px-3 mb-4">
+                    <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[10px] font-semibold text-gray-600 uppercase tracking-wide">Progress</span>
+                        <span className="text-xs font-bold text-gray-900">{completedCount}/{sections.length}</span>
                     </div>
-                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                         <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500" style={{ width: `${progress}%` }} />
                     </div>
                 </div>
-                <div className="px-5 mb-4 font-semibold text-xs text-gray-500 uppercase tracking-wider">Setup Steps</div>
-                <nav className="flex-1 px-3 space-y-1">
+                <div className="px-3 mb-3 font-semibold text-[10px] text-gray-500 uppercase tracking-wider">Steps</div>
+                <nav className="flex-1 px-2 space-y-1">
                     {sections.map((section, index) => {
                         const isComplete = isSectionComplete(section.id);
                         const isVisited = visitedSections.has(section.id);
@@ -410,12 +415,12 @@ export function ProtocolForm({ onClose, onSave, initialData, userRole }: Protoco
                             <button
                                 key={section.id}
                                 onClick={() => scrollToSection(section.id)}
-                                className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all ${isVisited ? 'text-gray-900 hover:bg-gray-100' : 'text-gray-500 hover:text-gray-900'}`}
+                                className={`w-full flex items-center gap-2 px-2 py-2 text-xs rounded-lg transition-all ${isVisited ? 'text-gray-900 hover:bg-gray-100' : 'text-gray-500 hover:text-gray-900'}`}
                             >
-                                <div className={`h-8 w-8 rounded-lg flex items-center justify-center text-xs font-semibold ${isComplete ? 'bg-green-100 text-green-700' : isVisited ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>
-                                    {isComplete ? <Check size={16} /> : index + 1}
+                                <div className={`h-6 w-6 rounded-md flex items-center justify-center text-[10px] font-semibold flex-shrink-0 ${isComplete ? 'bg-green-100 text-green-700' : isVisited ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                                    {isComplete ? <Check size={12} /> : index + 1}
                                 </div>
-                                <span className="font-medium flex-1 text-left">{section.label}</span>
+                                <span className="font-medium flex-1 text-left truncate">{section.label}</span>
                             </button>
                         );
                     })}
@@ -448,222 +453,224 @@ export function ProtocolForm({ onClose, onSave, initialData, userRole }: Protoco
                             </div>
                         </section>
 
-                        {/* Section: Patient Details */}
-                        <section
-                            ref={sectionRefs['patient-details']}
-                            className="scroll-mt-6">
+                        {/* Section: Patient Details - Hidden for admin users */}
+                        {userRole !== 'admin' && (
+                            <section
+                                ref={sectionRefs['patient-details']}
+                                className="scroll-mt-6">
 
-                            <div className="flex items-center justify-between mb-6">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                                        <UserIcon size={18} className="text-blue-600" />
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                                            <UserIcon size={18} className="text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-semibold text-gray-900">
+                                                Patient Details (Multiple)
+                                            </h3>
+                                            <p className="text-sm text-gray-500">
+                                                Add patients who will use this protocol
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="text-xl font-semibold text-gray-900">
-                                            Patient Details (Multiple)
-                                        </h3>
-                                        <p className="text-sm text-gray-500">
-                                            Add patients who will use this protocol
-                                        </p>
-                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="gap-2 shadow-sm"
+                                        onClick={handleAddPatient}>
+                                        <Plus size={14} />
+                                        Add Patient
+                                    </Button>
                                 </div>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="gap-2 shadow-sm"
-                                    onClick={handleAddPatient}>
-                                    <Plus size={14} />
-                                    Add Patient
-                                </Button>
-                            </div>
 
-                            <div className="space-y-4">
-                                {patients.map((patient, index) => {
-                                    const isEditing = editingPatientIndex === index;
+                                <div className="space-y-4">
+                                    {patients.map((patient, index) => {
+                                        const isEditing = editingPatientIndex === index;
 
-                                    if (!isEditing) {
-                                        return (
-                                            <div
-                                                key={index}
-                                                onClick={() => setEditingPatientIndex(index)}
-                                                className="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between group cursor-pointer hover:border-blue-400 hover:shadow-md transition-all animate-in fade-in slide-in-from-top-2 duration-300">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 transition-colors group-hover:bg-blue-100">
-                                                        <UserIcon size={20} />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-bold text-gray-900">
-                                                            {patient.name || 'Unnamed Patient'}
-                                                        </p>
-                                                        <div className="flex items-center gap-3 mt-1">
-                                                            <span className="flex items-center gap-1 text-xs text-gray-500">
-                                                                <Phone size={12} />
-                                                                {patient.countryCode} {patient.phoneNumber || 'No number'}
-                                                            </span>
-                                                            {patient.appointment && (
-                                                                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-[10px] font-bold text-blue-600 uppercase tracking-tighter">
-                                                                    <Calendar size={10} />
-                                                                    Appointment Scheduled
+                                        if (!isEditing) {
+                                            return (
+                                                <div
+                                                    key={index}
+                                                    onClick={() => setEditingPatientIndex(index)}
+                                                    className="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between group cursor-pointer hover:border-blue-400 hover:shadow-md transition-all animate-in fade-in slide-in-from-top-2 duration-300">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 transition-colors group-hover:bg-blue-100">
+                                                            <UserIcon size={20} />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-bold text-gray-900">
+                                                                {patient.name || 'Unnamed Patient'}
+                                                            </p>
+                                                            <div className="flex items-center gap-3 mt-1">
+                                                                <span className="flex items-center gap-1 text-xs text-gray-500">
+                                                                    <Phone size={12} />
+                                                                    {patient.countryCode} {patient.phoneNumber || 'No number'}
                                                                 </span>
-                                                            )}
+                                                                {patient.appointment && (
+                                                                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-[10px] font-bold text-blue-600 uppercase tracking-tighter">
+                                                                        <Calendar size={10} />
+                                                                        Appointment Scheduled
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleRemovePatient(index);
+                                                            }}
+                                                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100">
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                        <div className="p-2 text-gray-400 group-hover:text-blue-600 transition-colors">
+                                                            <ChevronRight size={20} />
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-2">
+                                            );
+                                        }
+
+                                        return (
+                                            <div key={index} className="bg-white rounded-xl border border-gray-200 p-6 relative group transition-all animate-in zoom-in-95 duration-200 shadow-sm">
+                                                <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-50">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="h-8 w-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400">
+                                                            <Edit2 size={16} />
+                                                        </div>
+                                                        <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Edit Patient Details</h4>
+                                                    </div>
                                                     <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleRemovePatient(index);
-                                                        }}
-                                                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100">
-                                                        <Trash2 size={16} />
+                                                        onClick={() => setEditingPatientIndex(null)}
+                                                        className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-all"
+                                                    >
+                                                        Save
                                                     </button>
-                                                    <div className="p-2 text-gray-400 group-hover:text-blue-600 transition-colors">
-                                                        <ChevronRight size={20} />
+                                                </div>
+
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <div className="md:col-span-2">
+                                                        <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Full Name</label>
+                                                        <input
+                                                            type="text"
+                                                            value={patient.name}
+                                                            onChange={(e) => handleUpdatePatient(index, 'name', e.target.value)}
+                                                            placeholder="Enter patient's full name"
+                                                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-gray-50/30"
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Country Code</label>
+                                                        <select
+                                                            value={patient.countryCode}
+                                                            onChange={(e) => handleUpdatePatient(index, 'countryCode', e.target.value)}
+                                                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-gray-50/30"
+                                                        >
+                                                            <option value="+1">🇺🇸 +1 (USA)</option>
+                                                            <option value="+44">🇬🇧 +44 (UK)</option>
+                                                            <option value="+34">🇪🇸 +34 (ES)</option>
+                                                            <option value="+52">🇲🇽 +52 (MX)</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Phone Number</label>
+                                                        <input
+                                                            type="tel"
+                                                            value={patient.phoneNumber}
+                                                            onChange={(e) => handleUpdatePatient(index, 'phoneNumber', e.target.value)}
+                                                            placeholder="e.g. 555-0123"
+                                                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-gray-50/30"
+                                                        />
+                                                    </div>
+
+                                                    <div className="md:col-span-2 pt-4 border-t border-gray-50">
+                                                        <div className="flex items-center justify-between mb-4 bg-gray-50/50 p-3 rounded-xl border border-gray-100/50">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={`h-8 w-8 rounded-lg flex items-center justify-center transition-colors ${patient.appointment ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-400'}`}>
+                                                                    <Calendar size={18} />
+                                                                </div>
+                                                                <div>
+                                                                    <h4 className="text-sm font-semibold text-gray-900">Appointment Details</h4>
+                                                                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Optional Information</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-3">
+                                                                <span className={`text-[10px] font-bold uppercase tracking-wider ${patient.appointment ? 'text-blue-600' : 'text-gray-400'}`}>
+                                                                    {patient.appointment ? 'Enabled' : 'Disabled'}
+                                                                </span>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        toggleAppointment(index);
+                                                                    }}
+                                                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 outline-none focus:ring-2 focus:ring-blue-500/20 ${patient.appointment ? 'bg-blue-600' : 'bg-gray-200'}`}>
+                                                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${patient.appointment ? 'translate-x-6' : 'translate-x-1'}`} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                        {patient.appointment && (
+                                                            <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200 bg-gray-50/30 p-4 rounded-xl border border-gray-100">
+                                                                <div>
+                                                                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Appointment Title</label>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={patient.appointment.title}
+                                                                        onChange={(e) => handleUpdateAppointment(index, 'title', e.target.value)}
+                                                                        placeholder="e.g. Post-Op Follow-up"
+                                                                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-white"
+                                                                    />
+                                                                </div>
+                                                                <div className="grid grid-cols-2 gap-4">
+                                                                    <div>
+                                                                        <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Date</label>
+                                                                        <input
+                                                                            type="date"
+                                                                            value={patient.appointment.date}
+                                                                            onChange={(e) => handleUpdateAppointment(index, 'date', e.target.value)}
+                                                                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-white"
+                                                                        />
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Time</label>
+                                                                        <input
+                                                                            type="time"
+                                                                            value={patient.appointment.time}
+                                                                            onChange={(e) => handleUpdateAppointment(index, 'time', e.target.value)}
+                                                                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-white"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="md:col-span-2">
+                                                                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Instructions</label>
+                                                                    <textarea
+                                                                        value={patient.appointment.instructions}
+                                                                        onChange={(e) => handleUpdateAppointment(index, 'instructions', e.target.value)}
+                                                                        placeholder="e.g. Please bring your medical records..."
+                                                                        rows={2}
+                                                                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all resize-none bg-white font-sans"
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
                                         );
-                                    }
-
-                                    return (
-                                        <div key={index} className="bg-white rounded-xl border border-gray-200 p-6 relative group transition-all animate-in zoom-in-95 duration-200 shadow-sm">
-                                            <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-50">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="h-8 w-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400">
-                                                        <Edit2 size={16} />
-                                                    </div>
-                                                    <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Edit Patient Details</h4>
-                                                </div>
-                                                <button
-                                                    onClick={() => setEditingPatientIndex(null)}
-                                                    className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-all"
-                                                >
-                                                    Save
-                                                </button>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Full Name</label>
-                                                    <input
-                                                        type="text"
-                                                        value={patient.name}
-                                                        onChange={(e) => handleUpdatePatient(index, 'name', e.target.value)}
-                                                        placeholder="Enter patient's full name"
-                                                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-gray-50/30"
-                                                    />
-                                                </div>
-
-                                                <div>
-                                                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Country Code</label>
-                                                    <select
-                                                        value={patient.countryCode}
-                                                        onChange={(e) => handleUpdatePatient(index, 'countryCode', e.target.value)}
-                                                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-gray-50/30"
-                                                    >
-                                                        <option value="+1">🇺🇸 +1 (USA)</option>
-                                                        <option value="+44">🇬🇧 +44 (UK)</option>
-                                                        <option value="+34">🇪🇸 +34 (ES)</option>
-                                                        <option value="+52">🇲🇽 +52 (MX)</option>
-                                                    </select>
-                                                </div>
-
-                                                <div>
-                                                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Phone Number</label>
-                                                    <input
-                                                        type="tel"
-                                                        value={patient.phoneNumber}
-                                                        onChange={(e) => handleUpdatePatient(index, 'phoneNumber', e.target.value)}
-                                                        placeholder="e.g. 555-0123"
-                                                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-gray-50/30"
-                                                    />
-                                                </div>
-
-                                                <div className="md:col-span-2 pt-4 border-t border-gray-50">
-                                                    <div className="flex items-center justify-between mb-4 bg-gray-50/50 p-3 rounded-xl border border-gray-100/50">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className={`h-8 w-8 rounded-lg flex items-center justify-center transition-colors ${patient.appointment ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-400'}`}>
-                                                                <Calendar size={18} />
-                                                            </div>
-                                                            <div>
-                                                                <h4 className="text-sm font-semibold text-gray-900">Appointment Details</h4>
-                                                                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Optional Information</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center gap-3">
-                                                            <span className={`text-[10px] font-bold uppercase tracking-wider ${patient.appointment ? 'text-blue-600' : 'text-gray-400'}`}>
-                                                                {patient.appointment ? 'Enabled' : 'Disabled'}
-                                                            </span>
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.preventDefault();
-                                                                    toggleAppointment(index);
-                                                                }}
-                                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 outline-none focus:ring-2 focus:ring-blue-500/20 ${patient.appointment ? 'bg-blue-600' : 'bg-gray-200'}`}>
-                                                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${patient.appointment ? 'translate-x-6' : 'translate-x-1'}`} />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-
-                                                    {patient.appointment && (
-                                                        <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200 bg-gray-50/30 p-4 rounded-xl border border-gray-100">
-                                                            <div>
-                                                                <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Appointment Title</label>
-                                                                <input
-                                                                    type="text"
-                                                                    value={patient.appointment.title}
-                                                                    onChange={(e) => handleUpdateAppointment(index, 'title', e.target.value)}
-                                                                    placeholder="e.g. Post-Op Follow-up"
-                                                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-white"
-                                                                />
-                                                            </div>
-                                                            <div className="grid grid-cols-2 gap-4">
-                                                                <div>
-                                                                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Date</label>
-                                                                    <input
-                                                                        type="date"
-                                                                        value={patient.appointment.date}
-                                                                        onChange={(e) => handleUpdateAppointment(index, 'date', e.target.value)}
-                                                                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-white"
-                                                                    />
-                                                                </div>
-                                                                <div>
-                                                                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Time</label>
-                                                                    <input
-                                                                        type="time"
-                                                                        value={patient.appointment.time}
-                                                                        onChange={(e) => handleUpdateAppointment(index, 'time', e.target.value)}
-                                                                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-white"
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                            <div className="md:col-span-2">
-                                                                <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Instructions</label>
-                                                                <textarea
-                                                                    value={patient.appointment.instructions}
-                                                                    onChange={(e) => handleUpdateAppointment(index, 'instructions', e.target.value)}
-                                                                    placeholder="e.g. Please bring your medical records..."
-                                                                    rows={2}
-                                                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all resize-none bg-white font-sans"
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
+                                    })}
+                                    {patients.length === 0 && (
+                                        <div className="bg-white rounded-xl border-2 border-dashed border-gray-200 p-10 text-center">
+                                            <UserIcon size={32} className="text-gray-300 mx-auto mb-3" />
+                                            <p className="text-sm font-medium text-gray-500">No patients assigned yet</p>
+                                            <button onClick={handleAddPatient} className="mt-3 text-sm font-bold text-blue-600 hover:text-blue-700">Add your first patient</button>
                                         </div>
-                                    );
-                                })}
-                                {patients.length === 0 && (
-                                    <div className="bg-white rounded-xl border-2 border-dashed border-gray-200 p-10 text-center">
-                                        <UserIcon size={32} className="text-gray-300 mx-auto mb-3" />
-                                        <p className="text-sm font-medium text-gray-500">No patients assigned yet</p>
-                                        <button onClick={handleAddPatient} className="mt-3 text-sm font-bold text-blue-600 hover:text-blue-700">Add your first patient</button>
-                                    </div>
-                                )}
-                            </div>
-                        </section>
+                                    )}
+                                </div>
+                            </section>
+                        )}
 
                         {/* Section 2: Intent Shortcut */}
                         <section ref={sectionRefs['intent-shortcut']} className="scroll-mt-6">
@@ -1000,39 +1007,38 @@ export function ProtocolForm({ onClose, onSave, initialData, userRole }: Protoco
                     </div>
                 </div>
 
-                {/* Right sidebar: Test Chatbot */}
-                <div className="w-80 border-l border-gray-200 bg-gray-50 flex flex-col pt-4">
-                    <div className="px-6 mb-6">
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="h-2 w-2 rounded-full bg-green-500" />
-                            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Test Console</h3>
+                {/* Right sidebar: Test Chatbot - Minimized */}
+                <div className="w-64 border-l border-gray-200 bg-gray-50 flex flex-col pt-3">
+                    <div className="px-4 mb-4">
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                            <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest">Preview</h3>
                         </div>
-                        <p className="text-xs text-gray-500 italic">Preview how patients experience this protocol</p>
+                        <p className="text-[10px] text-gray-500">Test protocol</p>
                     </div>
-                    <div className="flex-1 overflow-y-auto px-6 space-y-4">
+                    <div className="flex-1 overflow-y-auto px-4 space-y-3">
                         {testMessages.map((msg) => (
                             <div key={msg.id} className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
-                                <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${msg.sender === 'bot' ? 'bg-white text-gray-900 border border-gray-200 shadow-sm' : 'bg-gray-900 text-white'}`}>
+                                <div className={`max-w-[90%] rounded-xl px-3 py-2 text-xs ${msg.sender === 'bot' ? 'bg-white text-gray-900 border border-gray-200 shadow-sm' : 'bg-gray-900 text-white'}`}>
                                     {msg.content}
                                 </div>
-                                <span className="text-[10px] text-gray-400 mt-1 uppercase font-bold tracking-tighter">{msg.sender === 'bot' ? 'AI Assistant' : 'Patient'} • {msg.timestamp}</span>
+                                <span className="text-[9px] text-gray-400 mt-1 uppercase font-bold tracking-tighter">{msg.sender === 'bot' ? 'AI' : 'User'}</span>
                             </div>
                         ))}
                     </div>
-                    <div className="p-4 bg-white border-t border-gray-200">
-                        <div className="relative flex items-end gap-2 bg-gray-50 border border-gray-200 rounded-2xl p-2">
+                    <div className="p-3 bg-white border-t border-gray-200">
+                        <div className="relative flex items-end gap-1.5 bg-gray-50 border border-gray-200 rounded-xl p-1.5">
                             <textarea
                                 value={testInput}
                                 onChange={(e) => setTestInput(e.target.value)}
                                 disabled={isNewProtocol}
-                                placeholder={isNewProtocol ? 'Save to start' : 'Type message...'}
-                                className="flex-1 min-h-[40px] max-h-32 bg-transparent border-none focus:ring-0 text-sm py-2 px-1 resize-none"
+                                placeholder={isNewProtocol ? 'Save first' : 'Type...'}
+                                className="flex-1 min-h-[32px] max-h-24 bg-transparent border-none focus:ring-0 text-xs py-1.5 px-1 resize-none"
                             />
-                            <button onClick={handleSendTestMessage} disabled={!testInput.trim() || isNewProtocol} className="h-10 w-10 rounded-xl flex items-center justify-center text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 transition-all">
-                                <Send size={18} />
+                            <button onClick={handleSendTestMessage} disabled={!testInput.trim() || isNewProtocol} className="h-8 w-8 rounded-lg flex items-center justify-center text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 transition-all flex-shrink-0">
+                                <Send size={14} />
                             </button>
                         </div>
-                        <p className="text-[9px] text-gray-400 mt-3 text-center uppercase font-bold tracking-widest italic">Simulated Chat Environment</p>
                     </div>
                 </div>
             </div>
