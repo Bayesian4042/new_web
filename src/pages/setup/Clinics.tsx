@@ -8,6 +8,7 @@ export interface Clinic {
     ownerEmail: string;
     details?: string;
     categories?: string[];
+    timezone?: string;
     createdOn: string;
     patientCount: number;
     status: 'Active' | 'Inactive';
@@ -37,6 +38,7 @@ export const mockClinics: Clinic[] = [
         ownerEmail: 'admin@mainclinic.com',
         details: 'Primary healthcare facility serving downtown area',
         categories: ['General Medicine', 'Cardiology'],
+        timezone: 'America/New_York',
         createdOn: '2026-01-15',
         patientCount: 45,
         status: 'Active',
@@ -63,6 +65,7 @@ export const mockClinics: Clinic[] = [
         ownerEmail: 'contact@northwing.com',
         details: 'Specialized in orthopedics and physical therapy',
         categories: ['Orthopedics', 'Physical Therapy'],
+        timezone: 'America/Los_Angeles',
         createdOn: '2026-01-20',
         patientCount: 32,
         status: 'Active',
@@ -86,6 +89,7 @@ export const mockClinics: Clinic[] = [
         name: 'Westside Health Clinic',
         ownerEmail: 'info@westsidehealth.com',
         categories: ['Pediatrics', 'Family Medicine'],
+        timezone: 'America/Chicago',
         createdOn: '2026-02-01',
         patientCount: 28,
         status: 'Active',

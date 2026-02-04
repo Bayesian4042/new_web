@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Filter,
   X,
@@ -11,6 +11,17 @@ import {
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
+interface FollowupMessage {
+  id: string;
+  content: string;
+  triggerType: 'day-after-share' | 'specific-date';
+  startDay?: number;
+  specificDate?: string;
+  repeatDays: number;
+  repeatCount: number;
+  sendTime?: string;
+}
+
 export interface Followup {
   id: string;
   name: string;
@@ -22,6 +33,9 @@ export interface Followup {
   content?: string;
   duration?: string;
   time?: string;
+  messages?: FollowupMessage[];
+  totalDuration?: number;
+  totalMessages?: number;
 }
 
 interface FollowupsProps {
@@ -134,7 +148,16 @@ export function Followups({ onAddFollowup, onEditFollowup, onCopyFollowup, onDel
                   </span>
                 </td>
                 <td className="py-3 px-3">
-                  <span className="text-sm text-gray-600">{followup.frequency}</span>
+                  {followup.messages && followup.messages.length > 0 ? (
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-gray-900">Dynamic</span>
+                      <span className="text-xs text-gray-500">
+                        {followup.totalMessages || 0} msgs / {followup.totalDuration || 0}d
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-sm text-gray-600">{followup.frequency}</span>
+                  )}
                 </td>
                 <td className="py-3 px-3">
                   <div className="flex items-center justify-end gap-2">

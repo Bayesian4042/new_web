@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Building2, X } from 'lucide-react';
+import { Building2, X, ChevronDown } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Clinic } from './Clinics';
 
@@ -9,10 +9,28 @@ interface ClinicFormProps {
     onSubmit: (data: Partial<Clinic>) => void;
 }
 
+const TIMEZONES = [
+    { value: 'America/New_York', label: 'Eastern Time (ET)' },
+    { value: 'America/Chicago', label: 'Central Time (CT)' },
+    { value: 'America/Denver', label: 'Mountain Time (MT)' },
+    { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
+    { value: 'America/Anchorage', label: 'Alaska Time (AKT)' },
+    { value: 'Pacific/Honolulu', label: 'Hawaii Time (HT)' },
+    { value: 'Europe/London', label: 'London (GMT/BST)' },
+    { value: 'Europe/Paris', label: 'Paris (CET/CEST)' },
+    { value: 'Europe/Berlin', label: 'Berlin (CET/CEST)' },
+    { value: 'Asia/Dubai', label: 'Dubai (GST)' },
+    { value: 'Asia/Kolkata', label: 'India (IST)' },
+    { value: 'Asia/Singapore', label: 'Singapore (SGT)' },
+    { value: 'Asia/Tokyo', label: 'Tokyo (JST)' },
+    { value: 'Australia/Sydney', label: 'Sydney (AEDT/AEST)' },
+];
+
 export function ClinicForm({ initialData, onCancel, onSubmit }: ClinicFormProps) {
     const [clinicName, setClinicName] = useState(initialData?.name || '');
     const [ownerEmail, setOwnerEmail] = useState(initialData?.ownerEmail || '');
     const [details, setDetails] = useState(initialData?.details || '');
+    const [timezone, setTimezone] = useState(initialData?.timezone || 'America/New_York');
     const [categoryInput, setCategoryInput] = useState('');
     const [categories, setCategories] = useState<string[]>(initialData?.categories || []);
 
@@ -40,6 +58,7 @@ export function ClinicForm({ initialData, onCancel, onSubmit }: ClinicFormProps)
             name: clinicName,
             ownerEmail,
             details,
+            timezone,
             categories
         });
         if (onCancel) onCancel();
@@ -98,6 +117,29 @@ export function ClinicForm({ initialData, onCancel, onSubmit }: ClinicFormProps)
                                 className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
                             />
                         </div>
+                    </div>
+
+                    {/* Timezone */}
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            Timezone <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                            <select
+                                value={timezone}
+                                onChange={(e) => setTimezone(e.target.value)}
+                                required
+                                className="w-full appearance-none px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm cursor-pointer bg-white"
+                            >
+                                {TIMEZONES.map((tz) => (
+                                    <option key={tz.value} value={tz.value}>
+                                        {tz.label}
+                                    </option>
+                                ))}
+                            </select>
+                            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Used for scheduling messages and appointments</p>
                     </div>
 
                     {/* Clinic Details */}

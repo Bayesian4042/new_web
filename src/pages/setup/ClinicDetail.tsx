@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Building2, Database, Users, Shield, Activity, FileText, Clock, Calendar, ArrowLeft, Edit2, X, Save } from 'lucide-react';
+import { Building2, Database, Users, Shield, Activity, FileText, Clock, Calendar, ArrowLeft, Edit2, X, Save, ChevronDown } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Clinic } from './Clinics';
 
@@ -9,11 +9,29 @@ interface ClinicDetailProps {
     onSave: (data: Partial<Clinic>) => void;
 }
 
+const TIMEZONES = [
+    { value: 'America/New_York', label: 'Eastern Time (ET)' },
+    { value: 'America/Chicago', label: 'Central Time (CT)' },
+    { value: 'America/Denver', label: 'Mountain Time (MT)' },
+    { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
+    { value: 'America/Anchorage', label: 'Alaska Time (AKT)' },
+    { value: 'Pacific/Honolulu', label: 'Hawaii Time (HT)' },
+    { value: 'Europe/London', label: 'London (GMT/BST)' },
+    { value: 'Europe/Paris', label: 'Paris (CET/CEST)' },
+    { value: 'Europe/Berlin', label: 'Berlin (CET/CEST)' },
+    { value: 'Asia/Dubai', label: 'Dubai (GST)' },
+    { value: 'Asia/Kolkata', label: 'India (IST)' },
+    { value: 'Asia/Singapore', label: 'Singapore (SGT)' },
+    { value: 'Asia/Tokyo', label: 'Tokyo (JST)' },
+    { value: 'Australia/Sydney', label: 'Sydney (AEDT/AEST)' },
+];
+
 export function ClinicDetail({ clinic, onBack, onSave }: ClinicDetailProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [clinicName, setClinicName] = useState(clinic.name);
     const [ownerEmail, setOwnerEmail] = useState(clinic.ownerEmail);
     const [details, setDetails] = useState(clinic.details || '');
+    const [timezone, setTimezone] = useState(clinic.timezone || 'America/New_York');
     const [categoryInput, setCategoryInput] = useState('');
     const [categories, setCategories] = useState<string[]>(clinic.categories || []);
 
@@ -40,6 +58,7 @@ export function ClinicDetail({ clinic, onBack, onSave }: ClinicDetailProps) {
             name: clinicName,
             ownerEmail,
             details,
+            timezone,
             categories
         });
         setIsEditing(false);
@@ -49,6 +68,7 @@ export function ClinicDetail({ clinic, onBack, onSave }: ClinicDetailProps) {
         setClinicName(clinic.name);
         setOwnerEmail(clinic.ownerEmail);
         setDetails(clinic.details || '');
+        setTimezone(clinic.timezone || 'America/New_York');
         setCategories(clinic.categories || []);
         setIsEditing(false);
     };
@@ -223,6 +243,29 @@ export function ClinicDetail({ clinic, onBack, onSave }: ClinicDetailProps) {
                             />
                         </div>
 
+                        {/* Timezone */}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Timezone <span className="text-red-500">*</span>
+                            </label>
+                            <div className="relative">
+                                <select
+                                    value={timezone}
+                                    onChange={(e) => setTimezone(e.target.value)}
+                                    required
+                                    className="w-full appearance-none px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm cursor-pointer bg-white"
+                                >
+                                    {TIMEZONES.map((tz) => (
+                                        <option key={tz.value} value={tz.value}>
+                                            {tz.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">Used for scheduling messages and appointments</p>
+                        </div>
+
                         {/* Clinic Details */}
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -283,7 +326,7 @@ export function ClinicDetail({ clinic, onBack, onSave }: ClinicDetailProps) {
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-3 gap-4">
                             <div>
                                 <p className="text-xs text-gray-500 mb-1 uppercase font-medium">Owner Email</p>
                                 <p className="text-sm font-medium text-gray-900">{clinic.ownerEmail}</p>
@@ -291,6 +334,12 @@ export function ClinicDetail({ clinic, onBack, onSave }: ClinicDetailProps) {
                             <div>
                                 <p className="text-xs text-gray-500 mb-1 uppercase font-medium">Created On</p>
                                 <p className="text-sm font-medium text-gray-900">{clinic.createdOn}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 mb-1 uppercase font-medium">Timezone</p>
+                                <p className="text-sm font-medium text-gray-900">
+                                    {TIMEZONES.find(tz => tz.value === clinic.timezone)?.label || clinic.timezone || 'Not set'}
+                                </p>
                             </div>
                         </div>
                         <div>

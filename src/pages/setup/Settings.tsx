@@ -21,11 +21,32 @@ import {
   ExternalLink,
   CheckCircle2,
   Circle,
-  MessageSquare
+  MessageSquare,
+  ChevronDown
 } from 'lucide-react';
+
+const TIMEZONES = [
+  { value: 'America/New_York', label: 'Eastern Time (ET)' },
+  { value: 'America/Chicago', label: 'Central Time (CT)' },
+  { value: 'America/Denver', label: 'Mountain Time (MT)' },
+  { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
+  { value: 'America/Anchorage', label: 'Alaska Time (AKT)' },
+  { value: 'Pacific/Honolulu', label: 'Hawaii Time (HT)' },
+  { value: 'Europe/London', label: 'London (GMT/BST)' },
+  { value: 'Europe/Paris', label: 'Paris (CET/CEST)' },
+  { value: 'Europe/Berlin', label: 'Berlin (CET/CEST)' },
+  { value: 'Asia/Dubai', label: 'Dubai (GST)' },
+  { value: 'Asia/Kolkata', label: 'India (IST)' },
+  { value: 'Asia/Singapore', label: 'Singapore (SGT)' },
+  { value: 'Asia/Tokyo', label: 'Tokyo (JST)' },
+  { value: 'Australia/Sydney', label: 'Sydney (AEDT/AEST)' },
+];
 
 export function Settings() {
   const [activeTab, setActiveTab] = useState('general');
+
+  // General State
+  const [timezone, setTimezone] = useState('America/New_York');
 
   // Integrations State
   const [ecommerceMode, setEcommerceMode] = useState('planstore');
@@ -322,7 +343,6 @@ export function Settings() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-           {/* Placeholder content for General tab as it wasn't fully detailed in prompt, extrapolating from context */}
            <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Clinic Name</label>
@@ -331,6 +351,26 @@ export function Settings() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
                 <Input placeholder="https://..." />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Timezone
+                </label>
+                <div className="relative">
+                  <select
+                    value={timezone}
+                    onChange={(e) => setTimezone(e.target.value)}
+                    className="w-full appearance-none px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm cursor-pointer bg-white"
+                  >
+                    {TIMEZONES.map((tz) => (
+                      <option key={tz.value} value={tz.value}>
+                        {tz.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Default timezone for scheduling messages and appointments</p>
               </div>
            </div>
         </CardContent>
