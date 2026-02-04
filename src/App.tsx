@@ -10,6 +10,7 @@ import { Plans, Plan } from './pages/library/Plans';
 import { Followups, Followup } from './pages/library/Followups';
 import { HealthAssistant } from './pages/ai-system/HealthAssistant';
 import { Conversations } from './pages/ai-system/Conversations';
+import { ConversationsTable } from './pages/ai-system/ConversationsTable';
 import { Settings } from './pages/setup/Settings';
 import { Users } from './pages/setup/Users';
 import { CompanionForm } from './pages/workspace/CompanionForm';
@@ -20,8 +21,11 @@ import { KnowledgeBase, KBItem } from './pages/library/KnowledgeBase';
 import { KnowledgeBaseForm } from './pages/library/KnowledgeBaseForm';
 import { Button } from './components/ui/Button';
 import { PlanForm } from './pages/library/PlanForm';
-import { Clinics, mockClinics } from './pages/setup/Clinics';
+import { Clinics, mockClinics, Clinic } from './pages/setup/Clinics';
 import { ClinicForm } from './pages/setup/ClinicForm';
+import { ClinicDetail } from './pages/setup/ClinicDetail';
+import { OTCLists, OTCList } from './pages/otc/OTCLists';
+import { OTCListForm } from './pages/otc/OTCListForm';
 
 const INITIAL_RULES: AIRule[] = [
   {
@@ -264,6 +268,30 @@ const INITIAL_COMPANIONS: Companion[] = [
   }
 ];
 
+const INITIAL_OTC_LISTS: OTCList[] = [
+  {
+    id: 'OTC-0001',
+    name: 'Cold & Flu Bundle',
+    productsCount: 5,
+    createdOn: '02-02-2026',
+    lastUpdated: '2h ago'
+  },
+  {
+    id: 'OTC-0002',
+    name: 'Pain Management Kit',
+    productsCount: 3,
+    createdOn: '01-02-2026',
+    lastUpdated: '1d ago'
+  },
+  {
+    id: 'OTC-0003',
+    name: 'Allergy Relief Pack',
+    productsCount: 4,
+    createdOn: '31-01-2026',
+    lastUpdated: '3d ago'
+  }
+];
+
 export function App() {
   const [activeView, setActiveView] = useState('dashboard');
   const [userRole, setUserRole] = useState<'admin' | 'clinic'>('admin');
@@ -284,6 +312,7 @@ export function App() {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [showClinicForm, setShowClinicForm] = useState(false);
   const [editingClinic, setEditingClinic] = useState<any>(null);
+  const [viewingClinic, setViewingClinic] = useState<Clinic | null>(null);
   const [clinics, setClinics] = useState<any[]>(mockClinics);
   const [airuleDraft, setAiruleDraft] = useState<any>(null);
   const [planDraft, setPlanDraft] = useState<any>(null);
@@ -291,6 +320,9 @@ export function App() {
   const [kbDraft, setKbDraft] = useState<any>(null);
   const [companionDraft, setCompanionDraft] = useState<any>(null);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+  const [showOTCListForm, setShowOTCListForm] = useState(false);
+  const [editingOTCList, setEditingOTCList] = useState<OTCList | null>(null);
+  const [otcListDraft, setOtcListDraft] = useState<any>(null);
 
   const [rules, setRules] = useState<AIRule[]>(INITIAL_RULES);
   const [plans, setPlans] = useState<Plan[]>(INITIAL_PLANS);
@@ -298,6 +330,7 @@ export function App() {
   const [followups, setFollowups] = useState<Followup[]>(INITIAL_FOLLOWUPS);
   const [companions, setCompanions] = useState<Companion[]>(INITIAL_COMPANIONS);
   const [protocols, setProtocols] = useState<Protocol[]>(INITIAL_PROTOCOLS);
+  const [otcLists, setOtcLists] = useState<OTCList[]>(INITIAL_OTC_LISTS);
 
   const handleClinicSubmit = (data: any) => {
     if (editingClinic && !editingClinic.isCopy) {
@@ -314,6 +347,12 @@ export function App() {
     }
     setShowClinicForm(false);
     setEditingClinic(null);
+  };
+
+  const handleClinicDetailSave = (clinicId: string, data: any) => {
+    setClinics(prev => prev.map(c => c.id === clinicId ? { ...c, ...data } : c));
+    // Update the viewing clinic to reflect changes
+    setViewingClinic(prev => prev ? { ...prev, ...data } : null);
   };
 
   const handleDeleteClinic = (id: string) => {
@@ -503,6 +542,41 @@ export function App() {
     setCompanionDraft(null);
   };
 
+  const handleOTCListSubmit = () => {
+    if (!otcListDraft) return;
+    if (editingOTCList && editingOTCList.id) {
+      setOtcLists(prev => prev.map(list => list.id === editingOTCList.id ? {
+        ...list,
+        name: otcListDraft.name,
+        productsCount: otcListDraft.products?.length || 0,
+        lastUpdated: 'Now'
+      } : list));
+    } else {
+      const newList: OTCList = {
+        id: `OTC-${(otcLists.length + 1).toString().padStart(4, '0')}`,
+        name: otcListDraft.name,
+        productsCount: otcListDraft.products?.length || 0,
+        createdOn: new Date().toISOString().split('T')[0],
+        lastUpdated: 'Now'
+      };
+      setOtcLists(prev => [newList, ...prev]);
+    }
+    setShowOTCListForm(false);
+    setEditingOTCList(null);
+    setOtcListDraft(null);
+  };
+
+  const handleDeleteOTCList = (id: string) => {
+    if (confirm('Are you sure you want to delete this OTC list?')) {
+      setOtcLists(prev => prev.filter(list => list.id !== id));
+    }
+  };
+
+  const handleCopyOTCList = (list: OTCList) => {
+    setEditingOTCList({ ...list, id: '', name: `${list.name} (Copy)` } as any);
+    setShowOTCListForm(true);
+  };
+
   const renderContent = () => {
     // Show companion form when active
     if (showCompanionForm && activeView === 'companions') {
@@ -593,6 +667,16 @@ export function App() {
             setEditingClinic(null);
           }}
           onSubmit={handleClinicSubmit}
+        />
+      );
+    }
+
+    // Show OTC List form when active
+    if (showOTCListForm && activeView === 'otc-lists') {
+      return (
+        <OTCListForm
+          onChange={setOtcListDraft}
+          initialData={editingOTCList}
         />
       );
     }
@@ -695,6 +779,20 @@ export function App() {
           onDeleteItem={handleDeleteKB}
           items={kbItems}
         />;
+      case 'otc-lists':
+        return <OTCLists
+          onAddList={() => {
+            setEditingOTCList(null);
+            setShowOTCListForm(true);
+          }}
+          onEditList={(list) => {
+            setEditingOTCList(list);
+            setShowOTCListForm(true);
+          }}
+          onCopyList={handleCopyOTCList}
+          onDeleteList={handleDeleteOTCList}
+          lists={otcLists}
+        />;
       case 'health-assistant':
         return <HealthAssistant />;
       case 'conversations':
@@ -707,6 +805,14 @@ export function App() {
             setActiveView('all-patients');
           }}
         />;
+      case 'conversations-table':
+        return <ConversationsTable
+          userRole={userRole}
+          onViewConversation={(conv) => {
+            setSelectedConversationId(conv.id);
+            setActiveView('conversations');
+          }}
+        />;
       case 'clinics':
         return <Clinics
           clinics={clinics}
@@ -714,12 +820,25 @@ export function App() {
             setEditingClinic(null);
             setShowClinicForm(true);
           }}
-          onEditClinic={(clinic) => {
-            setEditingClinic(clinic);
-            setShowClinicForm(true);
+          onViewClinic={(clinic) => {
+            setViewingClinic(clinic);
+            setActiveView('clinic-detail');
           }}
           onCopyClinic={handleCopyClinic}
           onDeleteClinic={handleDeleteClinic}
+        />;
+      case 'clinic-detail':
+        if (!viewingClinic) {
+          setActiveView('clinics');
+          return null;
+        }
+        return <ClinicDetail
+          clinic={viewingClinic}
+          onBack={() => {
+            setViewingClinic(null);
+            setActiveView('clinics');
+          }}
+          onSave={(data) => handleClinicDetailSave(viewingClinic.id, data)}
         />;
       case 'users':
         return <Users />;
@@ -804,12 +923,20 @@ export function App() {
         title: 'Knowledge Base',
         breadcrumb: 'Library'
       },
+      'otc-lists': {
+        title: 'OTC Lists',
+        breadcrumb: 'OTC'
+      },
       'health-assistant': {
         title: 'Health Assistant',
         breadcrumb: 'AI System'
       },
       conversations: {
-        title: 'Conversations',
+        title: userRole === 'admin' ? 'All Conversations (Cards)' : 'Conversations (Cards)',
+        breadcrumb: 'AI System'
+      },
+      'conversations-table': {
+        title: userRole === 'admin' ? 'All Conversations (Table)' : 'Conversations (Table)',
         breadcrumb: 'AI System'
       },
       users: {
@@ -823,6 +950,10 @@ export function App() {
       clinics: {
         title: 'Clinics',
         breadcrumb: 'Setup'
+      },
+      'clinic-detail': {
+        title: viewingClinic?.name || 'Clinic Details',
+        breadcrumb: 'Setup / Clinics'
       }
     };
     return (
@@ -1135,6 +1266,55 @@ export function App() {
                 className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow transition-all rounded-lg"
                 onClick={handleKBSubmit}>
                 Add to Library
+              </Button>
+            )}
+          </div>
+        </header>
+      );
+    }
+
+    // Custom header for OTC List form
+    if (showOTCListForm && activeView === 'otc-lists') {
+      return (
+        <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20 shadow-sm">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-500 font-medium">OTC</span>
+            <span className="text-gray-300">/</span>
+            <span className="text-gray-500 font-medium">OTC Lists</span>
+            <span className="text-gray-300">/</span>
+            {editingOTCList ? (
+              <>
+                <span className="text-gray-500 font-medium">{editingOTCList.name}</span>
+                <span className="text-gray-300">/</span>
+                <span className="font-semibold text-gray-900">Edit</span>
+              </>
+            ) : (
+              <span className="font-semibold text-gray-900">New OTC List</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setShowOTCListForm(false);
+                setEditingOTCList(null);
+                setOtcListDraft(null);
+              }}
+              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">
+              Cancel
+            </button>
+            {editingOTCList ? (
+              <Button
+                size="sm"
+                className="h-9 px-5 bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow transition-all rounded-lg"
+                onClick={handleOTCListSubmit}>
+                Save Changes
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow transition-all rounded-lg"
+                onClick={handleOTCListSubmit}>
+                Create OTC List
               </Button>
             )}
           </div>

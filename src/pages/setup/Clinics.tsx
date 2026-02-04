@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Building2, Plus, Edit, Copy, Trash2, Search } from 'lucide-react';
+import { Building2, Plus, Copy, Trash2, Search, Clock, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
 export interface Clinic {
@@ -11,6 +11,23 @@ export interface Clinic {
     createdOn: string;
     patientCount: number;
     status: 'Active' | 'Inactive';
+    metrics?: {
+        users: number;
+        roles: number;
+        behaviours: number;
+        otcLists: number;
+        dbSize: string;
+    };
+    lastActivity?: {
+        login: string;
+        lastEvent: string;
+    };
+    activityHistory?: {
+        id: string;
+        action: string;
+        date: string;
+        user: string;
+    }[];
 }
 
 export const mockClinics: Clinic[] = [
@@ -22,7 +39,23 @@ export const mockClinics: Clinic[] = [
         categories: ['General Medicine', 'Cardiology'],
         createdOn: '2026-01-15',
         patientCount: 45,
-        status: 'Active'
+        status: 'Active',
+        metrics: {
+            users: 12,
+            roles: 4,
+            behaviours: 150,
+            otcLists: 8,
+            dbSize: '2.4 GB'
+        },
+        lastActivity: {
+            login: '2026-02-04T09:30:00',
+            lastEvent: 'Patient Record Updated'
+        },
+        activityHistory: [
+            { id: '1', action: 'System Backup Completed', date: '2026-02-04T02:00:00', user: 'System' },
+            { id: '2', action: 'New User Added', date: '2026-02-03T14:30:00', user: 'admin@mainclinic.com' },
+            { id: '3', action: 'Protocol Modified', date: '2026-02-03T11:15:00', user: 'dr.smith@mainclinic.com' }
+        ]
     },
     {
         id: 'CLN-002',
@@ -32,7 +65,21 @@ export const mockClinics: Clinic[] = [
         categories: ['Orthopedics', 'Physical Therapy'],
         createdOn: '2026-01-20',
         patientCount: 32,
-        status: 'Active'
+        status: 'Active',
+        metrics: {
+            users: 8,
+            roles: 3,
+            behaviours: 85,
+            otcLists: 5,
+            dbSize: '1.1 GB'
+        },
+        lastActivity: {
+            login: '2026-02-03T16:45:00',
+            lastEvent: 'Appointment Scheduled'
+        },
+        activityHistory: [
+            { id: '1', action: 'Staff Meeting Notes Added', date: '2026-02-03T16:00:00', user: 'manager@northwing.com' }
+        ]
     },
     {
         id: 'CLN-003',
@@ -41,26 +88,64 @@ export const mockClinics: Clinic[] = [
         categories: ['Pediatrics', 'Family Medicine'],
         createdOn: '2026-02-01',
         patientCount: 28,
-        status: 'Active'
+        status: 'Active',
+        metrics: {
+            users: 5,
+            roles: 2,
+            behaviours: 45,
+            otcLists: 3,
+            dbSize: '850 MB'
+        },
+        lastActivity: {
+            login: '2026-02-01T10:00:00',
+            lastEvent: 'Initial Setup'
+        },
+        activityHistory: [
+            { id: '1', action: 'Clinic Account Created', date: '2026-02-01T09:00:00', user: 'Super Admin' }
+        ]
     }
 ];
 
 interface ClinicsProps {
     clinics: Clinic[];
     onAddClinic: () => void;
-    onEditClinic: (clinic: Clinic) => void;
+    onViewClinic: (clinic: Clinic) => void;
     onCopyClinic: (clinic: Clinic) => void;
     onDeleteClinic: (clinicId: string) => void;
 }
 
-export function Clinics({ clinics, onAddClinic, onEditClinic, onCopyClinic, onDeleteClinic }: ClinicsProps) {
+export function Clinics({ clinics, onAddClinic, onViewClinic, onCopyClinic, onDeleteClinic }: ClinicsProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRows, setSelectedRows] = useState<string[]>([]);
+    const [activitySort, setActivitySort] = useState<'none' | 'asc' | 'desc'>('none');
 
-    const filteredClinics = clinics.filter(clinic =>
-        clinic.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        clinic.ownerEmail.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredClinics = clinics
+        .filter(clinic =>
+            clinic.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            clinic.ownerEmail.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .sort((a, b) => {
+            if (activitySort === 'none') return 0;
+            
+            const dateA = a.lastActivity?.login ? new Date(a.lastActivity.login).getTime() : 0;
+            const dateB = b.lastActivity?.login ? new Date(b.lastActivity.login).getTime() : 0;
+            
+            if (activitySort === 'desc') {
+                return dateB - dateA; // Most recent first
+            } else {
+                return dateA - dateB; // Oldest first
+            }
+        });
+
+    const handleActivitySort = () => {
+        if (activitySort === 'none') {
+            setActivitySort('desc'); // Most active first
+        } else if (activitySort === 'desc') {
+            setActivitySort('asc'); // Least active first
+        } else {
+            setActivitySort('none'); // Reset to default
+        }
+    };
 
     const handleCopy = (clinic: Clinic) => {
         onCopyClinic(clinic);
@@ -99,43 +184,6 @@ export function Clinics({ clinics, onAddClinic, onEditClinic, onCopyClinic, onDe
                 </Button>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                    <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                            <Building2 className="text-blue-600" size={20} />
-                        </div>
-                        <div>
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Clinics</p>
-                            <p className="text-2xl font-bold text-gray-900">{clinics.length}</p>
-                        </div>
-                    </div>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                    <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-green-50 flex items-center justify-center">
-                            <Building2 className="text-green-600" size={20} />
-                        </div>
-                        <div>
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Active Clinics</p>
-                            <p className="text-2xl font-bold text-gray-900">{clinics.filter(c => c.status === 'Active').length}</p>
-                        </div>
-                    </div>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                    <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-purple-50 flex items-center justify-center">
-                            <Building2 className="text-purple-600" size={20} />
-                        </div>
-                        <div>
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Patients</p>
-                            <p className="text-2xl font-bold text-gray-900">{clinics.reduce((sum, c) => sum + c.patientCount, 0)}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             {/* Table Card */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 {/* Toolbar */}
@@ -171,19 +219,21 @@ export function Clinics({ clinics, onAddClinic, onEditClinic, onCopyClinic, onDe
                                     />
                                 </th>
                                 <th className="py-3 px-3 text-left">
-                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Clinic ID</span>
+                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Clinic Details</span>
                                 </th>
                                 <th className="py-3 px-3 text-left">
-                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Clinic Name</span>
+                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Metrics</span>
                                 </th>
                                 <th className="py-3 px-3 text-left">
-                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Owner Email</span>
-                                </th>
-                                <th className="py-3 px-3 text-left">
-                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Categories</span>
-                                </th>
-                                <th className="py-3 px-3 text-left">
-                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Patients</span>
+                                    <button
+                                        onClick={handleActivitySort}
+                                        className="flex items-center gap-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition-colors"
+                                    >
+                                        Last Activity
+                                        {activitySort === 'none' && <ArrowUpDown size={12} className="text-gray-300" />}
+                                        {activitySort === 'desc' && <ArrowDown size={12} className="text-blue-600" />}
+                                        {activitySort === 'asc' && <ArrowUp size={12} className="text-blue-600" />}
+                                    </button>
                                 </th>
                                 <th className="py-3 px-3 text-left">
                                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Status</span>
@@ -197,9 +247,10 @@ export function Clinics({ clinics, onAddClinic, onEditClinic, onCopyClinic, onDe
                             {filteredClinics.map((clinic) => (
                                 <tr
                                     key={clinic.id}
-                                    className="hover:bg-gray-50/50 transition-colors group"
+                                    onClick={() => onViewClinic(clinic)}
+                                    className="hover:bg-blue-50/30 transition-colors group cursor-pointer"
                                 >
-                                    <td className="py-3 px-4">
+                                    <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
                                         <input
                                             type="checkbox"
                                             checked={selectedRows.includes(clinic.id)}
@@ -208,47 +259,47 @@ export function Clinics({ clinics, onAddClinic, onEditClinic, onCopyClinic, onDe
                                         />
                                     </td>
                                     <td className="py-3 px-3">
-                                        <span className="text-sm font-medium text-gray-600">{clinic.id}</span>
-                                    </td>
-                                    <td className="py-3 px-3">
-                                        <div className="flex items-center gap-2">
-                                            <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                                                <Building2 className="text-blue-600" size={14} />
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                                <Building2 className="text-blue-600" size={20} />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-semibold text-gray-900">{clinic.name}</p>
-                                                {clinic.details && (
-                                                    <p className="text-xs text-gray-500 line-clamp-1">{clinic.details}</p>
-                                                )}
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-sm font-bold text-gray-900">{clinic.name}</p>
+                                                    <span className="text-xs text-gray-400 font-mono">#{clinic.id}</span>
+                                                </div>
+                                                <p className="text-xs text-gray-500">{clinic.ownerEmail}</p>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="py-3 px-3">
-                                        <span className="text-sm text-gray-600">{clinic.ownerEmail}</span>
-                                    </td>
-                                    <td className="py-3 px-3">
-                                        {clinic.categories && clinic.categories.length > 0 ? (
-                                            <div className="flex flex-wrap gap-1">
-                                                {clinic.categories.slice(0, 2).map((category, idx) => (
-                                                    <span
-                                                        key={idx}
-                                                        className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full text-xs font-medium"
-                                                    >
-                                                        {category}
-                                                    </span>
-                                                ))}
-                                                {clinic.categories.length > 2 && (
-                                                    <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-medium">
-                                                        +{clinic.categories.length - 2}
-                                                    </span>
-                                                )}
+                                        <div className="flex gap-4">
+                                            <div>
+                                                <p className="text-xs text-gray-400 uppercase">Patients</p>
+                                                <p className="text-sm font-semibold text-gray-900">{clinic.patientCount}</p>
                                             </div>
-                                        ) : (
-                                            <span className="text-xs text-gray-400">—</span>
-                                        )}
+                                            <div>
+                                                <p className="text-xs text-gray-400 uppercase">Users</p>
+                                                <p className="text-sm font-semibold text-gray-900">{clinic.metrics?.users || 0}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-gray-400 uppercase">DB Size</p>
+                                                <p className="text-sm font-semibold text-gray-900">{clinic.metrics?.dbSize || '-'}</p>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td className="py-3 px-3">
-                                        <span className="text-sm font-semibold text-gray-900">{clinic.patientCount}</span>
+                                        <div className="flex items-center gap-2">
+                                            <Clock size={14} className="text-gray-400" />
+                                            <div>
+                                                <p className="text-xs font-medium text-gray-700">
+                                                    {clinic.lastActivity?.login ? new Date(clinic.lastActivity.login).toLocaleDateString() : 'Never'}
+                                                </p>
+                                                <p className="text-[10px] text-gray-400 truncate max-w-[120px]" title={clinic.lastActivity?.lastEvent}>
+                                                    {clinic.lastActivity?.lastEvent || 'No activity'}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td className="py-3 px-3">
                                         <span
@@ -260,28 +311,21 @@ export function Clinics({ clinics, onAddClinic, onEditClinic, onCopyClinic, onDe
                                             {clinic.status}
                                         </span>
                                     </td>
-                                    <td className="py-3 px-3">
+                                    <td className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
                                         <div className="flex items-center justify-end gap-1">
                                             <button
-                                                onClick={() => onEditClinic(clinic)}
-                                                className="h-8 w-8 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors flex items-center justify-center"
-                                                title="Edit"
-                                            >
-                                                <Edit size={14} />
-                                            </button>
-                                            <button
                                                 onClick={() => handleCopy(clinic)}
-                                                className="h-8 w-8 rounded-lg hover:bg-purple-50 text-gray-400 hover:text-purple-600 transition-colors flex items-center justify-center"
+                                                className="h-8 w-8 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center"
                                                 title="Copy"
                                             >
-                                                <Copy size={14} />
+                                                <Copy size={16} />
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(clinic.id)}
                                                 className="h-8 w-8 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors flex items-center justify-center"
                                                 title="Delete"
                                             >
-                                                <Trash2 size={14} />
+                                                <Trash2 size={16} />
                                             </button>
                                         </div>
                                     </td>
@@ -300,6 +344,7 @@ export function Clinics({ clinics, onAddClinic, onEditClinic, onCopyClinic, onDe
                     </div>
                 )}
             </div>
+
         </div>
     );
 }

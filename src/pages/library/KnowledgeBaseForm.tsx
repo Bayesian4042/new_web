@@ -12,6 +12,9 @@ import {
 } from 'lucide-react';
 import { TiptapEditor } from '../../components/ui/TiptapEditor';
 import { ClinicSelector } from '../../components/ui/ClinicSelector';
+import { Card, CardContent } from '../../components/ui/Card';
+import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/Button';
 
 interface KBFormProps {
     initialData?: {
@@ -69,155 +72,160 @@ export function KnowledgeBaseForm({ initialData, userRole, onChange }: KBFormPro
     };
 
     return (
-        <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="grid grid-cols-1 gap-8">
-                {/* 1. Basic Information Card */}
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div className="p-8 space-y-6">
-                        <div>
-                            <label className="block text-[15px] font-semibold text-gray-900 mb-2.5">
-                                Resource Name
-                            </label>
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder="e.g., Post-Op Recovery Guide"
-                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-[15px] text-gray-700 placeholder:text-gray-400"
-                            />
-                        </div>
+        <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left Column - Main Content */}
+                <div className="lg:col-span-2 space-y-6">
+                    <Card className="h-full">
+                        <div className="space-y-8">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                                    Resource Name
+                                </label>
+                                <Input
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder="e.g., Post-Op Recovery Guide"
+                                />
+                            </div>
 
-                        <div>
-                            <label className="block text-[15px] font-semibold text-gray-900 mb-2.5">
-                                Content & Summary
-                            </label>
-                            <TiptapEditor
-                                content={content}
-                                onChange={setContent}
-                                placeholder="Describe the content or add key excerpts from the resource..."
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                {/* 2. Attachments & Resources Card */}
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div className="px-8 py-5 border-b border-gray-50 bg-gray-50/30 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <Files size={18} className="text-indigo-500" />
-                            <h2 className="text-[16px] font-bold text-gray-900">Attachments & External Resources</h2>
-                        </div>
-                        <p className="text-xs text-gray-400">Files and links are optional</p>
-                    </div>
-
-                    <div className="p-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-
-                            {/* Documents Column */}
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <label className="flex items-center gap-2 text-sm font-bold text-gray-700 lowercase tracking-tight">
-                                        <FileUp size={16} className="text-orange-500" />
-                                        Clinical Documents
-                                    </label>
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{documents.length}/10 Files</span>
-                                </div>
-
-                                <div className="space-y-2.5">
-                                    {documents.map((doc, index) => (
-                                        <div key={index} className="group flex items-center justify-between p-3 bg-gray-50 hover:bg-orange-50/50 rounded-xl border border-transparent hover:border-orange-100 transition-all">
-                                            <div className="flex items-center gap-3 min-w-0">
-                                                <div className="h-8 w-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-orange-600 shrink-0">
-                                                    <FileText size={14} />
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <p className="text-xs font-bold text-gray-800 truncate leading-tight">{doc.name}</p>
-                                                    <p className="text-[10px] text-gray-400 mt-0.5">{doc.size}</p>
-                                                </div>
-                                            </div>
-                                            <button
-                                                onClick={() => removeDocument(index)}
-                                                className="p-1.5 text-gray-400 hover:text-red-500 transition-all"
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    ))}
-
-                                    <label className="cursor-pointer block relative">
-                                        <div className="flex items-center justify-center gap-2 py-4 border-2 border-dashed border-gray-200 rounded-2xl hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group">
-                                            <PlusCircle size={18} className="text-gray-400 group-hover:text-indigo-500" />
-                                            <span className="text-sm font-bold text-gray-500 group-hover:text-indigo-600">Add Clinical Document</span>
-                                        </div>
-                                        <input type="file" multiple className="sr-only" onChange={handleFileUpload} />
-                                    </label>
+                            <div className="flex-1 flex flex-col">
+                                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                                    Content & Summary
+                                </label>
+                                <div className="min-h-[300px]">
+                                    <TiptapEditor
+                                        content={content}
+                                        onChange={setContent}
+                                        placeholder="Describe the content or add key excerpts from the resource..."
+                                    />
                                 </div>
                             </div>
 
-                            {/* Links Column */}
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <label className="flex items-center gap-2 text-sm font-bold text-gray-700 lowercase tracking-tight">
-                                        <Globe size={16} className="text-blue-500" />
-                                        Reference Links
-                                    </label>
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{links.length} Added</span>
+                            <div className="pt-6 border-t border-gray-100">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <Files size={16} className="text-indigo-500" />
+                                    <h2 className="text-sm font-bold text-gray-900">Attachments & Resources</h2>
                                 </div>
 
-                                <div className="space-y-2.5">
-                                    {links.map((link, index) => (
-                                        <div key={index} className="group flex items-center justify-between p-3 bg-gray-50 hover:bg-blue-50/50 rounded-xl border border-transparent hover:border-blue-100 transition-all">
-                                            <div className="flex items-center gap-3 min-w-0">
-                                                <div className="h-8 w-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-blue-500 shrink-0">
-                                                    <LinkIcon size={14} />
-                                                </div>
-                                                <span className="text-xs text-gray-600 truncate text-pretty">{link}</span>
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <a href={link} target="_blank" rel="noreferrer" className="p-1 text-gray-400 hover:text-blue-600">
-                                                    <ExternalLink size={14} />
-                                                </a>
-                                                <button onClick={() => removeLink(index)} className="p-1 text-gray-400 hover:text-red-500">
-                                                    <Trash2 size={14} />
-                                                </button>
-                                            </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Documents Section */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <label className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wide">
+                                                <FileUp size={14} className="text-orange-500" />
+                                                Files
+                                            </label>
+                                            <span className="text-[10px] font-bold text-gray-400">{documents.length}</span>
                                         </div>
-                                    ))}
 
-                                    <div className="flex gap-2 pt-2">
-                                        <div className="relative flex-1">
-                                            <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                            <input
-                                                type="url"
-                                                value={newLink}
-                                                onChange={(e) => setNewLink(e.target.value)}
-                                                onKeyDown={(e) => e.key === 'Enter' && handleAddLink()}
-                                                placeholder="Paste reference URL..."
-                                                className="w-full pl-9 pr-3 py-3 bg-white border border-gray-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 rounded-xl transition-all text-xs"
-                                            />
+                                        <div className="space-y-2">
+                                            {documents.map((doc, index) => (
+                                                <div key={index} className="group flex items-center justify-between p-2 bg-gray-50 hover:bg-orange-50/50 rounded-lg border border-transparent hover:border-orange-100 transition-all">
+                                                    <div className="flex items-center gap-3 min-w-0">
+                                                        <div className="h-7 w-7 rounded bg-white border border-gray-100 flex items-center justify-center text-orange-600 shrink-0">
+                                                            <FileText size={12} />
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <p className="text-xs font-medium text-gray-800 truncate">{doc.name}</p>
+                                                            <p className="text-[10px] text-gray-400">{doc.size}</p>
+                                                        </div>
+                                                    </div>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => removeDocument(index)}
+                                                        className="h-6 w-6 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50"
+                                                    >
+                                                        <Trash2 size={12} />
+                                                    </Button>
+                                                </div>
+                                            ))}
+
+                                            <label className="cursor-pointer block">
+                                                <div className="flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-200 rounded-xl hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group">
+                                                    <PlusCircle size={16} className="text-gray-400 group-hover:text-indigo-500" />
+                                                    <span className="text-xs font-semibold text-gray-500 group-hover:text-indigo-600">Upload File</span>
+                                                </div>
+                                                <input type="file" multiple className="sr-only" onChange={handleFileUpload} />
+                                            </label>
                                         </div>
-                                        <button
-                                            onClick={handleAddLink}
-                                            className="px-4 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-md"
-                                        >
-                                            <Plus size={20} />
-                                        </button>
+                                    </div>
+
+                                    {/* Links Section */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <label className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wide">
+                                                <Globe size={14} className="text-blue-500" />
+                                                Links
+                                            </label>
+                                            <span className="text-[10px] font-bold text-gray-400">{links.length}</span>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            {links.map((link, index) => (
+                                                <div key={index} className="group flex items-center justify-between p-2 bg-gray-50 hover:bg-blue-50/50 rounded-lg border border-transparent hover:border-blue-100 transition-all">
+                                                    <div className="flex items-center gap-3 min-w-0">
+                                                        <div className="h-7 w-7 rounded bg-white border border-gray-100 flex items-center justify-center text-blue-500 shrink-0">
+                                                            <LinkIcon size={12} />
+                                                        </div>
+                                                        <span className="text-xs text-gray-600 truncate max-w-[150px]">{link}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <a href={link} target="_blank" rel="noreferrer" className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors">
+                                                            <ExternalLink size={12} />
+                                                        </a>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => removeLink(index)}
+                                                            className="h-6 w-6 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50"
+                                                        >
+                                                            <Trash2 size={12} />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+
+                                            <div className="flex gap-2 items-center">
+                                                <div className="flex-1">
+                                                    <Input
+                                                        type="url"
+                                                        icon={<LinkIcon size={12} />}
+                                                        value={newLink}
+                                                        onChange={(e) => setNewLink(e.target.value)}
+                                                        onKeyDown={(e) => e.key === 'Enter' && handleAddLink()}
+                                                        placeholder="URL..."
+                                                        className="text-xs h-9"
+                                                    />
+                                                </div>
+                                                <Button
+                                                    onClick={handleAddLink}
+                                                    variant="primary"
+                                                    className="bg-indigo-600 hover:bg-indigo-700 h-9 w-9 p-0 rounded-lg"
+                                                >
+                                                    <Plus size={16} />
+                                                </Button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-
                         </div>
-                    </div>
+                    </Card>
                 </div>
 
-                {/* Clinic Selector - Only for Super Admin */}
-                <ClinicSelector
-                    selectedClinics={selectedClinics}
-                    onSelectionChange={setSelectedClinics}
-                    selectedCategories={selectedCategories}
-                    onCategoriesChange={setSelectedCategories}
-                    userRole={userRole}
-                />
+                {/* Right Column - Sidebar */}
+                <div className="space-y-6">
+                    <ClinicSelector
+                        selectedClinics={selectedClinics}
+                        onSelectionChange={setSelectedClinics}
+                        selectedCategories={selectedCategories}
+                        onCategoriesChange={setSelectedCategories}
+                        userRole={userRole}
+                    />
+                </div>
             </div>
         </div>
     );

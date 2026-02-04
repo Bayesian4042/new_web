@@ -9,7 +9,8 @@ import {
   Settings,
   PanelLeftClose,
   Sparkles,
-  Building2
+  Building2,
+  Pill
 } from
   'lucide-react';
 
@@ -44,6 +45,7 @@ export function Sidebar({
     workspace: true,
     patients: true,
     library: true,
+    otc: true,
     ai: true,
     setup: true
   });
@@ -107,6 +109,16 @@ export function Sidebar({
         }]
     },
     {
+      id: 'otc',
+      label: 'OTC',
+      icon: <Pill size={16} />,
+      children: [
+        {
+          id: 'otc-lists',
+          label: 'OTC Lists'
+        }]
+    },
+    {
       id: 'ai',
       label: 'AI System',
       icon: <Sparkles size={16} />,
@@ -117,7 +129,11 @@ export function Sidebar({
         },
         {
           id: 'conversations',
-          label: 'Conversations'
+          label: 'Conversations (Cards)'
+        },
+        {
+          id: 'conversations-table',
+          label: 'Conversations (Table)'
         }]
     },
     {
@@ -181,9 +197,28 @@ export function Sidebar({
         }]
     },
     {
-      id: 'conversations',
-      label: 'Conversations',
-      icon: <Sparkles size={16} />
+      id: 'otc',
+      label: 'OTC',
+      icon: <Pill size={16} />,
+      children: [
+        {
+          id: 'otc-lists',
+          label: 'OTC Lists'
+        }]
+    },
+    {
+      id: 'ai',
+      label: 'AI System',
+      icon: <Sparkles size={16} />,
+      children: [
+        {
+          id: 'conversations',
+          label: 'Conversations (Cards)'
+        },
+        {
+          id: 'conversations-table',
+          label: 'Conversations (Table)'
+        }]
     },
     {
       id: 'clinics',
