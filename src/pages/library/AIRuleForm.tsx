@@ -3,6 +3,7 @@ import { TiptapEditor } from '../../components/ui/TiptapEditor';
 import { ClinicSelector } from '../../components/ui/ClinicSelector';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/Button';
 
 interface AIRuleFormProps {
   initialData?: {
@@ -13,9 +14,11 @@ interface AIRuleFormProps {
   } | null;
   userRole: 'admin' | 'clinic';
   onChange: (data: any) => void;
+  onSubmit: () => void;
+  onCancel: () => void;
 }
 
-export function AIRuleForm({ initialData, userRole, onChange }: AIRuleFormProps) {
+export function AIRuleForm({ initialData, userRole, onChange, onSubmit, onCancel }: AIRuleFormProps) {
   const [title, setTitle] = useState(initialData?.name || '');
   const [content, setContent] = useState(initialData?.content || '');
   const [selectedClinics, setSelectedClinics] = useState<string[]>(initialData?.assignedClinics || []);
@@ -66,6 +69,23 @@ export function AIRuleForm({ initialData, userRole, onChange }: AIRuleFormProps)
               </div>
             </div>
           </Card>
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-end gap-3">
+            <Button
+              onClick={onCancel}
+              variant="outline"
+              className="px-6"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={onSubmit}
+              className="bg-gray-900 hover:bg-gray-800 text-white px-6"
+            >
+              {initialData ? 'Save Changes' : 'Create Rule'}
+            </Button>
+          </div>
         </div>
 
         {/* Right Column - Sidebar */}

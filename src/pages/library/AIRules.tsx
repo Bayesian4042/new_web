@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import {
-  Filter,
-  X,
   ArrowUpDown,
   BrainCircuit,
   Plus,
@@ -22,6 +20,7 @@ export interface AIRule {
   content?: string;
   assignedClinics?: string[];
   assignedCategories?: string[];
+  tags?: string[];
 }
 
 interface AIRulesProps {
@@ -34,7 +33,6 @@ interface AIRulesProps {
 
 export function AIRules({ onAddRule, onEditRule, onCopyRule, onDeleteRule, rules }: AIRulesProps) {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [filterActive, setFilterActive] = useState(false);
 
   const toggleRow = (id: string) => {
     setSelectedRows((prev) =>
@@ -51,21 +49,7 @@ export function AIRules({ onAddRule, onEditRule, onCopyRule, onDeleteRule, rules
   return (
     <div className="space-y-0">
       {/* Toolbar */}
-      <div className="flex items-center justify-between py-3 border-b border-gray-100">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setFilterActive(!filterActive)}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md border border-gray-200 ${filterActive ? 'bg-gray-50' : ''}`}>
-            <Filter size={14} />
-            Filter
-            {filterActive && <X size={14} className="text-gray-400" />}
-          </button>
-          <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md border border-gray-200">
-            <ArrowUpDown size={14} />
-            Created On
-          </button>
-        </div>
-
+      <div className="flex items-center justify-end py-3 border-b border-gray-100">
         <Button onClick={onAddRule} size="sm" className="bg-gray-900 hover:bg-gray-800 text-white">
           <Plus size={16} />
           Add AI Rule
@@ -90,9 +74,8 @@ export function AIRules({ onAddRule, onEditRule, onCopyRule, onDeleteRule, rules
                 </button>
               </th>
               <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Name</th>
-              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Type</th>
+              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Tag</th>
               <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Status</th>
-              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Triggers</th>
               <th className="py-3 px-3 text-right text-sm font-medium text-gray-500">Action</th>
             </tr>
           </thead>
@@ -122,17 +105,18 @@ export function AIRules({ onAddRule, onEditRule, onCopyRule, onDeleteRule, rules
                   </div>
                 </td>
                 <td className="py-3 px-3">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${rule.type === 'Safety' ? 'bg-red-50 text-red-700' : rule.type === 'Adherence' ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'}`}>
-                    {rule.type}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {rule.tags?.slice(0, 2).map((tag, index) => (
+                      <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 </td>
                 <td className="py-3 px-3">
                   <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${rule.status === 'Active' ? 'bg-green-50 text-green-700' : rule.status === 'Testing' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>
                     {rule.status}
                   </span>
-                </td>
-                <td className="py-3 px-3">
-                  <span className="text-sm text-gray-600">{rule.triggers}</span>
                 </td>
                 <td className="py-3 px-3">
                   <div className="flex items-center justify-end gap-2">

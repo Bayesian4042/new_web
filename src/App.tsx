@@ -620,6 +620,12 @@ export function App() {
           onChange={setAiruleDraft}
           initialData={editingAIRule}
           userRole={userRole}
+          onSubmit={handleAIRuleSubmit}
+          onCancel={() => {
+            setShowAIRuleForm(false);
+            setEditingAIRule(null);
+            setAiruleDraft(null);
+          }}
         />
       );
     }
@@ -1045,32 +1051,6 @@ export function App() {
               </>
             ) : (
               <span className="font-semibold text-gray-900">New AI Rule</span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                setShowAIRuleForm(false);
-                setEditingAIRule(null);
-                setAiruleDraft(null);
-              }}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">
-              Cancel
-            </button>
-            {editingAIRule ? (
-              <Button
-                size="sm"
-                className="h-9 px-5 bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow transition-all rounded-lg"
-                onClick={handleAIRuleSubmit}>
-                Save Changes
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow transition-all rounded-lg"
-                onClick={handleAIRuleSubmit}>
-                Create AI Rule
-              </Button>
             )}
           </div>
         </header>);
