@@ -35,11 +35,11 @@ export function AIRuleForm({ initialData, userRole, onChange, onSubmit, onCancel
 
   return (
     <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-8rem)]">
         {/* Left Column - Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="h-full">
-            <div className="space-y-8">
+        <div className="lg:col-span-2 flex flex-col gap-4 min-h-0">
+          <Card noPadding className="flex-1 overflow-y-auto min-h-0 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-400">
+            <div className="space-y-8 p-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
                   Rule Name <span className="text-red-500">*</span>
@@ -70,8 +70,8 @@ export function AIRuleForm({ initialData, userRole, onChange, onSubmit, onCancel
             </div>
           </Card>
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3">
+          {/* Action Buttons - Fixed at Bottom */}
+          <div className="flex items-center justify-end gap-3 bg-white border-t border-gray-200 py-3 px-6 rounded-lg shadow-sm">
             <Button
               onClick={onCancel}
               variant="outline"
@@ -89,7 +89,7 @@ export function AIRuleForm({ initialData, userRole, onChange, onSubmit, onCancel
         </div>
 
         {/* Right Column - Sidebar */}
-        <div className="space-y-6">
+        <div className="h-full overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-400">
           <ClinicSelector
             selectedClinics={selectedClinics}
             onSelectionChange={setSelectedClinics}

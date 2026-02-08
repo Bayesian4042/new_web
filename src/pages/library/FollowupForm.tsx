@@ -43,9 +43,11 @@ interface FollowupFormProps {
         assignedClinics: string[];
         type: 'Scheduled' | 'Triggered' | 'Manual';
     }) => void;
+    onSubmit: () => void;
+    onCancel: () => void;
 }
 
-export function FollowupForm({ initialData, userRole, onChange }: FollowupFormProps) {
+export function FollowupForm({ initialData, userRole, onChange, onSubmit, onCancel }: FollowupFormProps) {
     const [name, setName] = useState(initialData?.name || '');
     const [messages, setMessages] = useState<FollowupMessage[]>(initialData?.messages || []);
     const [selectedClinics, setSelectedClinics] = useState<string[]>(initialData?.assignedClinics || []);
@@ -199,12 +201,12 @@ export function FollowupForm({ initialData, userRole, onChange }: FollowupFormPr
     };
 
     return (
-        <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="grid grid-cols-1 gap-8">
+        <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 h-[calc(100vh-8rem)] flex flex-col gap-4 min-h-0">
+            <div className="flex-1 overflow-y-auto space-y-6 pr-2 min-h-0 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-400">
 
                 {/* Name Field */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                    <div className="space-y-4">
+                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                    <div className="space-y-3">
                         <div>
                             <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
                                 Follow-up Name
@@ -221,8 +223,8 @@ export function FollowupForm({ initialData, userRole, onChange }: FollowupFormPr
                 </div>
 
                 {/* Messages Schedule Section */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-6">
+                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
                         <div>
                             <h3 className="text-sm font-semibold text-gray-900">Messages Schedule</h3>
                             <p className="text-xs text-gray-500 mt-1">
@@ -527,6 +529,23 @@ export function FollowupForm({ initialData, userRole, onChange }: FollowupFormPr
                     onSelectionChange={setSelectedClinics}
                     userRole={userRole}
                 />
+            </div>
+
+            {/* Action Buttons - Fixed at Bottom */}
+            <div className="flex items-center justify-end gap-3 bg-white border-t border-gray-200 py-3 px-6 rounded-lg shadow-sm">
+                <Button
+                    onClick={onCancel}
+                    variant="outline"
+                    className="px-6"
+                >
+                    Cancel
+                </Button>
+                <Button
+                    onClick={onSubmit}
+                    className="bg-gray-900 hover:bg-gray-800 text-white px-6"
+                >
+                    {initialData ? 'Save Changes' : 'Create Followup'}
+                </Button>
             </div>
         </div>
     );

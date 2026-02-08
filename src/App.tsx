@@ -637,6 +637,12 @@ export function App() {
           onChange={setKbDraft}
           initialData={editingKB}
           userRole={userRole}
+          onSubmit={handleKBSubmit}
+          onCancel={() => {
+            setShowKBForm(false);
+            setEditingKB(null);
+            setKbDraft(null);
+          }}
         />
       );
     }
@@ -648,6 +654,12 @@ export function App() {
           onChange={setPlanDraft}
           initialData={editingPlan}
           userRole={userRole}
+          onSubmit={handlePlanSubmit}
+          onCancel={() => {
+            setShowPlanForm(false);
+            setEditingPlan(null);
+            setPlanDraft(null);
+          }}
         />
       );
     }
@@ -659,6 +671,12 @@ export function App() {
           onChange={setFollowupDraft}
           initialData={editingFollowup}
           userRole={userRole}
+          onSubmit={handleFollowupSubmit}
+          onCancel={() => {
+            setShowFollowupForm(false);
+            setEditingFollowup(null);
+            setFollowupDraft(null);
+          }}
         />
       );
     }
@@ -1125,32 +1143,6 @@ export function App() {
               <span className="font-semibold text-gray-900">New Plan</span>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                setShowPlanForm(false);
-                setEditingPlan(null);
-                setPlanDraft(null);
-              }}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">
-              Cancel
-            </button>
-            {editingPlan ? (
-              <Button
-                size="sm"
-                className="h-9 px-5 bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow transition-all rounded-lg"
-                onClick={handlePlanSubmit}>
-                Save Changes
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow transition-all rounded-lg"
-                onClick={handlePlanSubmit}>
-                Create Plan
-              </Button>
-            )}
-          </div>
         </header>
       );
     }
@@ -1174,32 +1166,6 @@ export function App() {
               <span className="font-semibold text-gray-900">New Followup</span>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                setShowFollowupForm(false);
-                setEditingFollowup(null);
-                setFollowupDraft(null);
-              }}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">
-              Cancel
-            </button>
-            {editingFollowup ? (
-              <Button
-                size="sm"
-                className="h-9 px-5 bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow transition-all rounded-lg"
-                onClick={handleFollowupSubmit}>
-                Save Changes
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow transition-all rounded-lg"
-                onClick={handleFollowupSubmit}>
-                Create Followup
-              </Button>
-            )}
-          </div>
         </header>
       );
     }
@@ -1221,32 +1187,6 @@ export function App() {
               </>
             ) : (
               <span className="font-semibold text-gray-900">New Resource</span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                setShowKBForm(false);
-                setEditingKB(null);
-                setKbDraft(null);
-              }}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50">
-              Cancel
-            </button>
-            {editingKB ? (
-              <Button
-                size="sm"
-                className="h-9 px-5 bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow transition-all rounded-lg"
-                onClick={handleKBSubmit}>
-                Save Changes
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow transition-all rounded-lg"
-                onClick={handleKBSubmit}>
-                Add to Library
-              </Button>
             )}
           </div>
         </header>

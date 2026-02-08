@@ -42,6 +42,8 @@ interface PlanFormProps {
     } | null;
     userRole: 'admin' | 'clinic';
     onChange: (data: any) => void;
+    onSubmit: () => void;
+    onCancel: () => void;
 }
 
 const TIMES = [
@@ -67,7 +69,7 @@ const productItems: SideSheetItem[] = AVAILABLE_PRODUCTS.map(p => ({
     icon: <Pill size={16} />
 }));
 
-export function PlanForm({ initialData, userRole, onChange }: PlanFormProps) {
+export function PlanForm({ initialData, userRole, onChange, onSubmit, onCancel }: PlanFormProps) {
     const [mode, setMode] = useState<'create' | 'import'>('create');
     const [name, setName] = useState(initialData?.name || '');
     const [content, setContent] = useState(initialData?.content || '');
@@ -168,191 +170,179 @@ export function PlanForm({ initialData, userRole, onChange }: PlanFormProps) {
 
     return (
         <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-8rem)]">
                 {/* Left Column - Main Content */}
-                <div className="lg:col-span-2 space-y-6">
-                    <Card className="h-full">
-                        <div className="space-y-8">
-                            <div className="flex flex-col gap-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex-1">
-                                        <label className="block text-sm font-semibold text-gray-900 mb-2">
-                                            Plan Name
-                                        </label>
-                                        <Input
-                                            type="text"
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
-                                            placeholder="e.g., Post-Op Recovery Guide"
-                                        />
-                                    </div>
-                                    <div className="pl-4 pt-7">
-                                        <Button
-                                            variant="outline"
-                                            className="gap-2 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
-                                            onClick={() => window.open('#', '_blank')}
-                                            title="Preview how this plan will look to patients"
-                                        >
-                                            <ExternalLink size={16} />
-                                            Preview Plan
-                                        </Button>
-                                    </div>
+                <div className="lg:col-span-2 flex flex-col gap-4 min-h-0">
+                    <Card noPadding className="flex-1 overflow-y-auto min-h-0 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-400">
+                        <div className="space-y-4 p-6">
+                            {/* Plan Name & Mode Selection */}
+                            <div className="flex items-end gap-3">
+                                <div className="flex-1">
+                                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                                        Plan Name
+                                    </label>
+                                    <Input
+                                        type="text"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        placeholder="e.g., Post-Op Recovery Guide"
+                                    />
                                 </div>
-
-                                {/* Mode Selection */}
-                                <div className="bg-gray-100/50 p-1 rounded-lg inline-flex w-fit border border-gray-200/50">
+                                <div className="bg-gray-100/50 p-1 rounded-lg inline-flex border border-gray-200/50">
                                     <button
                                         onClick={() => setMode('create')}
-                                        className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${mode === 'create'
-                                            ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50'
+                                        className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${mode === 'create'
+                                            ? 'bg-white text-gray-900 shadow-sm'
                                             : 'text-gray-500 hover:text-gray-900'
                                             }`}
                                     >
-                                        Create Manually
+                                        Create
                                     </button>
                                     <button
                                         onClick={() => setMode('import')}
-                                        className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${mode === 'import'
-                                            ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50'
+                                        className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${mode === 'import'
+                                            ? 'bg-white text-gray-900 shadow-sm'
                                             : 'text-gray-500 hover:text-gray-900'
                                             }`}
                                     >
-                                        Import from Link
+                                        Import
                                     </button>
                                 </div>
+                                <Button
+                                    variant="outline"
+                                    className="gap-1.5 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                                    onClick={() => window.open('#', '_blank')}
+                                    title="Preview plan"
+                                >
+                                    <ExternalLink size={14} />
+                                </Button>
                             </div>
 
-                            <div className="flex-1 flex flex-col">
+                            {/* Description */}
+                            <div>
                                 <label className="block text-sm font-semibold text-gray-900 mb-2">
-                                    {mode === 'create' ? 'Plan Description & Instructions' : 'Description (Optional)'}
+                                    {mode === 'create' ? 'Description' : 'Description (Optional)'}
                                 </label>
-                                <div className="min-h-[200px]">
+                                <div className="min-h-[120px]">
                                     <TiptapEditor
                                         content={content}
                                         onChange={setContent}
-                                        placeholder={mode === 'create' ? "Describe the clinical goals and steps..." : "Add any notes about this imported plan..."}
+                                        placeholder={mode === 'create' ? "Describe the clinical goals..." : "Add notes..."}
                                     />
                                 </div>
                             </div>
 
                             {mode === 'import' ? (
-                                <div className="pt-6 border-t border-gray-100 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-2">
-                                            <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
-                                                <LinkIcon size={18} />
+                                <div className="border-t border-gray-100 pt-4">
+                                    <label className="block text-sm font-semibold text-gray-900 mb-2">Import Source URL</label>
+                                    <div className="relative">
+                                        <Input
+                                            type="url"
+                                            icon={<Globe size={16} />}
+                                            value={importUrl}
+                                            onChange={(e) => setImportUrl(e.target.value)}
+                                            placeholder="https://..."
+                                            className="pl-10"
+                                        />
+                                        {importUrl && (
+                                            <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                                                <a
+                                                    href={importUrl}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="p-1.5 text-gray-400 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 rounded-md transition-all block"
+                                                >
+                                                    <ExternalLink size={14} />
+                                                </a>
                                             </div>
-                                            <div>
-                                                <h2 className="text-sm font-bold text-gray-900">Import Source</h2>
-                                                <p className="text-xs text-gray-500">Enter the URL to import the plan from</p>
-                                            </div>
-                                        </div>
-                                        <div className="relative">
-                                            <Input
-                                                type="url"
-                                                icon={<Globe size={16} />}
-                                                value={importUrl}
-                                                onChange={(e) => setImportUrl(e.target.value)}
-                                                placeholder="https://..."
-                                                className="pl-10"
-                                            />
-                                            {importUrl && (
-                                                <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                                                    <a
-                                                        href={importUrl}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="p-1.5 text-gray-400 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 rounded-md transition-all block"
-                                                    >
-                                                        <ExternalLink size={14} />
-                                                    </a>
-                                                </div>
-                                            )}
-                                        </div>
+                                        )}
                                     </div>
                                 </div>
                             ) : (
                                 <>
                                     {/* Package Items Section */}
-                                    <div className="pt-6 border-t border-gray-100 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className="flex items-center gap-2">
-                                                <Pill size={16} className="text-blue-500" />
-                                                <h2 className="text-sm font-bold text-gray-900">Package Items</h2>
-                                            </div>
+                                    <div className="border-t border-gray-100 pt-4">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                                <Pill size={14} className="text-blue-500" />
+                                                Package Items
+                                            </h2>
                                             <Button
                                                 onClick={openProductSheet}
                                                 size="sm"
-                                                className="flex items-center gap-1.5 bg-blue-600 text-white hover:bg-blue-700"
+                                                className="gap-1.5 bg-blue-600 text-white hover:bg-blue-700 h-8 text-xs"
                                             >
                                                 <Plus size={14} />
-                                                Add Product
+                                                Add
                                             </Button>
                                         </div>
 
                                         {products.length === 0 ? (
-                                            <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed border-gray-100 rounded-xl bg-gray-50/50">
-                                                <p className="text-xs text-gray-400 font-medium italic">No medical products selected</p>
+                                            <div className="flex items-center justify-center py-6 border-2 border-dashed border-gray-100 rounded-lg bg-gray-50/50">
+                                                <p className="text-xs text-gray-400 font-medium">No products selected</p>
                                             </div>
                                         ) : (
-                                            <div className="space-y-3">
+                                            <div className="space-y-2">
                                                 {products.map((product, index) => (
-                                                    <div key={product.id} className="bg-white border border-gray-100 rounded-xl p-4 flex items-center gap-4 transition-all hover:border-blue-200 hover:shadow-sm group relative">
-                                                        {/* Sort Controls */}
-                                                        <div className="flex flex-col gap-0.5 shrink-0">
-                                                            <button onClick={() => moveProduct(index, 'up')} disabled={index === 0} className="p-0.5 text-gray-300 hover:text-blue-500 disabled:opacity-0 transition-colors">
-                                                                <ChevronUp size={16} />
-                                                            </button>
-                                                            <button onClick={() => moveProduct(index, 'down')} disabled={index === products.length - 1} className="p-0.5 text-gray-300 hover:text-blue-500 disabled:opacity-0 transition-colors">
-                                                                <ChevronDown size={16} />
-                                                            </button>
-                                                        </div>
-
-                                                        <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 border border-blue-100">
-                                                            <Pill size={20} />
-                                                        </div>
-
-                                                        <div className="flex-1 min-w-0 grid grid-cols-12 gap-4 items-center">
-                                                            <div className="col-span-4">
-                                                                <p className="text-sm font-bold text-gray-900 truncate tracking-tight">{product.name}</p>
-                                                                <div className="flex items-center gap-2 mt-0.5">
-                                                                    <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{product.type}</span>
-                                                                    <span className="text-[10px] font-medium text-gray-400">{product.price}</span>
-                                                                </div>
+                                                    <div key={product.id} className="bg-white border border-gray-100 rounded-lg p-3 hover:border-blue-200 transition-all group">
+                                                        <div className="flex items-center gap-3">
+                                                            {/* Sort Controls */}
+                                                            <div className="flex flex-col gap-0.5 shrink-0">
+                                                                <button 
+                                                                    onClick={() => moveProduct(index, 'up')} 
+                                                                    disabled={index === 0} 
+                                                                    className="p-0.5 text-gray-300 hover:text-blue-500 disabled:opacity-0"
+                                                                >
+                                                                    <ChevronUp size={14} />
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => moveProduct(index, 'down')} 
+                                                                    disabled={index === products.length - 1} 
+                                                                    className="p-0.5 text-gray-300 hover:text-blue-500 disabled:opacity-0"
+                                                                >
+                                                                    <ChevronDown size={14} />
+                                                                </button>
                                                             </div>
 
-                                                            <div className="col-span-4">
-                                                                <input
-                                                                    type="text"
-                                                                    value={product.instruction}
-                                                                    onChange={(e) => updateProduct(product.id, { instruction: e.target.value })}
-                                                                    placeholder="Dosage..."
-                                                                    className="w-full bg-gray-50/50 border border-gray-100 rounded-lg px-3 py-2 text-xs text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all placeholder:text-gray-400"
-                                                                />
+                                                            {/* Product Info */}
+                                                            <div className="min-w-0 w-48">
+                                                                <p className="text-xs font-bold text-gray-900 truncate">{product.name}</p>
+                                                                <span className="text-[10px] text-gray-500">{product.type}</span>
                                                             </div>
 
-                                                            <div className="col-span-4 flex items-center gap-1 justify-end">
+                                                            {/* Dosage Input */}
+                                                            <input
+                                                                type="text"
+                                                                value={product.instruction}
+                                                                onChange={(e) => updateProduct(product.id, { instruction: e.target.value })}
+                                                                placeholder="Dosage..."
+                                                                className="flex-1 bg-gray-50 border border-gray-200 rounded px-2 py-1.5 text-xs focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                                            />
+
+                                                            {/* Time of Day */}
+                                                            <div className="flex items-center gap-1">
                                                                 {TIMES.map(t => (
                                                                     <button
                                                                         key={t.char}
                                                                         onClick={() => toggleTime(product.id, t.char)}
                                                                         title={t.label}
-                                                                        className={`w-7 h-7 rounded-md text-[10px] font-black transition-all border ${product.timeOfDay.includes(t.char)
-                                                                            ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
-                                                                            : 'bg-gray-50 border-gray-100 text-gray-400 hover:bg-gray-100'
+                                                                        className={`w-7 h-7 rounded text-[10px] font-black transition-all border ${product.timeOfDay.includes(t.char)
+                                                                            ? 'bg-blue-600 border-blue-600 text-white'
+                                                                            : 'bg-gray-50 border-gray-200 text-gray-400 hover:bg-gray-100'
                                                                             }`}
                                                                     >
                                                                         {t.char}
                                                                     </button>
                                                                 ))}
-                                                                <div className="w-px h-6 bg-gray-100 mx-1.5" />
-                                                                <button
-                                                                    onClick={() => removeProduct(product.id)}
-                                                                    className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                                                >
-                                                                    <Trash2 size={16} />
-                                                                </button>
                                                             </div>
+
+                                                            {/* Delete Button */}
+                                                            <button
+                                                                onClick={() => removeProduct(product.id)}
+                                                                className="p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded transition-all shrink-0"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -361,50 +351,45 @@ export function PlanForm({ initialData, userRole, onChange }: PlanFormProps) {
                                     </div>
 
                                     {/* Attachments Section */}
-                                    <div className="pt-6 border-t border-gray-100 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                        <div className="flex items-center gap-2 mb-4">
-                                            <Files size={16} className="text-indigo-500" />
-                                            <h2 className="text-sm font-bold text-gray-900">Attachments & Resources</h2>
-                                        </div>
+                                    <div className="border-t border-gray-100 pt-4">
+                                        <h2 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                            <Files size={14} className="text-indigo-500" />
+                                            Attachments
+                                        </h2>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             {/* Documents Section */}
-                                            <div className="space-y-3">
-                                                <div className="flex items-center justify-between">
-                                                    <label className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wide">
-                                                        <FileUp size={14} className="text-orange-500" />
-                                                        Files
+                                            <div className="space-y-2">
+                                                <div className="flex items-center justify-between mb-1.5">
+                                                    <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                                                        <FileUp size={12} className="text-orange-500" />
+                                                        Files ({documents.length})
                                                     </label>
-                                                    <span className="text-[10px] font-bold text-gray-400">{documents.length}</span>
                                                 </div>
 
-                                                <div className="space-y-2">
+                                                <div className="space-y-1.5">
                                                     {documents.map((doc, index) => (
-                                                        <div key={index} className="group flex items-center justify-between p-2 bg-gray-50 hover:bg-orange-50/50 rounded-lg border border-transparent hover:border-orange-100 transition-all">
-                                                            <div className="flex items-center gap-3 min-w-0">
-                                                                <div className="h-7 w-7 rounded bg-white border border-gray-100 flex items-center justify-center text-orange-600 shrink-0">
-                                                                    <FileText size={12} />
-                                                                </div>
-                                                                <div className="min-w-0">
+                                                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 hover:bg-orange-50/50 rounded border border-gray-100 hover:border-orange-200 transition-all group">
+                                                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                                <FileText size={12} className="text-orange-600 shrink-0" />
+                                                                <div className="min-w-0 flex-1">
                                                                     <p className="text-xs font-medium text-gray-800 truncate">{doc.name}</p>
                                                                     <p className="text-[10px] text-gray-400">{doc.size}</p>
                                                                 </div>
                                                             </div>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
+                                                            <button
                                                                 onClick={() => removeDocument(index)}
-                                                                className="h-6 w-6 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50"
+                                                                className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-all"
                                                             >
                                                                 <Trash2 size={12} />
-                                                            </Button>
+                                                            </button>
                                                         </div>
                                                     ))}
 
                                                     <label className="cursor-pointer block">
-                                                        <div className="flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-200 rounded-xl hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group">
-                                                            <PlusCircle size={16} className="text-gray-400 group-hover:text-indigo-500" />
-                                                            <span className="text-xs font-semibold text-gray-500 group-hover:text-indigo-600">Upload File</span>
+                                                        <div className="flex items-center justify-center gap-1.5 py-2 border-2 border-dashed border-gray-200 rounded hover:border-orange-400 hover:bg-orange-50/30 transition-all group">
+                                                            <PlusCircle size={14} className="text-gray-400 group-hover:text-orange-500" />
+                                                            <span className="text-xs font-semibold text-gray-500 group-hover:text-orange-600">Upload</span>
                                                         </div>
                                                         <input type="file" multiple className="sr-only" onChange={handleFileUpload} />
                                                     </label>
@@ -412,58 +397,56 @@ export function PlanForm({ initialData, userRole, onChange }: PlanFormProps) {
                                             </div>
 
                                             {/* Links Section */}
-                                            <div className="space-y-3">
-                                                <div className="flex items-center justify-between">
-                                                    <label className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wide">
-                                                        <Globe size={14} className="text-blue-500" />
-                                                        Links
+                                            <div className="space-y-2">
+                                                <div className="flex items-center justify-between mb-1.5">
+                                                    <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                                                        <Globe size={12} className="text-blue-500" />
+                                                        Links ({links.length})
                                                     </label>
-                                                    <span className="text-[10px] font-bold text-gray-400">{links.length}</span>
                                                 </div>
 
-                                                <div className="space-y-2">
+                                                <div className="space-y-1.5">
                                                     {links.map((link, index) => (
-                                                        <div key={index} className="group flex items-center justify-between p-2 bg-gray-50 hover:bg-blue-50/50 rounded-lg border border-transparent hover:border-blue-100 transition-all">
-                                                            <div className="flex items-center gap-3 min-w-0">
-                                                                <div className="h-7 w-7 rounded bg-white border border-gray-100 flex items-center justify-center text-blue-500 shrink-0">
-                                                                    <LinkIcon size={12} />
-                                                                </div>
-                                                                <span className="text-xs text-gray-600 truncate max-w-[150px]">{link}</span>
+                                                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 hover:bg-blue-50/50 rounded border border-gray-100 hover:border-blue-200 transition-all group">
+                                                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                                <LinkIcon size={12} className="text-blue-500 shrink-0" />
+                                                                <span className="text-xs text-gray-600 truncate">{link}</span>
                                                             </div>
-                                                            <div className="flex items-center gap-1">
-                                                                <a href={link} target="_blank" rel="noreferrer" className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors">
+                                                            <div className="flex items-center gap-0.5 shrink-0">
+                                                                <a 
+                                                                    href={link} 
+                                                                    target="_blank" 
+                                                                    rel="noreferrer" 
+                                                                    className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
+                                                                >
                                                                     <ExternalLink size={12} />
                                                                 </a>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
+                                                                <button
                                                                     onClick={() => removeLink(index)}
-                                                                    className="h-6 w-6 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50"
+                                                                    className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-all"
                                                                 >
                                                                     <Trash2 size={12} />
-                                                                </Button>
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     ))}
 
-                                                    <div className="flex gap-2 items-center">
-                                                        <div className="flex-1">
-                                                            <Input
-                                                                type="url"
-                                                                icon={<LinkIcon size={12} />}
-                                                                value={newLink}
-                                                                onChange={(e) => setNewLink(e.target.value)}
-                                                                onKeyDown={(e) => e.key === 'Enter' && handleAddLink()}
-                                                                placeholder="URL..."
-                                                                className="text-xs h-9"
-                                                            />
-                                                        </div>
+                                                    <div className="flex gap-1.5">
+                                                        <Input
+                                                            type="url"
+                                                            icon={<LinkIcon size={12} />}
+                                                            value={newLink}
+                                                            onChange={(e) => setNewLink(e.target.value)}
+                                                            onKeyDown={(e) => e.key === 'Enter' && handleAddLink()}
+                                                            placeholder="URL..."
+                                                            className="text-xs flex-1"
+                                                        />
                                                         <Button
                                                             onClick={handleAddLink}
-                                                            variant="primary"
-                                                            className="bg-indigo-600 hover:bg-indigo-700 h-9 w-9 p-0 rounded-lg"
+                                                            size="sm"
+                                                            className="bg-blue-600 hover:bg-blue-700 text-white h-8 px-3"
                                                         >
-                                                            <Plus size={16} />
+                                                            <Plus size={14} />
                                                         </Button>
                                                     </div>
                                                 </div>
@@ -474,10 +457,27 @@ export function PlanForm({ initialData, userRole, onChange }: PlanFormProps) {
                             )}
                         </div>
                     </Card>
+
+                    {/* Action Buttons - Fixed at Bottom */}
+                    <div className="flex items-center justify-end gap-3 bg-white border-t border-gray-200 py-3 px-6 rounded-lg shadow-sm">
+                        <Button
+                            onClick={onCancel}
+                            variant="outline"
+                            className="px-6"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={onSubmit}
+                            className="bg-gray-900 hover:bg-gray-800 text-white px-6"
+                        >
+                            {initialData ? 'Save Changes' : 'Create Plan'}
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Right Column - Sidebar */}
-                <div className="space-y-6">
+                <div className="h-full overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-400">
                     <ClinicSelector
                         selectedClinics={selectedClinics}
                         onSelectionChange={setSelectedClinics}
