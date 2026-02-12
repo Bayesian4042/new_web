@@ -73,37 +73,55 @@
     --sidebar-active: 217 91% 60%;
   }
 
+  /* Dark Mode (preserved for future use) */
   :root[class~="dark"] {
     --background: 224 71% 4%;
     --foreground: 213 31% 91%;
 
-    --muted: 223 47% 11%;
-    --muted-foreground: 215.4 16.3% 56.9%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 9%;
 
-    --accent: 216 34% 17%;
-    --accent-foreground: 210 40% 98%;
+    --secondary: 217 91% 60%;
+    --secondary-foreground: 0 0% 100%;
+
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --muted: 223 47% 11%;
+    --muted-foreground: 215 16% 57%;
 
     --popover: 224 71% 4%;
-    --popover-foreground: 215 20.2% 65.1%;
+    --popover-foreground: 213 31% 91%;
 
     --border: 216 34% 17%;
     --input: 216 34% 17%;
 
-    --card: 224 71% 4%;
+    --card: 223 47% 11%;
     --card-foreground: 213 31% 91%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 1.2%;
+    --destructive: 0 63% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --secondary: 222.2 47.4% 11.2%;
-    --secondary-foreground: 210 40% 98%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 9%;
 
-    --ring: 216 34% 17%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+
+    --ring: 217 91% 60%;
 
     --radius: 0.5rem;
+
+    --form-bg: 223 47% 11%;
+    --form-border: 216 34% 25%;
+    --form-placeholder: 215 16% 50%;
+    
+    --sidebar-bg: 224 71% 4%;
+    --sidebar-border: 216 34% 17%;
+    --sidebar-active: 217 91% 60%;
   }
 }
 
