@@ -17,30 +17,53 @@ module.exports = {
         'screen-3xl': '1920px',
       },
       colors: {
+        /* Base Colors */
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        
+        /* Primary - Black (ERPNext style) */
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },
+        
+        /* Secondary - Blue */
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
         },
+        
+        /* Accent/Theme - Blue */
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        
+        /* Status Colors */
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        info: {
+          DEFAULT: "hsl(var(--info))",
+          foreground: "hsl(var(--info-foreground))",
+        },
+        
+        /* UI Elements */
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -49,6 +72,20 @@ module.exports = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        
+        /* Form Elements */
+        form: {
+          bg: "hsl(var(--form-bg))",
+          border: "hsl(var(--form-border))",
+          placeholder: "hsl(var(--form-placeholder))",
+        },
+        
+        /* Sidebar */
+        sidebar: {
+          bg: "hsl(var(--sidebar-bg))",
+          border: "hsl(var(--sidebar-border))",
+          active: "hsl(var(--sidebar-active))",
         },
       },
       borderRadius: {
