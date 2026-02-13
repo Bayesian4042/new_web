@@ -81,6 +81,25 @@ export function Settings() {
     { id: 1, name: 'Clinic Protocols', url: 'https://clinic.com/protocols' }
   ]);
 
+  // AI Assistant State
+  const [chatChannel, setChatChannel] = useState<'native' | 'whatsapp'>('native');
+  const [clinicName, setClinicName] = useState('Clinic Rep');
+  const [colorTheme, setColorTheme] = useState('#bf9b30');
+  const [logo, setLogo] = useState<string | null>(null);
+  const [assistantName, setAssistantName] = useState('MediBot');
+
+  const handleLogoUpload = () => {
+    setLogo('https://api.dicebear.com/7.x/icons/svg?seed=medicore');
+  };
+
+  const themes = [
+    { name: 'Gold', value: '#bf9b30' },
+    { name: 'Blue', value: '#2563eb' },
+    { name: 'Green', value: '#059669' },
+    { name: 'Purple', value: '#7c3aed' },
+    { name: 'Navy', value: '#1e293b' },
+  ];
+
   const tabs = [
     { id: 'general', label: 'General', icon: <Building2 size={18} /> },
     { id: 'communications', label: 'Communications', icon: <Bell size={18} /> },
