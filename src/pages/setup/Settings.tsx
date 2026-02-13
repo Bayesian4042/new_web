@@ -510,59 +510,6 @@ export function Settings() {
                   <p className="text-xs text-gray-500">Name of the AI assistant.</p>
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Clinic Logo</label>
-                  <div className="flex items-center gap-4">
-                    {logo ? (
-                      <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 rounded-lg border border-gray-200 p-1 bg-white">
-                          <img src={logo} alt="Logo" className="w-full h-full object-contain" />
-                        </div>
-                        <div>
-                          <span className="block text-xs font-medium text-green-600 mb-1">Logo Uploaded</span>
-                          <button
-                            onClick={() => setLogo(null)}
-                            className="text-xs text-red-500 hover:text-red-600 flex items-center gap-1">
-                            <X size={12} /> Remove
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={handleLogoUpload}
-                        className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors bg-gray-50/50">
-                        <Upload size={16} />
-                        Upload Logo
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Color Theme</label>
-                  <div className="flex items-center gap-4">
-                    <div
-                      className="h-10 w-10 rounded-lg border border-gray-200 shadow-sm"
-                      style={{ backgroundColor: colorTheme }} />
-                    <div className="flex gap-2">
-                      {themes.map((theme) => (
-                        <button
-                          key={theme.name}
-                          onClick={() => setColorTheme(theme.value)}
-                          className={`h-8 w-8 rounded-full border-2 transition-all ${colorTheme === theme.value ? 'border-gray-400 scale-110' : 'border-transparent hover:scale-110'}`}
-                          style={{ backgroundColor: theme.value }}
-                          title={theme.name} />
-                      ))}
-                    </div>
-                    <div className="text-xs text-gray-500 ml-2">
-                      {colorTheme}
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500">Theme color will be applied in the actual app.</p>
-                </div>
-              </div>
             </div>
           ) : (
             <div className="space-y-6">
