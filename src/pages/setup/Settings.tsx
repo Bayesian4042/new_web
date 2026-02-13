@@ -429,7 +429,7 @@ export function Settings() {
   );
 
   const renderAIAssistant = () => (
-    <div className="space-y-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Channel Selection */}
       <Card>
         <CardHeader>
@@ -442,7 +442,7 @@ export function Settings() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-col gap-4">
             <button
               onClick={() => setChatChannel('native')}
               className={`flex items-center gap-3 px-5 py-3 rounded-lg border transition-all ${chatChannel === 'native' ? 'border-blue-600 bg-blue-50/50 text-blue-700 ring-1 ring-blue-600/20' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}>
@@ -453,7 +453,7 @@ export function Settings() {
                 <span className="block text-sm font-semibold">Tesigo (Native App)</span>
                 <span className="block text-xs opacity-80">In-app chat experience</span>
               </div>
-              {chatChannel === 'native' && <div className="ml-2 h-4 w-4 bg-blue-600 rounded-full flex items-center justify-center"><Check size={10} className="text-white" /></div>}
+              {chatChannel === 'native' && <div className="ml-auto h-4 w-4 bg-blue-600 rounded-full flex items-center justify-center"><Check size={10} className="text-white" /></div>}
             </button>
 
             <button
@@ -466,7 +466,7 @@ export function Settings() {
                 <span className="block text-sm font-semibold">WhatsApp (Twilio)</span>
                 <span className="block text-xs opacity-80">External messaging</span>
               </div>
-              {chatChannel === 'whatsapp' && <div className="ml-2 h-4 w-4 bg-green-600 rounded-full flex items-center justify-center"><Check size={10} className="text-white" /></div>}
+              {chatChannel === 'whatsapp' && <div className="ml-auto h-4 w-4 bg-green-600 rounded-full flex items-center justify-center"><Check size={10} className="text-white" /></div>}
             </button>
           </div>
         </CardContent>
@@ -490,42 +490,38 @@ export function Settings() {
         </CardHeader>
         <CardContent>
           {chatChannel === 'native' ? (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Clinic Representative Name</label>
-                  <Input
-                    value={clinicName}
-                    onChange={(e) => setClinicName(e.target.value)}
-                    placeholder="e.g. Dr. Smith's Office" />
-                  <p className="text-xs text-gray-500">Displayed as the sender name in the chat header.</p>
-                </div>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Clinic Representative Name</label>
+                <Input
+                  value={clinicName}
+                  onChange={(e) => setClinicName(e.target.value)}
+                  placeholder="e.g. Dr. Smith's Office" />
+                <p className="text-xs text-gray-500">Displayed as the sender name in the chat header.</p>
+              </div>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Assistant Name</label>
-                  <Input
-                    value={assistantName}
-                    onChange={(e) => setAssistantName(e.target.value)}
-                    placeholder="e.g. MediBot" />
-                  <p className="text-xs text-gray-500">Name of the AI assistant.</p>
-                </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Assistant Name</label>
+                <Input
+                  value={assistantName}
+                  onChange={(e) => setAssistantName(e.target.value)}
+                  placeholder="e.g. MediBot" />
+                <p className="text-xs text-gray-500">Name of the AI assistant.</p>
               </div>
             </div>
           ) : (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Twilio Account SID</label>
-                  <Input type="password" placeholder="Checking accounts..." />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Auth Token</label>
-                  <Input type="password" placeholder="••••••••••••••••" />
-                </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Twilio Account SID</label>
+                <Input type="password" placeholder="Checking accounts..." />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Auth Token</label>
+                <Input type="password" placeholder="••••••••••••••••" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp Phone Number</label>
-                <Input placeholder="+1 (555) 000-0000" className="max-w-md" />
+                <Input placeholder="+1 (555) 000-0000" />
               </div>
               <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-3 text-xs text-yellow-800">
                 Note: WhatsApp styling is limited by the platform. Custom colors and logos may not appear in all contexts.
