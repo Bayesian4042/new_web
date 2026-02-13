@@ -213,7 +213,7 @@ export function Sidebar({
       children: [
         {
           id: 'conversations-table',
-          label: 'Conversations (Table)'
+          label: 'Conversations'
         }]
     },
     {
