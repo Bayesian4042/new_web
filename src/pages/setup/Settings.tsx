@@ -168,7 +168,7 @@ export function Settings() {
   );
 
   const renderCommunications = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -176,10 +176,10 @@ export function Settings() {
             Notification Mode
           </CardTitle>
           <CardDescription>
-            Choose how to deliver notifications for reminders and follow-ups
+            How to deliver notifications
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           <div className="space-y-3">
              <div onClick={() => setNotificationMode('app')} className="flex items-center gap-3 cursor-pointer group">
                <div className={`text-orange-600 ${notificationMode === 'app' ? 'opacity-100' : 'opacity-40 group-hover:opacity-60'}`}>
@@ -219,10 +219,10 @@ export function Settings() {
             Appointment Reminders
           </CardTitle>
           <CardDescription>
-            Select when to send reminders before appointments
+            When to send reminders
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           <div className="space-y-3">
             {[
               { key: 'dayBefore', label: '1 day before', sub: '24 hours prior' },
@@ -237,7 +237,7 @@ export function Settings() {
                 </div>
                 <button
                   onClick={() => setReminders(prev => ({ ...prev, [item.key]: !prev[item.key as keyof typeof reminders] }))}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${reminders[item.key as keyof typeof reminders] ? 'bg-indigo-600' : 'bg-gray-200'}`}>
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${reminders[item.key as keyof typeof reminders] ? 'bg-primary' : 'bg-gray-200'}`}>
                   <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${reminders[item.key as keyof typeof reminders] ? 'translate-x-6' : 'translate-x-1'}`} />
                 </button>
               </div>
@@ -246,41 +246,30 @@ export function Settings() {
         </CardContent>
       </Card>
 
-      {/* Message Template - Full Width */}
-      <Card className="lg:col-span-2">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="text-indigo-600" size={20} />
             Message Template
           </CardTitle>
           <CardDescription>
-            Customize the appointment reminder message sent to patients
+            Customize reminder message
           </CardDescription>
         </CardHeader>
         <CardContent>
           <textarea
             value={appointmentTemplate}
             onChange={(e) => setAppointmentTemplate(e.target.value)}
-            rows={8}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm font-mono resize-none"
+            rows={6}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-mono resize-none"
             placeholder="Enter your appointment reminder message..."
           />
-          <div className="mt-3 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
-            <p className="text-xs font-medium text-indigo-900 mb-2">Available placeholders:</p>
-            <div className="flex flex-wrap gap-2">
-              {[
-                '{patient_name}',
-                '{appointment_date}',
-                '{appointment_time}',
-                '{clinic_name}',
-                '{clinic_phone}',
-                '{doctor_name}'
-              ].map(placeholder => (
-                <code key={placeholder} className="px-2 py-1 bg-white border border-indigo-200 rounded text-xs text-indigo-700">
-                  {placeholder}
-                </code>
-              ))}
-            </div>
+          <div className="mt-3 flex flex-wrap gap-1">
+            {['{patient_name}', '{appointment_date}', '{clinic_name}'].map(placeholder => (
+              <code key={placeholder} className="px-1.5 py-0.5 bg-gray-100 border border-gray-200 rounded text-[10px] text-gray-600">
+                {placeholder}
+              </code>
+            ))}
           </div>
         </CardContent>
       </Card>
