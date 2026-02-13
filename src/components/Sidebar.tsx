@@ -128,10 +128,6 @@ export function Sidebar({
           label: 'Health Assistant'
         },
         {
-          id: 'conversations',
-          label: 'Conversations (Cards)'
-        },
-        {
           id: 'conversations-table',
           label: 'Conversations (Table)'
         }]
