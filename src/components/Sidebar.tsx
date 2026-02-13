@@ -208,10 +208,6 @@ export function Sidebar({
       icon: <Sparkles size={16} />,
       children: [
         {
-          id: 'conversations',
-          label: 'Conversations (Cards)'
-        },
-        {
           id: 'conversations-table',
           label: 'Conversations (Table)'
         }]
