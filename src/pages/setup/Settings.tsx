@@ -236,10 +236,17 @@ export function Settings() {
           <textarea
             value={appointmentTemplate}
             onChange={(e) => setAppointmentTemplate(e.target.value)}
-            rows={3}
+            rows={6}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary text-sm font-mono resize-none"
             placeholder="Hi {patient_name}, reminder for your appointment on {appointment_date}..."
           />
+          <div className="flex flex-wrap gap-2">
+            {['{patient_name}', '{appointment_date}', '{appointment_time}', '{clinic_name}', '{clinic_phone}', '{doctor_name}'].map(placeholder => (
+              <code key={placeholder} className="px-2 py-1 bg-gray-100 border border-gray-200 rounded text-xs text-gray-600 cursor-pointer hover:bg-gray-200">
+                {placeholder}
+              </code>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>
