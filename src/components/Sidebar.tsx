@@ -132,7 +132,7 @@ export function Sidebar({
         },
         {
           id: 'users',
-          label: 'Users'
+          label: 'Members'
         }
       ]
     }];
