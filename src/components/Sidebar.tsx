@@ -197,16 +197,6 @@ export function Sidebar({
         }]
     },
     {
-      id: 'ai',
-      label: 'AI System',
-      icon: <Sparkles size={16} />,
-      children: [
-        {
-          id: 'conversations-table',
-          label: 'Conversations'
-        }]
-    },
-    {
       id: 'clinics',
       label: 'Clinics',
       icon: <Building2 size={16} />
