@@ -567,7 +567,7 @@ export function Settings() {
       
       {/* Save Action */}
       <div className="flex justify-end pt-6 border-t border-gray-100">
-         <Button>Save Changes</Button>
+         <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">Save Changes</Button>
       </div>
     </div>
   );
