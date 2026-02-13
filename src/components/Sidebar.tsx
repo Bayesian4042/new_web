@@ -123,16 +123,6 @@ export function Sidebar({
         }]
     },
     {
-      id: 'ai',
-      label: 'AI System',
-      icon: <Sparkles size={16} />,
-      children: [
-        {
-          id: 'conversations-table',
-          label: 'Conversations'
-        }]
-    },
-    {
       id: 'setup',
       label: 'Setup',
       icon: <Settings size={16} />,
