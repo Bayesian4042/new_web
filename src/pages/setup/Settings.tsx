@@ -22,7 +22,13 @@ import {
   CheckCircle2,
   Circle,
   MessageSquare,
-  ChevronDown
+  ChevronDown,
+  Bot,
+  MessageCircle,
+  Upload,
+  X,
+  Check,
+  Save
 } from 'lucide-react';
 
 const TIMEZONES = [
