@@ -102,6 +102,7 @@ export function Settings() {
 
   const tabs = [
     { id: 'general', label: 'General', icon: <Building2 size={18} /> },
+    { id: 'ai-assistant', label: 'AI Assistant', icon: <Bot size={18} /> },
     { id: 'communications', label: 'Communications', icon: <Bell size={18} /> },
     { id: 'knowledge', label: 'Knowledge Base', icon: <BookOpen size={18} /> },
     { id: 'integrations', label: 'Integrations', icon: <Store size={18} /> }
