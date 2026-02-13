@@ -290,73 +290,80 @@ export function Settings() {
   );
 
   const renderKnowledgeBase = () => (
-    <div className="space-y-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Globe className="text-teal-600" size={20} />
-            Fallback Sources
+            Suggested Medical Sources
           </CardTitle>
           <CardDescription>
-            External sources the AI can reference when it cannot find an answer in the companion's variables
+            External sources the AI can reference when it cannot find an answer
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <h4 className="text-sm font-medium text-gray-900 mb-3">Suggested Medical Sources</h4>
-            <div className="space-y-3">
-              {[
-                { key: 'pubmed', label: 'PubMed', sub: 'Biomedical literature from MEDLINE and life science journals' },
-                { key: 'mayo', label: 'Mayo Clinic', sub: 'Patient care and health information from Mayo Clinic' },
-                { key: 'cochrane', label: 'Cochrane Library', sub: 'High-quality evidence for healthcare decision-making' },
-                { key: 'medline', label: 'MedlinePlus', sub: 'Health information from the National Library of Medicine' },
-                { key: 'cdc', label: 'CDC', sub: 'Centers for Disease Control and Prevention resources' },
-              ].map(source => (
-                 <div
-                   key={source.key}
-                   onClick={() => setSources(prev => ({ ...prev, [source.key]: !prev[source.key as keyof typeof sources] }))}
-                   className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                   <div className={`flex items-center justify-center h-5 w-5 rounded border ${sources[source.key as keyof typeof sources] ? 'bg-teal-600 border-teal-600 text-white' : 'bg-white border-gray-300'}`}>
-                      {sources[source.key as keyof typeof sources] && <CheckCircle2 size={14} />}
-                   </div>
-                   <div>
-                     <div className="flex items-center gap-1.5">
-                        <span className="text-sm font-medium text-gray-900">{source.label}</span>
-                        <ExternalLink size={12} className="text-gray-400" />
-                     </div>
-                     <p className="text-xs text-gray-500">{source.sub}</p>
-                   </div>
+        <CardContent>
+          <div className="space-y-3">
+            {[
+              { key: 'pubmed', label: 'PubMed', sub: 'Biomedical literature from MEDLINE and life science journals' },
+              { key: 'mayo', label: 'Mayo Clinic', sub: 'Patient care and health information from Mayo Clinic' },
+              { key: 'cochrane', label: 'Cochrane Library', sub: 'High-quality evidence for healthcare decision-making' },
+              { key: 'medline', label: 'MedlinePlus', sub: 'Health information from the National Library of Medicine' },
+              { key: 'cdc', label: 'CDC', sub: 'Centers for Disease Control and Prevention resources' },
+            ].map(source => (
+               <div
+                 key={source.key}
+                 onClick={() => setSources(prev => ({ ...prev, [source.key]: !prev[source.key as keyof typeof sources] }))}
+                 className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                 <div className={`flex items-center justify-center h-5 w-5 rounded border ${sources[source.key as keyof typeof sources] ? 'bg-teal-600 border-teal-600 text-white' : 'bg-white border-gray-300'}`}>
+                    {sources[source.key as keyof typeof sources] && <CheckCircle2 size={14} />}
                  </div>
-              ))}
-            </div>
+                 <div>
+                   <div className="flex items-center gap-1.5">
+                      <span className="text-sm font-medium text-gray-900">{source.label}</span>
+                      <ExternalLink size={12} className="text-gray-400" />
+                   </div>
+                   <p className="text-xs text-gray-500">{source.sub}</p>
+                 </div>
+               </div>
+            ))}
           </div>
+        </CardContent>
+      </Card>
 
-          <div>
-             <h4 className="text-sm font-medium text-gray-900 mb-3">Custom Sources</h4>
-             <div className="space-y-3">
-                {customSources.map(source => (
-                  <div key={source.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg bg-gray-50/50">
-                     <div>
-                       <div className="flex items-center gap-1.5">
-                          <span className="text-sm font-medium text-gray-900">{source.name}</span>
-                       </div>
-                       <p className="text-xs text-gray-500">{source.url}</p>
-                     </div>
-                     <button className="text-gray-400 hover:text-red-500 transition-colors">
-                       <Trash2 size={16} />
-                     </button>
-                  </div>
-                ))}
-                
-                <div className="flex gap-2">
-                   <Input placeholder="Source name" className="flex-1" />
-                   <Input placeholder="URL (e.g., example.com)" className="flex-[2]" />
-                   <Button size="icon" className="shrink-0 bg-gray-900 text-white">
-                      <Plus size={18} />
-                   </Button>
-                </div>
-                <p className="text-xs text-gray-500">Add custom websites or documentation URLs for the AI to reference</p>
-             </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="text-teal-600" size={20} />
+            Custom Sources
+          </CardTitle>
+          <CardDescription>
+            Add custom websites or documentation URLs for the AI to reference
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {customSources.map(source => (
+              <div key={source.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg bg-gray-50/50">
+                 <div>
+                   <div className="flex items-center gap-1.5">
+                      <span className="text-sm font-medium text-gray-900">{source.name}</span>
+                   </div>
+                   <p className="text-xs text-gray-500">{source.url}</p>
+                 </div>
+                 <button className="text-gray-400 hover:text-red-500 transition-colors">
+                   <Trash2 size={16} />
+                 </button>
+              </div>
+            ))}
+            
+            <div className="pt-3 border-t border-gray-100 space-y-3">
+              <Input placeholder="Source name" />
+              <Input placeholder="URL (e.g., example.com)" />
+              <Button size="sm" className="w-full">
+                <Plus size={16} className="mr-2" />
+                Add Source
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
