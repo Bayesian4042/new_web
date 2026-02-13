@@ -294,7 +294,7 @@ const INITIAL_OTC_LISTS: OTCList[] = [
 
 export function App() {
   const [activeView, setActiveView] = useState('dashboard');
-  const [userRole, setUserRole] = useState<'admin' | 'clinic'>('admin');
+  const [userRole, setUserRole] = useState<'admin' | 'clinic'>('clinic');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showCompanionForm, setShowCompanionForm] = useState(false);
   const [editingCompanion, setEditingCompanion] = useState<any>(null);
