@@ -8,7 +8,6 @@ import {
   Home,
   Settings,
   PanelLeftClose,
-  Sparkles,
   Building2,
   Pill
 } from
