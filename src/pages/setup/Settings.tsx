@@ -428,6 +428,168 @@ export function Settings() {
     </div>
   );
 
+  const renderAIAssistant = () => (
+    <div className="space-y-6">
+      {/* Channel Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bot className="text-blue-600" size={20} />
+            Chat Channel
+          </CardTitle>
+          <CardDescription>
+            Select how patients will interact with your AI assistant
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-4">
+            <button
+              onClick={() => setChatChannel('native')}
+              className={`flex items-center gap-3 px-5 py-3 rounded-lg border transition-all ${chatChannel === 'native' ? 'border-blue-600 bg-blue-50/50 text-blue-700 ring-1 ring-blue-600/20' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}>
+              <div className={`p-2 rounded-full ${chatChannel === 'native' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
+                <Smartphone size={18} />
+              </div>
+              <div className="text-left">
+                <span className="block text-sm font-semibold">Tesigo (Native App)</span>
+                <span className="block text-xs opacity-80">In-app chat experience</span>
+              </div>
+              {chatChannel === 'native' && <div className="ml-2 h-4 w-4 bg-blue-600 rounded-full flex items-center justify-center"><Check size={10} className="text-white" /></div>}
+            </button>
+
+            <button
+              onClick={() => setChatChannel('whatsapp')}
+              className={`flex items-center gap-3 px-5 py-3 rounded-lg border transition-all ${chatChannel === 'whatsapp' ? 'border-green-600 bg-green-50/50 text-green-700 ring-1 ring-green-600/20' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}>
+              <div className={`p-2 rounded-full ${chatChannel === 'whatsapp' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
+                <MessageCircle size={18} />
+              </div>
+              <div className="text-left">
+                <span className="block text-sm font-semibold">WhatsApp (Twilio)</span>
+                <span className="block text-xs opacity-80">External messaging</span>
+              </div>
+              {chatChannel === 'whatsapp' && <div className="ml-2 h-4 w-4 bg-green-600 rounded-full flex items-center justify-center"><Check size={10} className="text-white" /></div>}
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Configuration Fields */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            {chatChannel === 'native' ? (
+              <><Smartphone className="text-blue-600" size={20} /> App Configuration</>
+            ) : (
+              <><MessageCircle className="text-green-600" size={20} /> WhatsApp Configuration</>
+            )}
+          </CardTitle>
+          <CardDescription>
+            {chatChannel === 'native' 
+              ? 'Configure how your AI assistant appears in the native app'
+              : 'Configure your WhatsApp Business integration'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {chatChannel === 'native' ? (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Clinic Representative Name</label>
+                  <Input
+                    value={clinicName}
+                    onChange={(e) => setClinicName(e.target.value)}
+                    placeholder="e.g. Dr. Smith's Office" />
+                  <p className="text-xs text-gray-500">Displayed as the sender name in the chat header.</p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Assistant Name</label>
+                  <Input
+                    value={assistantName}
+                    onChange={(e) => setAssistantName(e.target.value)}
+                    placeholder="e.g. MediBot" />
+                  <p className="text-xs text-gray-500">Name of the AI assistant.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Clinic Logo</label>
+                  <div className="flex items-center gap-4">
+                    {logo ? (
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-lg border border-gray-200 p-1 bg-white">
+                          <img src={logo} alt="Logo" className="w-full h-full object-contain" />
+                        </div>
+                        <div>
+                          <span className="block text-xs font-medium text-green-600 mb-1">Logo Uploaded</span>
+                          <button
+                            onClick={() => setLogo(null)}
+                            className="text-xs text-red-500 hover:text-red-600 flex items-center gap-1">
+                            <X size={12} /> Remove
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleLogoUpload}
+                        className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors bg-gray-50/50">
+                        <Upload size={16} />
+                        Upload Logo
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Color Theme</label>
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="h-10 w-10 rounded-lg border border-gray-200 shadow-sm"
+                      style={{ backgroundColor: colorTheme }} />
+                    <div className="flex gap-2">
+                      {themes.map((theme) => (
+                        <button
+                          key={theme.name}
+                          onClick={() => setColorTheme(theme.value)}
+                          className={`h-8 w-8 rounded-full border-2 transition-all ${colorTheme === theme.value ? 'border-gray-400 scale-110' : 'border-transparent hover:scale-110'}`}
+                          style={{ backgroundColor: theme.value }}
+                          title={theme.name} />
+                      ))}
+                    </div>
+                    <div className="text-xs text-gray-500 ml-2">
+                      {colorTheme}
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500">Theme color will be applied in the actual app.</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Twilio Account SID</label>
+                  <Input type="password" placeholder="Checking accounts..." />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Auth Token</label>
+                  <Input type="password" placeholder="••••••••••••••••" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp Phone Number</label>
+                <Input placeholder="+1 (555) 000-0000" className="max-w-md" />
+              </div>
+              <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-3 text-xs text-yellow-800">
+                Note: WhatsApp styling is limited by the platform. Custom colors and logos may not appear in all contexts.
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-10">
       <div>
