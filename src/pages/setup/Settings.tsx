@@ -109,64 +109,62 @@ export function Settings() {
   ];
 
   const renderIntegrations = () => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Store className="text-blue-600" size={20} />
-          E-commerce Connection
-        </CardTitle>
-        <CardDescription>
-          Connect to an e-commerce store for product selection in Shopping variables
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Option 1: ThePlanStore */}
-        <div
-          onClick={() => setEcommerceMode('planstore')}
-          className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${ecommerceMode === 'planstore' ? 'border-blue-600 bg-blue-50/30' : 'border-gray-200 hover:border-gray-300'}`}>
-          <div className={`mt-0.5 ${ecommerceMode === 'planstore' ? 'text-blue-600' : 'text-gray-400'}`}>
-            {ecommerceMode === 'planstore' ? <CheckCircle2 size={20} /> : <Circle size={20} />}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-gray-900">ThePlanStore</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full uppercase tracking-wide">Recommended</span>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Card className="lg:col-span-2">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Store className="text-blue-600" size={20} />
+            E-commerce Connection
+          </CardTitle>
+          <CardDescription>
+            Connect to an e-commerce store for product selection in Shopping variables
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Option 1: ThePlanStore */}
+            <div
+              onClick={() => setEcommerceMode('planstore')}
+              className={`flex flex-col gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${ecommerceMode === 'planstore' ? 'border-blue-600 bg-blue-50/30' : 'border-gray-200 hover:border-gray-300'}`}>
+              <div className="flex items-center gap-2">
+                <div className={`${ecommerceMode === 'planstore' ? 'text-blue-600' : 'text-gray-400'}`}>
+                  {ecommerceMode === 'planstore' ? <CheckCircle2 size={20} /> : <Circle size={20} />}
+                </div>
+                <span className="font-semibold text-gray-900">ThePlanStore</span>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full uppercase tracking-wide w-fit">Recommended</span>
+              <p className="text-sm text-gray-500">Pre-configured product catalog with health supplements and wellness products</p>
             </div>
-            <p className="text-sm text-gray-500 mt-1">Pre-configured product catalog with health supplements and wellness products</p>
-          </div>
-        </div>
 
-        {/* Option 2: Shopify */}
-        <div
-          onClick={() => setEcommerceMode('shopify')}
-          className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${ecommerceMode === 'shopify' ? 'border-blue-600 bg-blue-50/30' : 'border-gray-200 hover:border-gray-300'}`}>
-          <div className={`mt-0.5 ${ecommerceMode === 'shopify' ? 'text-blue-600' : 'text-gray-400'}`}>
-            {ecommerceMode === 'shopify' ? <CheckCircle2 size={20} /> : <Circle size={20} />}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-gray-900">Connect Shopify Store</span>
+            {/* Option 2: Shopify */}
+            <div
+              onClick={() => setEcommerceMode('shopify')}
+              className={`flex flex-col gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${ecommerceMode === 'shopify' ? 'border-blue-600 bg-blue-50/30' : 'border-gray-200 hover:border-gray-300'}`}>
+              <div className="flex items-center gap-2">
+                <div className={`${ecommerceMode === 'shopify' ? 'text-blue-600' : 'text-gray-400'}`}>
+                  {ecommerceMode === 'shopify' ? <CheckCircle2 size={20} /> : <Circle size={20} />}
+                </div>
+                <span className="font-semibold text-gray-900">Shopify Store</span>
+              </div>
+              <p className="text-sm text-gray-500 mt-4">Use your own Shopify store's product catalog</p>
             </div>
-            <p className="text-sm text-gray-500 mt-1">Use your own Shopify store's product catalog</p>
-          </div>
-        </div>
 
-        {/* Option 3: None */}
-        <div
-          onClick={() => setEcommerceMode('none')}
-          className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${ecommerceMode === 'none' ? 'border-blue-600 bg-blue-50/30' : 'border-gray-200 hover:border-gray-300'}`}>
-          <div className={`mt-0.5 ${ecommerceMode === 'none' ? 'text-blue-600' : 'text-gray-400'}`}>
-             {ecommerceMode === 'none' ? <CheckCircle2 size={20} /> : <Circle size={20} />}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-gray-900">No e-commerce</span>
+            {/* Option 3: None */}
+            <div
+              onClick={() => setEcommerceMode('none')}
+              className={`flex flex-col gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${ecommerceMode === 'none' ? 'border-blue-600 bg-blue-50/30' : 'border-gray-200 hover:border-gray-300'}`}>
+              <div className="flex items-center gap-2">
+                <div className={`${ecommerceMode === 'none' ? 'text-blue-600' : 'text-gray-400'}`}>
+                   {ecommerceMode === 'none' ? <CheckCircle2 size={20} /> : <Circle size={20} />}
+                </div>
+                <span className="font-semibold text-gray-900">No e-commerce</span>
+              </div>
+              <p className="text-sm text-gray-500 mt-4">Disable product selection (you can still add manual links)</p>
             </div>
-            <p className="text-sm text-gray-500 mt-1">Disable product selection (you can still add manual links)</p>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 
   const renderCommunications = () => (
