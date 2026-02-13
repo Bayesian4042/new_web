@@ -168,16 +168,14 @@ export function Settings() {
   );
 
   const renderCommunications = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Notification Mode */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-sm">
+    <Card>
+      <CardContent className="p-6 space-y-5">
+        {/* Notification Mode */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <Bell className="text-orange-600" size={16} />
-            Notification Mode
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
+            <span className="text-sm font-medium text-gray-900">Notification Mode</span>
+          </div>
           <div className="flex gap-1">
             {[
               { key: 'app', label: 'App' },
@@ -187,7 +185,7 @@ export function Settings() {
               <button
                 key={option.key}
                 onClick={() => setNotificationMode(option.key as 'app' | 'sms' | 'both')}
-                className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all ${
                   notificationMode === option.key
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -196,29 +194,27 @@ export function Settings() {
               </button>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Appointment Reminders */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-sm">
+        <div className="border-t border-gray-100" />
+
+        {/* Appointment Reminders */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <Calendar className="text-indigo-600" size={16} />
-            Reminder Timing
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
+            <span className="text-sm font-medium text-gray-900">Reminder Timing</span>
+          </div>
           <div className="flex gap-1">
             {[
-              { key: 'dayBefore', label: '1D' },
-              { key: 'twoDaysBefore', label: '2D' },
-              { key: 'threeDaysBefore', label: '3D' },
-              { key: 'weekBefore', label: '1W' },
+              { key: 'dayBefore', label: '1 Day' },
+              { key: 'twoDaysBefore', label: '2 Days' },
+              { key: 'threeDaysBefore', label: '3 Days' },
+              { key: 'weekBefore', label: '1 Week' },
             ].map((item) => (
               <button
                 key={item.key}
                 onClick={() => setReminders(prev => ({ ...prev, [item.key]: !prev[item.key as keyof typeof reminders] }))}
-                className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                   reminders[item.key as keyof typeof reminders]
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -227,28 +223,26 @@ export function Settings() {
               </button>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Message Template */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-sm">
+        <div className="border-t border-gray-100" />
+
+        {/* Message Template */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
             <MessageSquare className="text-indigo-600" size={16} />
-            Message Template
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
+            <span className="text-sm font-medium text-gray-900">Message Template</span>
+          </div>
           <textarea
             value={appointmentTemplate}
             onChange={(e) => setAppointmentTemplate(e.target.value)}
             rows={3}
-            className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary/20 focus:border-primary text-xs font-mono resize-none"
-            placeholder="Hi {patient_name}, reminder for {appointment_date}..."
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary text-sm font-mono resize-none"
+            placeholder="Hi {patient_name}, reminder for your appointment on {appointment_date}..."
           />
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 
   const renderKnowledgeBase = () => (
