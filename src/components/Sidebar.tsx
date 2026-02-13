@@ -83,6 +83,10 @@ export function Sidebar({
         {
           id: 'all-patients',
           label: 'All Patients'
+        },
+        {
+          id: 'conversations-table',
+          label: 'Conversations'
         }
       ]
     },
@@ -167,6 +171,10 @@ export function Sidebar({
         {
           id: 'all-patients',
           label: 'All Patients'
+        },
+        {
+          id: 'conversations-table',
+          label: 'Conversations'
         }
       ]
     },
