@@ -615,6 +615,7 @@ export function Settings() {
       {/* Content */}
       <div className="min-h-[500px]">
         {activeTab === 'general' && renderGeneral()}
+        {activeTab === 'ai-assistant' && renderAIAssistant()}
         {activeTab === 'communications' && renderCommunications()}
         {activeTab === 'knowledge' && renderKnowledgeBase()}
         {activeTab === 'integrations' && renderIntegrations()}
