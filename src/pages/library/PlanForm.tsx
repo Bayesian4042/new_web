@@ -67,7 +67,7 @@ const AVAILABLE_PRODUCTS = [
 const productItems: SideSheetItem[] = AVAILABLE_PRODUCTS.map(p => ({
     id: p.id,
     name: p.name,
-    description: p.price,
+    price: p.price,
     category: p.type,
     icon: <Pill size={16} />
 }));
