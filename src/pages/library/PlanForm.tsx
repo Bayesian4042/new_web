@@ -578,13 +578,13 @@ export function PlanForm({ initialData, userRole, onChange, onSubmit, onCancel }
             <SideSheet
                 isOpen={isProductSheetOpen}
                 onClose={() => setIsProductSheetOpen(false)}
-                title="Add Product to Plan"
-                description="Select medical products to include in this plan"
-                items={productItems}
+                title="Add Package to Plan"
+                description="Select packages to include in this plan"
+                items={packageItems}
                 selectedIds={tempProductIds}
                 onSelectionChange={setTempProductIds}
                 onConfirm={handleProductSheetConfirm}
-                searchPlaceholder="Search products..."
+                searchPlaceholder="Search packages..."
             />
         </div>
     );
