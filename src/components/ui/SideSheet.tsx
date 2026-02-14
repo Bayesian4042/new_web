@@ -110,37 +110,43 @@ export function SideSheet({
                 <button
                   key={item.id}
                   onClick={() => toggleItem(item.id)}
-                  className={`w-full flex items-start gap-3 p-3 rounded-lg text-left transition-colors ${isSelected ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50 border border-transparent'}`}>
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${isSelected ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50 border border-transparent'}`}>
 
                     <div
-                    className={`flex-shrink-0 h-5 w-5 rounded border-2 flex items-center justify-center mt-0.5 transition-colors ${isSelected ? 'bg-blue-600 border-blue-600' : 'border-gray-300'}`}>
+                    className={`flex-shrink-0 h-5 w-5 rounded border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-blue-600 border-blue-600' : 'border-gray-300'}`}>
 
                       {isSelected && <Check size={12} className="text-white" />}
                     </div>
+                    
+                    {item.icon &&
+                      <span className={`flex-shrink-0 p-2 rounded-lg ${isSelected ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>{item.icon}</span>
+                    }
+                    
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        {item.icon &&
-                      <span className="text-gray-400">{item.icon}</span>
-                      }
                         <span
-                        className={`text-sm font-medium ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
-
+                        className={`text-sm font-semibold ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
                           {item.name}
                         </span>
                         {item.category &&
-                      <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">
+                      <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded font-medium">
                             {item.category}
                           </span>
                       }
                       </div>
                       {item.description &&
                     <p
-                      className={`text-xs mt-0.5 ${isSelected ? 'text-blue-700' : 'text-gray-500'}`}>
-
+                      className={`text-xs mt-0.5 ${isSelected ? 'text-blue-600' : 'text-gray-500'}`}>
                           {item.description}
                         </p>
                     }
                     </div>
+                    
+                    {item.price &&
+                      <span className={`text-sm font-bold flex-shrink-0 ${isSelected ? 'text-blue-700' : 'text-gray-900'}`}>
+                        {item.price}
+                      </span>
+                    }
                   </button>);
 
             })}
