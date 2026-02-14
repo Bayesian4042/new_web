@@ -29,6 +29,20 @@ interface Product {
     price: string;
 }
 
+interface PackageProduct {
+    id: string;
+    name: string;
+    price: string;
+}
+
+interface Package {
+    id: string;
+    name: string;
+    type: string;
+    totalPrice: string;
+    products: PackageProduct[];
+}
+
 interface PlanFormProps {
     initialData?: {
         id: string;
@@ -38,7 +52,7 @@ interface PlanFormProps {
         links?: string[];
         products?: Product[];
         assignedClinics?: string[];
-        assignedCategories?: string[]; // Consistency check
+        assignedCategories?: string[];
     } | null;
     userRole: 'admin' | 'clinic';
     onChange: (data: any) => void;
@@ -53,23 +67,83 @@ const TIMES = [
     { label: 'Evening', char: 'E' }
 ];
 
-const AVAILABLE_PRODUCTS = [
-    { id: 'p1', name: 'Amoxicillin 500mg', type: 'Antibiotic', price: '12.50 €' },
-    { id: 'p2', name: 'Ibuprofen 400mg', type: 'Pain Relief', price: '8.20 €' },
-    { id: 'p3', name: 'Vitamin D3', type: 'Supplement', price: '15.00 €' },
-    { id: 'p4', name: 'Omega-3 Fish Oil', type: 'Supplement', price: '22.00 €' },
-    { id: 'p5', name: 'Metformin', type: 'Diabetes', price: '10.00 €' },
-    { id: 'p6', name: 'Lisinopril 10mg', type: 'Blood Pressure', price: '14.00 €' },
-    { id: 'p7', name: 'Atorvastatin 20mg', type: 'Cholesterol', price: '18.50 €' },
-    { id: 'p8', name: 'Probiotic Complex', type: 'Supplement', price: '25.00 €' },
+const AVAILABLE_PACKAGES: Package[] = [
+    { 
+        id: 'pkg1', 
+        name: 'Cold & Flu Bundle', 
+        type: 'Wellness',
+        totalPrice: '35.70 €',
+        products: [
+            { id: 'p1', name: 'Paracetamol 500mg', price: '8.50 €' },
+            { id: 'p2', name: 'Vitamin C 1000mg', price: '12.00 €' },
+            { id: 'p3', name: 'Zinc Lozenges', price: '15.20 €' },
+        ]
+    },
+    { 
+        id: 'pkg2', 
+        name: 'Pain Management Kit', 
+        type: 'Pain Relief',
+        totalPrice: '32.70 €',
+        products: [
+            { id: 'p4', name: 'Ibuprofen 400mg', price: '8.20 €' },
+            { id: 'p5', name: 'Muscle Relaxant Gel', price: '14.50 €' },
+            { id: 'p6', name: 'Heat Patches (5 pack)', price: '10.00 €' },
+        ]
+    },
+    { 
+        id: 'pkg3', 
+        name: 'Digestive Health Pack', 
+        type: 'Digestive',
+        totalPrice: '45.00 €',
+        products: [
+            { id: 'p7', name: 'Probiotic Complex', price: '25.00 €' },
+            { id: 'p8', name: 'Digestive Enzymes', price: '12.00 €' },
+            { id: 'p9', name: 'Fiber Supplement', price: '8.00 €' },
+        ]
+    },
+    { 
+        id: 'pkg4', 
+        name: 'Diabetes Care Bundle', 
+        type: 'Chronic Care',
+        totalPrice: '52.00 €',
+        products: [
+            { id: 'p10', name: 'Metformin 500mg', price: '10.00 €' },
+            { id: 'p11', name: 'Blood Glucose Strips (50)', price: '25.00 €' },
+            { id: 'p12', name: 'Diabetic Multivitamin', price: '17.00 €' },
+        ]
+    },
+    { 
+        id: 'pkg5', 
+        name: 'Heart Health Package', 
+        type: 'Cardiovascular',
+        totalPrice: '58.50 €',
+        products: [
+            { id: 'p13', name: 'Omega-3 Fish Oil', price: '22.00 €' },
+            { id: 'p14', name: 'CoQ10 100mg', price: '18.50 €' },
+            { id: 'p15', name: 'Low-dose Aspirin', price: '6.00 €' },
+            { id: 'p16', name: 'Magnesium 400mg', price: '12.00 €' },
+        ]
+    },
+    { 
+        id: 'pkg6', 
+        name: 'Immunity Booster Set', 
+        type: 'Wellness',
+        totalPrice: '42.00 €',
+        products: [
+            { id: 'p17', name: 'Vitamin D3 2000IU', price: '15.00 €' },
+            { id: 'p18', name: 'Elderberry Extract', price: '18.00 €' },
+            { id: 'p19', name: 'Echinacea Capsules', price: '9.00 €' },
+        ]
+    },
 ];
 
-const productItems: SideSheetItem[] = AVAILABLE_PRODUCTS.map(p => ({
-    id: p.id,
-    name: p.name,
-    price: p.price,
-    category: p.type,
-    icon: <Pill size={16} />
+const packageItems: SideSheetItem[] = AVAILABLE_PACKAGES.map(pkg => ({
+    id: pkg.id,
+    name: pkg.name,
+    price: pkg.totalPrice,
+    category: pkg.type,
+    icon: <Pill size={16} />,
+    products: pkg.products
 }));
 
 export function PlanForm({ initialData, userRole, onChange, onSubmit, onCancel }: PlanFormProps) {
