@@ -104,50 +104,71 @@ export function SideSheet({
             }
             </div> :
 
-          <div className="space-y-1">
+          <div className="space-y-2">
               {filteredItems.map((item) => {
               const isSelected = selectedIds.includes(item.id);
               return (
                 <button
                   key={item.id}
                   onClick={() => toggleItem(item.id)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${isSelected ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50 border border-transparent'}`}>
+                  className={`w-full p-3 rounded-lg text-left transition-colors ${isSelected ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50 border border-gray-100'}`}>
 
-                    <div
-                    className={`flex-shrink-0 h-5 w-5 rounded border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-blue-600 border-blue-600' : 'border-gray-300'}`}>
-
-                      {isSelected && <Check size={12} className="text-white" />}
-                    </div>
-                    
-                    {item.icon &&
-                      <span className={`flex-shrink-0 p-2 rounded-lg ${isSelected ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>{item.icon}</span>
-                    }
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span
-                        className={`text-sm font-semibold ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
-                          {item.name}
-                        </span>
-                        {item.category &&
-                      <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded font-medium">
-                            {item.category}
-                          </span>
-                      }
+                    {/* Header Row */}
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`flex-shrink-0 h-5 w-5 rounded border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-blue-600 border-blue-600' : 'border-gray-300'}`}>
+                        {isSelected && <Check size={12} className="text-white" />}
                       </div>
-                      {item.description &&
-                    <p
-                      className={`text-xs mt-0.5 ${isSelected ? 'text-blue-600' : 'text-gray-500'}`}>
-                          {item.description}
-                        </p>
-                    }
+                      
+                      {item.icon &&
+                        <span className={`flex-shrink-0 p-2 rounded-lg ${isSelected ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>{item.icon}</span>
+                      }
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-sm font-semibold ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
+                            {item.name}
+                          </span>
+                          {item.category &&
+                            <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded font-medium">
+                              {item.category}
+                            </span>
+                          }
+                        </div>
+                        {item.description &&
+                          <p className={`text-xs mt-0.5 ${isSelected ? 'text-blue-600' : 'text-gray-500'}`}>
+                            {item.description}
+                          </p>
+                        }
+                      </div>
+                      
+                      {item.price &&
+                        <span className={`text-sm font-bold flex-shrink-0 ${isSelected ? 'text-blue-700' : 'text-gray-900'}`}>
+                          {item.price}
+                        </span>
+                      }
                     </div>
                     
-                    {item.price &&
-                      <span className={`text-sm font-bold flex-shrink-0 ${isSelected ? 'text-blue-700' : 'text-gray-900'}`}>
-                        {item.price}
-                      </span>
-                    }
+                    {/* Products Inside Package */}
+                    {item.products && item.products.length > 0 && (
+                      <div className={`mt-3 pt-3 border-t ${isSelected ? 'border-blue-200' : 'border-gray-100'}`}>
+                        <p className={`text-[10px] font-semibold uppercase tracking-wide mb-2 ${isSelected ? 'text-blue-500' : 'text-gray-400'}`}>
+                          Contains {item.products.length} products
+                        </p>
+                        <div className="space-y-1.5">
+                          {item.products.map((product) => (
+                            <div key={product.id} className={`flex items-center justify-between py-1 px-2 rounded ${isSelected ? 'bg-blue-100/50' : 'bg-gray-50'}`}>
+                              <span className={`text-xs ${isSelected ? 'text-blue-800' : 'text-gray-600'}`}>
+                                {product.name}
+                              </span>
+                              <span className={`text-xs font-medium ${isSelected ? 'text-blue-600' : 'text-gray-500'}`}>
+                                {product.price}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </button>);
 
             })}
