@@ -203,19 +203,28 @@ export function PlanForm({ initialData, userRole, onChange, onSubmit, onCancel }
     };
 
     const handleProductSheetConfirm = () => {
-        const selectedProducts = AVAILABLE_PRODUCTS.filter(p => tempProductIds.includes(p.id))
-            .map(p => {
-                const existing = products.find(ep => ep.id === p.id);
-                return existing || {
-                    id: p.id,
-                    name: p.name,
-                    type: p.type,
-                    price: p.price,
-                    instruction: '',
-                    timeOfDay: []
-                };
+        // Get all products from selected packages
+        const selectedPackages = AVAILABLE_PACKAGES.filter(pkg => tempProductIds.includes(pkg.id));
+        const allProducts: Product[] = [];
+        
+        selectedPackages.forEach(pkg => {
+            pkg.products.forEach(prod => {
+                // Check if product already exists
+                const existing = products.find(ep => ep.id === prod.id);
+                if (!allProducts.find(p => p.id === prod.id)) {
+                    allProducts.push(existing || {
+                        id: prod.id,
+                        name: prod.name,
+                        type: pkg.type,
+                        price: prod.price,
+                        instruction: '',
+                        timeOfDay: []
+                    });
+                }
             });
-        setProducts(selectedProducts);
+        });
+        
+        setProducts(allProducts);
         setIsProductSheetOpen(false);
     };
 
