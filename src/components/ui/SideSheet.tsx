@@ -5,6 +5,7 @@ export interface SideSheetItem {
   id: string;
   name: string;
   description?: string;
+  price?: string;
   category?: string;
   icon?: React.ReactNode;
 }
