@@ -8,6 +8,7 @@ export interface SideSheetItem {
   price?: string;
   category?: string;
   icon?: React.ReactNode;
+  products?: { id: string; name: string; price: string }[];
 }
 interface SideSheetProps {
   isOpen: boolean;
