@@ -59,6 +59,9 @@ const AVAILABLE_PRODUCTS = [
     { id: 'p3', name: 'Vitamin D3', type: 'Supplement', price: '15.00 €' },
     { id: 'p4', name: 'Omega-3 Fish Oil', type: 'Supplement', price: '22.00 €' },
     { id: 'p5', name: 'Metformin', type: 'Diabetes', price: '10.00 €' },
+    { id: 'p6', name: 'Lisinopril 10mg', type: 'Blood Pressure', price: '14.00 €' },
+    { id: 'p7', name: 'Atorvastatin 20mg', type: 'Cholesterol', price: '18.50 €' },
+    { id: 'p8', name: 'Probiotic Complex', type: 'Supplement', price: '25.00 €' },
 ];
 
 const productItems: SideSheetItem[] = AVAILABLE_PRODUCTS.map(p => ({
