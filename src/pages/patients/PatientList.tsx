@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import {
-  Folder,
   Search,
   Building2,
-  MoreHorizontal,
   ChevronRight,
   User as UserIcon,
   Phone,
