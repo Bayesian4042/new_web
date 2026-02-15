@@ -193,6 +193,147 @@ export function PatientList({ onNavigateToConversations, userRole, initialPatien
     setSelectedRows(e.target.checked ? patients.map((p) => p.id) : []);
   };
 
+  const openEditAppointment = (appointment: Appointment) => {
+    setEditingAppointment(appointment);
+    setAppointmentForm({
+      date: appointment.date,
+      time: appointment.time,
+      type: appointment.type,
+      doctor: appointment.doctor,
+      location: appointment.location
+    });
+    setShowAppointmentModal(true);
+  };
+
+  const openNewAppointment = () => {
+    setEditingAppointment(null);
+    setAppointmentForm({
+      date: '',
+      time: '',
+      type: '',
+      doctor: '',
+      location: ''
+    });
+    setShowAppointmentModal(true);
+  };
+
+  const handleSaveAppointment = () => {
+    // In real app, this would save to backend
+    console.log('Saving appointment:', appointmentForm, editingAppointment);
+    setShowAppointmentModal(false);
+    setEditingAppointment(null);
+  };
+
+  const handleCancelAppointment = (appointmentId: string) => {
+    // In real app, this would update backend
+    console.log('Cancelling appointment:', appointmentId);
+  };
+
+  const renderAppointmentModal = () => {
+    if (!showAppointmentModal) return null;
+    
+    return (
+      <>
+        <div className="fixed inset-0 bg-black/20 z-40" onClick={() => setShowAppointmentModal(false)} />
+        <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-xl z-50 flex flex-col animate-in slide-in-from-right duration-300">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                {editingAppointment ? 'Edit Appointment' : 'New Appointment'}
+              </h2>
+              <p className="text-sm text-gray-500">
+                {editingAppointment ? 'Update appointment details' : 'Schedule a new appointment'}
+              </p>
+            </div>
+            <button
+              onClick={() => setShowAppointmentModal(false)}
+              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md">
+              <X size={20} />
+            </button>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <input
+                type="text"
+                value={appointmentForm.date}
+                onChange={(e) => setAppointmentForm({...appointmentForm, date: e.target.value})}
+                placeholder="Feb 20, 2026"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+              <input
+                type="text"
+                value={appointmentForm.time}
+                onChange={(e) => setAppointmentForm({...appointmentForm, time: e.target.value})}
+                placeholder="11:00 AM"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <input
+                type="text"
+                value={appointmentForm.type}
+                onChange={(e) => setAppointmentForm({...appointmentForm, type: e.target.value})}
+                placeholder="Follow-up, Checkup, etc."
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Doctor</label>
+              <input
+                type="text"
+                value={appointmentForm.doctor}
+                onChange={(e) => setAppointmentForm({...appointmentForm, doctor: e.target.value})}
+                placeholder="Dr. Smith"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+              <input
+                type="text"
+                value={appointmentForm.location}
+                onChange={(e) => setAppointmentForm({...appointmentForm, location: e.target.value})}
+                placeholder="Room 204"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+            </div>
+          </div>
+          
+          <div className="p-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+            {editingAppointment && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  handleCancelAppointment(editingAppointment.id);
+                  setShowAppointmentModal(false);
+                }}
+                className="text-red-600 border-red-200 hover:bg-red-50">
+                <Trash2 size={14} className="mr-1" />
+                Cancel Appointment
+              </Button>
+            )}
+            <div className={`flex items-center gap-2 ${!editingAppointment ? 'ml-auto' : ''}`}>
+              <Button variant="outline" size="sm" onClick={() => setShowAppointmentModal(false)}>
+                Close
+              </Button>
+              <Button size="sm" onClick={handleSaveAppointment}>
+                <Check size={14} className="mr-1" />
+                {editingAppointment ? 'Update' : 'Schedule'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  };
+
   const renderPatientDetail = (patient: Patient) => (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
