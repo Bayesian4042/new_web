@@ -651,147 +651,161 @@ export function PatientList({ onNavigateToConversations, userRole, initialPatien
   }
 
   return (
-    <div className="space-y-4">
-      {/* Filters and Search */}
-      <div className="flex items-center gap-4 py-2 border-b border-gray-100">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-          <input
-            type="text"
-            placeholder="Search patients..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-          />
+    <div className="space-y-0">
+      {/* Toolbar */}
+      <div className="flex items-center justify-between py-3 border-b border-gray-100">
+        <div className="flex items-center gap-2">
+          <div className="relative max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+            <input
+              type="text"
+              placeholder="Search patients..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
+            />
+          </div>
+
+          {userRole === 'admin' && (
+            <select
+              value={selectedClinic}
+              onChange={(e) => setSelectedClinic(e.target.value)}
+              className="text-sm border border-gray-200 rounded-md px-2.5 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-gray-400"
+            >
+              <option value="all">All Clinics</option>
+              {clinics.map(clinic => (
+                <option key={clinic} value={clinic as string}>{clinic as string}</option>
+              ))}
+            </select>
+          )}
+
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            className="text-sm border border-gray-200 rounded-md px-2.5 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-gray-400"
+          >
+            <option value="all">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Warning">Warning</option>
+            <option value="Inactive">Inactive</option>
+          </select>
         </div>
 
-        {userRole === 'admin' && (
-          <select
-            value={selectedClinic}
-            onChange={(e) => setSelectedClinic(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-          >
-            <option value="all">All Clinics</option>
-            {clinics.map(clinic => (
-              <option key={clinic} value={clinic as string}>{clinic as string}</option>
-            ))}
-          </select>
-        )}
-
-        <select
-          value={selectedStatus}
-          onChange={(e) => setSelectedStatus(e.target.value)}
-          className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-        >
-          <option value="all">All Status</option>
-          <option value="Active">Active</option>
-          <option value="Warning">Warning</option>
-          <option value="Inactive">Inactive</option>
-        </select>
+        <Button size="sm" className="gap-1.5">
+          <Plus size={16} />
+          Add Patient
+        </Button>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-gray-50 text-gray-700 font-medium border-b border-gray-200">
-              <tr>
-                <th className="p-4 w-4">
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-gray-200">
+              <th className="w-10 py-3 px-3">
+                <input
+                  type="checkbox"
+                  checked={filteredPatients.length > 0 && selectedRows.length === filteredPatients.length}
+                  onChange={toggleAll}
+                  className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
+                />
+              </th>
+              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">ID</th>
+              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Patient</th>
+              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Status</th>
+              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Clinic</th>
+              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Last Active</th>
+              <th className="py-3 px-3 text-right text-sm font-medium text-gray-500">Action</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {filteredPatients.map((patient) => (
+              <tr
+                key={patient.id}
+                onClick={() => setSelectedPatient(patient)}
+                className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors group cursor-pointer"
+              >
+                <td className="py-3 px-3">
                   <input
                     type="checkbox"
-                    checked={filteredPatients.length > 0 && selectedRows.length === filteredPatients.length}
-                    onChange={toggleAll}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    checked={selectedRows.includes(patient.id)}
+                    onChange={(e) => toggleRow(patient.id, e as any)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
                   />
-                </th>
-                <th className="p-4">ID</th>
-                <th className="p-4">Patient</th>
-                <th className="p-4">Condition</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Clinic</th>
-                <th className="p-4 text-center">Last Active</th>
-                <th className="p-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filteredPatients.map((patient) => (
-                <tr
-                  key={patient.id}
-                  onClick={() => setSelectedPatient(patient)}
-                  className="hover:bg-gray-50 cursor-pointer transition-colors"
-                >
-                  <td className="p-4">
-                    <input
-                      type="checkbox"
-                      checked={selectedRows.includes(patient.id)}
-                      onClick={(e) => toggleRow(patient.id, e)}
-                      onChange={() => { }}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                  </td>
-                  <td className="p-4 whitespace-nowrap">
-                    <span className="text-blue-600 font-bold hover:underline cursor-pointer">{patient.id}</span>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 overflow-hidden">
-                        <UserIcon size={16} />
-                      </div>
-                      <div className="font-bold text-gray-900">{patient.name}</div>
+                </td>
+                <td className="py-3 px-3">
+                  <span className="text-sm font-medium text-blue-600">{patient.id}</span>
+                </td>
+                <td className="py-3 px-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center">
+                      <UserIcon size={14} className="text-gray-500" />
                     </div>
-                  </td>
-                  <td className="p-4 text-gray-600 font-medium">{patient.condition}</td>
-                  <td className="p-4">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${patient.status === 'Active' ? 'bg-green-50 text-green-700' :
-                      patient.status === 'Warning' ? 'bg-orange-50 text-orange-700' :
-                        'bg-gray-100 text-gray-600'
-                      }`}>
-                      {patient.status}
-                    </span>
-                  </td>
-                  <td className="p-4 text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <div className="h-4 w-4 rounded-full bg-gray-50 flex items-center justify-center">
-                        <Folder size={12} className="text-gray-400" />
-                      </div>
-                      <span className="text-xs font-bold text-gray-500">{patient.clinicName || 'Unassigned'}</span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-center">
-                    <div className="text-gray-900 font-bold text-sm leading-none">{patient.lastActive}</div>
-                    {patient.recentConversations && patient.recentConversations.length > 0 && (
-                      <div className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter mt-1">
-                        Conversations: {patient.recentConversations.length}
-                      </div>
-                    )}
-                  </td>
-                  <td className="p-4 text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-400 hover:text-gray-600"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Action
-                      }}
+                    <span className="text-sm text-gray-900">{patient.name}</span>
+                  </div>
+                </td>
+                <td className="py-3 px-3">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                    patient.status === 'Active' ? 'bg-green-50 text-green-700' : 
+                    patient.status === 'Warning' ? 'bg-orange-50 text-orange-700' : 
+                    'bg-gray-100 text-gray-600'
+                  }`}>
+                    {patient.status}
+                  </span>
+                </td>
+                <td className="py-3 px-3">
+                  <span className="text-sm text-gray-600">{patient.clinicName || 'Unassigned'}</span>
+                </td>
+                <td className="py-3 px-3">
+                  <span className="text-sm text-gray-600">{patient.lastActive}</span>
+                </td>
+                <td className="py-3 px-3">
+                  <div className="flex items-center justify-end gap-1">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setSelectedPatient(patient); }}
+                      className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="View Details"
                     >
-                      <MoreHorizontal size={16} />
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      <ChevronRight size={16} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); /* Edit action */ }}
+                      className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                      title="Edit"
+                    >
+                      <Edit size={16} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onNavigateToConversations?.(); }}
+                      className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                      title="Conversations"
+                    >
+                      <MessageSquare size={16} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); /* Delete action */ }}
+                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-          {filteredPatients.length === 0 && (
-            <div className="py-12 text-center">
-              <div className="h-12 w-12 bg-gray-50 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <Search size={20} className="text-gray-400" />
-              </div>
-              <p className="text-sm font-medium text-gray-900">No patients found</p>
-              <p className="text-xs text-gray-500 mt-1">Try adjusting your filters</p>
+        {filteredPatients.length === 0 && (
+          <div className="py-12 text-center">
+            <div className="h-12 w-12 bg-gray-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <Search size={20} className="text-gray-400" />
             </div>
-          )}
-        </div>
+            <p className="text-sm font-medium text-gray-900">No patients found</p>
+            <p className="text-xs text-gray-500 mt-1">Try adjusting your filters</p>
+          </div>
+        )}
       </div>
     </div>
   );
