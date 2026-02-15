@@ -154,6 +154,17 @@ export function PatientList({ onNavigateToConversations, userRole, initialPatien
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedClinic, setSelectedClinic] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  
+  // Appointment modal state
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+  const [appointmentForm, setAppointmentForm] = useState({
+    date: '',
+    time: '',
+    type: '',
+    doctor: '',
+    location: ''
+  });
 
   // get unique clinics
   const clinics = Array.from(new Set(patients.map(p => p.clinicName).filter(Boolean)));
