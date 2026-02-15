@@ -13,9 +13,24 @@ import {
   Calendar,
   Edit,
   AlertCircle,
-  Plus
+  Plus,
+  X,
+  Clock,
+  MapPin,
+  Trash2,
+  Check
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
+
+interface Appointment {
+  id: string;
+  date: string;
+  time: string;
+  type: string;
+  doctor: string;
+  location: string;
+  status: 'upcoming' | 'completed' | 'cancelled';
+}
 
 export interface Patient {
   id: string;
@@ -28,6 +43,7 @@ export interface Patient {
   clinicName?: string;
   protocol?: { id: string; name: string };
   companion?: { id: string; name: string };
+  appointments?: Appointment[];
   recentConversations?: {
     id: string;
     date: string;
