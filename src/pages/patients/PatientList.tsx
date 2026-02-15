@@ -64,6 +64,11 @@ const patients: Patient[] = [
     clinicName: 'Main Clinic',
     protocol: { id: 'PRT-01', name: 'Standard Diabetes Care' },
     companion: { id: 'CMP-01', name: 'Sarah\'s Daily Assistant' },
+    appointments: [
+      { id: 'APT-001', date: 'Feb 20, 2026', time: '11:00 AM', type: 'Follow-up', doctor: 'Dr. Smith', location: 'Room 204', status: 'upcoming' },
+      { id: 'APT-002', date: 'Mar 05, 2026', time: '2:30 PM', type: 'Blood Test', doctor: 'Dr. Johnson', location: 'Lab 1', status: 'upcoming' },
+      { id: 'APT-003', date: 'Jan 15, 2026', time: '10:00 AM', type: 'Checkup', doctor: 'Dr. Smith', location: 'Room 204', status: 'completed' },
+    ],
     recentConversations: [
       { id: '2', date: 'Today, 10:30 AM', lastMessage: 'Blood sugar level checked.', sentiment: 'happy' },
       { id: '2', date: 'Yesterday, 4:15 PM', lastMessage: 'Meal plan updated.', sentiment: 'neutral' }
@@ -79,6 +84,9 @@ const patients: Patient[] = [
     phone: '+1 (555) 987-6543',
     clinicName: 'North Wing',
     protocol: { id: 'PRT-02', name: 'Hypertension Protocol V2' },
+    appointments: [
+      { id: 'APT-004', date: 'Feb 18, 2026', time: '9:00 AM', type: 'BP Monitoring', doctor: 'Dr. Lee', location: 'Room 105', status: 'upcoming' },
+    ],
     recentConversations: [
       { id: '1', date: '1d ago', lastMessage: 'High blood pressure alert.', sentiment: 'anxious' }
     ]
@@ -92,6 +100,9 @@ const patients: Patient[] = [
     createdOn: '31-01-2026 14:30:00',
     phone: '+1 (555) 456-7890',
     companion: { id: 'CMP-02', name: 'Anxiety Support AI' },
+    appointments: [
+      { id: 'APT-005', date: 'Feb 22, 2026', time: '3:00 PM', type: 'Therapy Session', doctor: 'Dr. Parker', location: 'Room 302', status: 'upcoming' },
+    ],
     recentConversations: [
       { id: 'CONV-04', date: '5m ago', lastMessage: 'Beginning guided breathing.', sentiment: 'sad' }
     ]
@@ -104,6 +115,7 @@ const patients: Patient[] = [
     lastActive: '3d ago',
     createdOn: '28-01-2026 11:45:10',
     phone: '+1 (555) 234-5678',
+    appointments: [],
     recentConversations: []
   },
   {
@@ -115,6 +127,10 @@ const patients: Patient[] = [
     createdOn: '25-01-2026 16:20:55',
     phone: '+1 (555) 345-6789',
     protocol: { id: 'PRT-03', name: 'Joint Mobility Plan' },
+    appointments: [
+      { id: 'APT-006', date: 'Feb 25, 2026', time: '10:30 AM', type: 'Physical Therapy', doctor: 'Dr. Adams', location: 'Therapy Room', status: 'upcoming' },
+      { id: 'APT-007', date: 'Jan 20, 2026', time: '11:00 AM', type: 'X-Ray', doctor: 'Dr. Adams', location: 'Radiology', status: 'completed' },
+    ],
     recentConversations: [
       { id: 'CONV-05', date: '4h ago', lastMessage: 'Daily steps goal achieved.', sentiment: 'happy' }
     ]
