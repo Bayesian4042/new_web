@@ -334,8 +334,13 @@ export function PatientList({ onNavigateToConversations, userRole, initialPatien
     );
   };
 
-  const renderPatientDetail = (patient: Patient) => (
-    <div className="space-y-8 animate-in fade-in duration-500">
+  const renderPatientDetail = (patient: Patient) => {
+    const upcomingAppointments = patient.appointments?.filter(a => a.status === 'upcoming') || [];
+    const pastAppointments = patient.appointments?.filter(a => a.status !== 'upcoming') || [];
+    const nextAppointment = upcomingAppointments[0];
+    
+    return (
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
@@ -359,42 +364,33 @@ export function PatientList({ onNavigateToConversations, userRole, initialPatien
           >
             Back
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold px-8 flex items-center gap-2">
+          <Button className="rounded-xl font-bold px-8 flex items-center gap-2">
             <Edit size={16} />
             Edit
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Contact Info */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-6">
-          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Contact Information</h3>
-          <div className="space-y-5">
-            <div className="flex items-center gap-4 text-gray-600">
-              <div className="h-10 w-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400">
-                <Phone size={18} />
+        <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm space-y-4">
+          <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest">Contact Information</h3>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 text-gray-600">
+              <div className="h-9 w-9 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400">
+                <Phone size={16} />
               </div>
               <div>
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Phone</p>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Phone</p>
                 <p className="text-sm font-bold text-gray-900">{patient.phone || 'No phone'}</p>
               </div>
             </div>
-            <div className="flex items-center gap-4 text-gray-600">
-              <div className="h-10 w-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400">
-                <Calendar size={18} />
+            <div className="flex items-center gap-3 text-gray-600">
+              <div className="h-9 w-9 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400">
+                <Building2 size={16} />
               </div>
               <div>
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Next Appointment</p>
-                <p className="text-sm font-bold text-gray-900">Feb 20, 2026 11:00 AM</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 text-gray-600">
-              <div className="h-10 w-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400">
-                <Building2 size={18} />
-              </div>
-              <div>
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Clinic</p>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Clinic</p>
                 <p className="text-sm font-bold text-gray-900">{patient.clinicName || 'Unassigned'}</p>
               </div>
             </div>
@@ -402,33 +398,31 @@ export function PatientList({ onNavigateToConversations, userRole, initialPatien
         </div>
 
         {/* Active Care */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-4">
+        <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Active Care</h3>
+            <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest">Active Care</h3>
             <button className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
               <Plus size={12} />
               Add
             </button>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {patient.protocol ? (
-              <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/50">
-                    <Zap size={18} />
+              <div className="flex items-center justify-between p-3 bg-gray-50/50 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/50">
+                    <Zap size={14} />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-900">{patient.protocol.name}</p>
-                    <p className="text-[10px] font-bold text-gray-500 uppercase">Protocol</p>
+                    <p className="text-xs font-bold text-gray-900">{patient.protocol.name}</p>
+                    <p className="text-[9px] font-bold text-gray-500 uppercase">Protocol</p>
                   </div>
                 </div>
-                <ChevronRight size={16} className="text-gray-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight size={14} className="text-gray-300 group-hover:text-blue-500 transition-all" />
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-4 border border-dashed border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50/30 transition-colors group cursor-pointer">
-                <Zap size={20} className="text-gray-300 mb-2 group-hover:text-blue-500 transition-colors" />
-                <p className="text-xs text-gray-400 mb-2">No protocol assigned</p>
-                <button className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
+              <div className="flex items-center justify-center py-3 border border-dashed border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50/30 transition-colors cursor-pointer">
+                <button className="text-xs font-bold text-blue-600 flex items-center gap-1">
                   <Plus size={12} />
                   Assign Protocol
                 </button>
@@ -436,23 +430,21 @@ export function PatientList({ onNavigateToConversations, userRole, initialPatien
             )}
 
             {patient.companion ? (
-              <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100/50">
-                    <UserIcon size={18} />
+              <div className="flex items-center justify-between p-3 bg-gray-50/50 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100/50">
+                    <UserIcon size={14} />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-900">{patient.companion.name}</p>
-                    <p className="text-[10px] font-bold text-gray-500 uppercase">Companion</p>
+                    <p className="text-xs font-bold text-gray-900">{patient.companion.name}</p>
+                    <p className="text-[9px] font-bold text-gray-500 uppercase">Companion</p>
                   </div>
                 </div>
-                <ChevronRight size={16} className="text-gray-300 group-hover:text-purple-500 group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight size={14} className="text-gray-300 group-hover:text-purple-500 transition-all" />
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-4 border border-dashed border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50/30 transition-colors group cursor-pointer">
-                <UserIcon size={20} className="text-gray-300 mb-2 group-hover:text-purple-500 transition-colors" />
-                <p className="text-xs text-gray-400 mb-2">No companion assigned</p>
-                <button className="text-xs font-bold text-purple-600 hover:text-purple-700 flex items-center gap-1">
+              <div className="flex items-center justify-center py-3 border border-dashed border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50/30 transition-colors cursor-pointer">
+                <button className="text-xs font-bold text-purple-600 flex items-center gap-1">
                   <Plus size={12} />
                   Assign Companion
                 </button>
@@ -460,64 +452,199 @@ export function PatientList({ onNavigateToConversations, userRole, initialPatien
             )}
           </div>
         </div>
+
+        {/* Next Appointment Quick View */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest">Next Appointment</h3>
+            <button 
+              onClick={openNewAppointment}
+              className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
+              <Plus size={12} />
+              New
+            </button>
+          </div>
+          {nextAppointment ? (
+            <div 
+              onClick={() => openEditAppointment(nextAppointment)}
+              className="p-3 bg-blue-50/50 rounded-xl border border-blue-100 hover:bg-blue-50 transition-colors cursor-pointer group">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-blue-700">{nextAppointment.type}</span>
+                <span className="text-[9px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full uppercase">
+                  {nextAppointment.status}
+                </span>
+              </div>
+              <p className="text-sm font-bold text-gray-900">{nextAppointment.date}</p>
+              <p className="text-xs text-gray-600">{nextAppointment.time} • {nextAppointment.doctor}</p>
+              <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                <MapPin size={10} /> {nextAppointment.location}
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-6 border border-dashed border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50/30 transition-colors cursor-pointer"
+                 onClick={openNewAppointment}>
+              <Calendar size={20} className="text-gray-300 mb-2" />
+              <p className="text-xs text-gray-400">No upcoming appointments</p>
+              <button className="text-xs font-bold text-blue-600 mt-1">Schedule Now</button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Appointments Section */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Calendar className="text-gray-400" size={18} />
+            <h3 className="text-base font-bold text-gray-900">Appointments</h3>
+            <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold">
+              {upcomingAppointments.length} upcoming
+            </span>
+          </div>
+          <Button size="sm" onClick={openNewAppointment} className="h-8">
+            <Plus size={14} className="mr-1" />
+            Schedule
+          </Button>
+        </div>
+        <div className="p-4">
+          {upcomingAppointments.length > 0 ? (
+            <div className="space-y-2">
+              {upcomingAppointments.map((apt) => (
+                <div
+                  key={apt.id}
+                  onClick={() => openEditAppointment(apt)}
+                  className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl cursor-pointer hover:bg-white hover:border-blue-100 hover:shadow-sm transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                      <Calendar size={18} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-bold text-gray-900">{apt.type}</p>
+                        <span className="text-[9px] font-bold text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded uppercase">
+                          {apt.status}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-xs text-gray-600 flex items-center gap-1">
+                          <Clock size={10} /> {apt.date} at {apt.time}
+                        </span>
+                        <span className="text-gray-300">•</span>
+                        <span className="text-xs text-gray-500">{apt.doctor}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400 flex items-center gap-1">
+                      <MapPin size={10} /> {apt.location}
+                    </span>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); openEditAppointment(apt); }}
+                      className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all">
+                      <Edit size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Calendar size={28} className="mx-auto text-gray-200 mb-2" />
+              <p className="text-sm text-gray-400">No upcoming appointments</p>
+              <button 
+                onClick={openNewAppointment}
+                className="text-xs font-bold text-blue-600 mt-2">
+                Schedule an appointment
+              </button>
+            </div>
+          )}
+
+          {pastAppointments.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Past Appointments</p>
+              <div className="space-y-2">
+                {pastAppointments.slice(0, 3).map((apt) => (
+                  <div
+                    key={apt.id}
+                    className="flex items-center justify-between p-2 bg-gray-50/30 border border-gray-50 rounded-lg"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="h-7 w-7 rounded-lg bg-gray-100 text-gray-400 flex items-center justify-center">
+                        <Calendar size={12} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-gray-600">{apt.type}</p>
+                        <p className="text-[10px] text-gray-400">{apt.date}</p>
+                      </div>
+                    </div>
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase ${
+                      apt.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+                    }`}>
+                      {apt.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Recent Conversations Card */}
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-50 flex items-center justify-between">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <MessageSquare className="text-gray-400" size={20} />
-            <h3 className="text-lg font-bold text-gray-900">Recent Conversations</h3>
+            <MessageSquare className="text-gray-400" size={18} />
+            <h3 className="text-base font-bold text-gray-900">Recent Conversations</h3>
             <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold">
               {patient.recentConversations?.length || 0}
             </span>
           </div>
         </div>
-        <div className="p-6 space-y-4">
+        <div className="p-4 space-y-2">
           {patient.recentConversations && patient.recentConversations.length > 0 ? (
             patient.recentConversations.map((conv, idx) => (
               <div
                 key={idx}
                 onClick={() => onNavigateToConversations?.(conv.id)}
-                className="group flex items-center justify-between p-4 bg-gray-50/30 border border-gray-100 rounded-2xl cursor-pointer hover:bg-white hover:border-blue-100 hover:shadow-md transition-all duration-300"
+                className="group flex items-center justify-between p-3 bg-gray-50/30 border border-gray-100 rounded-xl cursor-pointer hover:bg-white hover:border-blue-100 hover:shadow-sm transition-all"
               >
-                <div className="flex items-center gap-4">
-                  <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${conv.sentiment === 'anxious' ? 'bg-orange-50 text-orange-600 border border-orange-100' :
+                <div className="flex items-center gap-3">
+                  <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${conv.sentiment === 'anxious' ? 'bg-orange-50 text-orange-600 border border-orange-100' :
                     conv.sentiment === 'happy' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
                       'bg-blue-50 text-blue-600 border border-blue-100'
                     }`}>
-                    {conv.sentiment === 'anxious' ? <AlertCircle size={20} /> : <MessageSquare size={20} />}
+                    {conv.sentiment === 'anxious' ? <AlertCircle size={16} /> : <MessageSquare size={16} />}
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-900">{conv.lastMessage}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{patient.name}</span>
-                      <span className="text-gray-300 text-xs">•</span>
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{conv.date}</span>
-                    </div>
+                    <p className="text-sm font-medium text-gray-900">{conv.lastMessage}</p>
+                    <span className="text-[10px] text-gray-400">{conv.date}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${conv.sentiment === 'happy' ? 'bg-emerald-50 text-emerald-700' :
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${conv.sentiment === 'happy' ? 'bg-emerald-50 text-emerald-700' :
                     conv.sentiment === 'anxious' ? 'bg-orange-50 text-orange-700' :
                       'bg-blue-50 text-blue-700'
                     }`}>
-                    {conv.sentiment.toUpperCase()}
+                    {conv.sentiment}
                   </span>
-                  <ChevronRight size={18} className="text-gray-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                  <ChevronRight size={14} className="text-gray-300 group-hover:text-blue-500 transition-all" />
                 </div>
               </div>
             ))
           ) : (
-            <div className="text-center py-10">
-              <MessageSquare size={32} className="mx-auto text-gray-200 mb-3" />
-              <p className="text-sm text-gray-400 font-medium">No recent conversations</p>
+            <div className="text-center py-8">
+              <MessageSquare size={28} className="mx-auto text-gray-200 mb-2" />
+              <p className="text-sm text-gray-400">No recent conversations</p>
             </div>
           )}
         </div>
       </div>
+      
+      {renderAppointmentModal()}
     </div>
-  );
+  )};
 
   if (selectedPatient) {
     return renderPatientDetail(selectedPatient);
