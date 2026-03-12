@@ -21,7 +21,7 @@ export function Header({
   setUserRole,
 }: HeaderProps) {
   return (
-    <header className="h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-6 sticky top-0 z-20 shadow-sm transition-all duration-200">
+    <header className="h-16 bg-white flex items-center justify-between px-6 sticky top-0 z-20 transition-all duration-200">
       {/* Left: Breadcrumb */}
       <div className="flex items-center gap-3 text-sm">
         <div className="bg-blue-50 p-1.5 rounded-lg">

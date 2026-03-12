@@ -21,8 +21,8 @@
     --secondary-foreground: 0 0% 100%;
     
     /* Theme/Accent Colors */
-    --accent: 217 91% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: oklch(0.9491 0 0);
+    --accent-foreground: oklch(0 0 0);
 
     /* Card & Form Background - Greyish */
     --card: 210 20% 98%;

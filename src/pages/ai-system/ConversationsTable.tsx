@@ -264,14 +264,14 @@ export function ConversationsTable({ userRole = 'clinic', onViewConversation }: 
       </div>
 
       {/* Table Card */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm mt-4">
         {/* Toolbar */}
-        <div className="flex items-center justify-between py-3 px-4 border-b border-gray-100">
+        <div className="flex items-center justify-between py-3 px-4 border-b border-gray-100 bg-gray-50/10">
           <div className="flex items-center gap-2">
             {userRole === 'admin' && (
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${
+                className={`flex items-center gap-2 px-3 py-1.5 text-sm font-bold rounded-lg transition-all ${
                   showFilters
                     ? 'bg-blue-50 text-blue-700 border border-blue-200'
                     : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
@@ -288,30 +288,30 @@ export function ConversationsTable({ userRole = 'clinic', onViewConversation }: 
                 placeholder="Search conversations..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-4 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-64 transition-all"
+                className="w-64 pl-9 pr-3 py-1.5 text-sm bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 rounded-lg transition-all"
               />
             </div>
           </div>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 font-medium">
             Showing <span className="font-bold text-gray-900">{filteredConversations.length}</span> of <span className="font-bold text-gray-900">{mockConversations.length}</span> conversations
           </div>
         </div>
 
         {/* Filters Panel */}
         {showFilters && userRole === 'admin' && (
-          <div className="bg-gray-50 border-b border-gray-100 p-4 space-y-4 animate-in slide-in-from-top-2 duration-200">
+          <div className="bg-gray-50 border-b border-gray-100 p-4 space-y-4 animate-in slide-in-from-top-2 duration-200 shadow-inner">
             <div className="grid grid-cols-2 gap-4">
               {/* Clinic Filter */}
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                  Filter by Clinic
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">
+                  Clinic
                 </label>
                 <div className="relative">
                   <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <select
                     value={selectedClinic}
                     onChange={(e) => setSelectedClinic(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    className="w-full pl-10 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                   >
                     <option value="all">All Clinics</option>
                     {clinics.map((clinic, idx) => (
@@ -325,36 +325,20 @@ export function ConversationsTable({ userRole = 'clinic', onViewConversation }: 
 
               {/* Status Filter */}
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                  Filter by Status
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">
+                  Status
                 </label>
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                 >
                   <option value="all">All Statuses</option>
-                  <option value="needs attention">🔴 Needs Attention</option>
-                  <option value="active">🔵 Active</option>
-                  <option value="resolved">🟢 Resolved</option>
+                  <option value="needs attention">Needs Attention</option>
+                  <option value="active">Active</option>
+                  <option value="resolved">Resolved</option>
                 </select>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-2 border-t border-gray-200">
-              <p className="text-xs text-gray-500">
-                Showing <span className="font-bold text-gray-900">{filteredConversations.length}</span> of{' '}
-                <span className="font-bold text-gray-900">{mockConversations.length}</span> conversations
-              </p>
-              <button
-                onClick={() => {
-                  setSelectedClinic('all');
-                  setSelectedStatus('all');
-                }}
-                className="text-xs font-medium text-blue-600 hover:text-blue-700"
-              >
-                Clear All Filters
-              </button>
             </div>
           </div>
         )}
@@ -363,46 +347,44 @@ export function ConversationsTable({ userRole = 'clinic', onViewConversation }: 
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-50/50 border-b border-gray-100">
+              <tr className="bg-gray-50/30 border-b border-gray-200">
                 <th className="py-3 px-4 text-left w-12">
                   <input
                     type="checkbox"
                     checked={selectedRows.length === mockConversations.length}
                     onChange={(e) => toggleAll(e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
                   />
                 </th>
                 <th className="py-3 px-3 text-left">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Patient</span>
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Patient</span>
                 </th>
                 {userRole === 'admin' && (
                   <th className="py-3 px-3 text-left">
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Clinic</span>
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Clinic</span>
                   </th>
                 )}
                 <th className="py-3 px-3 text-left">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Last Message</span>
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Last Message</span>
                 </th>
                 <th className="py-3 px-3 text-left">
                   <button
                     onClick={handleActivitySort}
-                    className="flex items-center gap-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition-colors"
+                    className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest hover:text-gray-900 transition-colors"
                   >
                     Last Activity
-                    {activitySort === 'none' && <ArrowUpDown size={12} className="text-gray-300" />}
-                    {activitySort === 'desc' && <ArrowDown size={12} className="text-blue-600" />}
-                    {activitySort === 'asc' && <ArrowUp size={12} className="text-blue-600" />}
+                    {activitySort === 'none' && <ArrowUpDown size={10} className="text-gray-400" />}
+                    {activitySort === 'desc' && <ArrowDown size={10} className="text-blue-600" />}
+                    {activitySort === 'asc' && <ArrowUp size={10} className="text-blue-600" />}
                   </button>
                 </th>
                 <th className="py-3 px-3 text-left">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Status</span>
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Status</span>
                 </th>
                 <th className="py-3 px-3 text-left">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Sentiment</span>
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Sentiment</span>
                 </th>
-                <th className="py-3 px-3 text-right">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</span>
-                </th>
+                <th className="py-3 px-3 text-right"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -410,28 +392,28 @@ export function ConversationsTable({ userRole = 'clinic', onViewConversation }: 
                 <tr
                   key={conv.id}
                   onClick={() => onViewConversation(conv)}
-                  className="hover:bg-blue-50/30 transition-colors group cursor-pointer"
+                  className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group cursor-pointer"
                 >
                   <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
                       checked={selectedRows.includes(conv.id)}
                       onChange={() => toggleRow(conv.id)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
                     />
                   </td>
                   <td className="py-3 px-3">
                     <div className="flex items-center gap-3">
-                      <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                        conv.status === 'Needs Attention' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
+                      <div className={`h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0 border shadow-sm transition-transform group-hover:scale-105 ${
+                        conv.status === 'Needs Attention' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-indigo-50 text-indigo-600 border-indigo-100'
                       }`}>
-                        <MessageSquare size={20} />
+                        <MessageSquare size={18} />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-bold text-gray-900">{conv.patientName}</p>
                         </div>
-                        <p className="text-xs text-gray-500">{conv.patientEmail}</p>
+                        <p className="text-xs text-gray-500 font-medium">{conv.patientEmail}</p>
                       </div>
                     </div>
                   </td>
@@ -439,54 +421,54 @@ export function ConversationsTable({ userRole = 'clinic', onViewConversation }: 
                     <td className="py-3 px-3">
                       <div className="flex items-center gap-1.5">
                         <Building2 size={14} className="text-gray-400" />
-                        <span className="text-sm text-gray-600">{conv.clinicName}</span>
+                        <span className="text-sm font-bold text-gray-600">{conv.clinicName}</span>
                       </div>
                     </td>
                   )}
                   <td className="py-3 px-3">
                     <div className="max-w-xs">
-                      <p className="text-xs text-gray-500 mb-0.5">via {conv.assistantName}</p>
-                      <p className="text-sm text-gray-700 truncate">{conv.lastMessage}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{conv.messageCount} messages</p>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight mb-0.5">via {conv.assistantName}</p>
+                      <p className="text-sm text-gray-700 font-medium truncate">{conv.lastMessage}</p>
+                      <p className="text-[10px] font-bold text-blue-600/60 mt-0.5 uppercase tracking-widest">{conv.messageCount} messages</p>
                     </div>
                   </td>
                   <td className="py-3 px-3">
                     <div className="flex items-center gap-2">
                       <Clock size={14} className="text-gray-400" />
                       <div>
-                        <p className="text-xs font-medium text-gray-700">
+                        <p className="text-xs font-bold text-gray-700">
                           {new Date(conv.timestamp).toLocaleDateString()}
                         </p>
-                        <p className="text-[10px] text-gray-400">
+                        <p className="text-[10px] font-medium text-gray-400">
                           {new Date(conv.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
                     </div>
                   </td>
                   <td className="py-3 px-3">
-                    <Badge
-                      className={`text-xs font-bold ${
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                         conv.status === 'Needs Attention'
-                          ? 'bg-red-50 text-red-700 border border-red-100'
+                          ? 'bg-rose-50 text-rose-700'
                           : conv.status === 'active'
-                          ? 'bg-blue-50 text-blue-700 border border-blue-100'
-                          : 'bg-green-50 text-green-700 border border-green-100'
+                          ? 'bg-indigo-50 text-indigo-700'
+                          : 'bg-green-50 text-green-700'
                       }`}
                     >
-                      {conv.status === 'Needs Attention' ? 'Needs Attention' : conv.status === 'active' ? 'Active' : 'Resolved'}
-                    </Badge>
+                      {conv.status === 'Needs Attention' ? 'Attention' : conv.status === 'active' ? 'Active' : 'Resolved'}
+                    </span>
                   </td>
                   <td className="py-3 px-3">
-                    <Badge className={`text-xs font-bold flex items-center gap-1.5 w-fit border ${sentimentConfig[conv.sentiment].color}`}>
+                    <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${sentimentConfig[conv.sentiment].color}`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${sentimentConfig[conv.sentiment].dot}`} />
                       {sentimentConfig[conv.sentiment].label}
-                    </Badge>
+                    </div>
                   </td>
                   <td className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => onViewConversation(conv)}
-                        className="h-8 w-8 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors flex items-center justify-center"
+                        className="h-8 w-8 rounded-lg hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 transition-colors flex items-center justify-center"
                         title="View Conversation"
                       >
                         <Eye size={16} />
@@ -501,10 +483,12 @@ export function ConversationsTable({ userRole = 'clinic', onViewConversation }: 
 
         {/* Empty State */}
         {filteredConversations.length === 0 && (
-          <div className="py-12 text-center">
-            <MessageSquare className="mx-auto text-gray-300 mb-3" size={48} />
-            <p className="text-gray-500 font-medium">No conversations found</p>
-            <p className="text-sm text-gray-400 mt-1">Try adjusting your search</p>
+          <div className="py-16 text-center bg-white border-t border-gray-50">
+            <div className="h-12 w-12 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100 shadow-sm">
+                <MessageSquare className="text-gray-300" size={24} />
+            </div>
+            <p className="text-sm font-bold text-gray-900">No conversations found</p>
+            <p className="text-xs text-gray-500 mt-1 font-medium">Try adjusting your filters or search criteria</p>
           </div>
         )}
       </div>

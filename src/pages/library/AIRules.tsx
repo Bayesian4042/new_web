@@ -57,96 +57,98 @@ export function AIRules({ onAddRule, onEditRule, onCopyRule, onDeleteRule, rules
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-200">
-              <th className="w-10 py-3 px-3">
-                <input
-                  type="checkbox"
-                  checked={rules.length > 0 && selectedRows.length === rules.length}
-                  onChange={toggleAll}
-                  className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
-              </th>
-              <th className="py-3 px-3 text-left">
-                <button className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-700">
-                  ID <ArrowUpDown size={12} />
-                </button>
-              </th>
-              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Name</th>
-              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Tag</th>
-              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Status</th>
-              <th className="py-3 px-3 text-right text-sm font-medium text-gray-500">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rules.map((rule) => (
-              <tr
-                key={rule.id}
-                onClick={() => onEditRule(rule)}
-                className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors group cursor-pointer">
-                <td className="py-3 px-3">
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-200 bg-gray-50/30">
+                <th className="w-10 py-3 px-4">
                   <input
                     type="checkbox"
-                    checked={selectedRows.includes(rule.id)}
-                    onChange={() => toggleRow(rule.id)}
-                    onClick={(e) => e.stopPropagation()}
+                    checked={rules.length > 0 && selectedRows.length === rules.length}
+                    onChange={toggleAll}
                     className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
-                </td>
-                <td className="py-3 px-3">
-                  <span className="text-sm font-medium text-blue-600">{rule.id}</span>
-                </td>
-                <td className="py-3 px-3">
-                  <div className="flex items-center gap-2">
-                    <div className="h-6 w-6 rounded bg-gray-100 flex items-center justify-center">
-                      <BrainCircuit size={14} className="text-gray-500" />
-                    </div>
-                    <span className="text-sm text-gray-900">{rule.name}</span>
-                  </div>
-                </td>
-                <td className="py-3 px-3">
-                  <div className="flex items-center gap-1.5">
-                    {rule.tags?.slice(0, 2).map((tag, index) => (
-                      <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </td>
-                <td className="py-3 px-3">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${rule.status === 'Active' ? 'bg-green-50 text-green-700' : rule.status === 'Testing' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>
-                    {rule.status}
-                  </span>
-                </td>
-                <td className="py-3 px-3">
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); onCopyRule(rule); }}
-                      className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                      title="Copy"
-                    >
-                      <Copy size={16} />
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); onEditRule(rule); }}
-                      className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                      title="Edit"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); onDeleteRule(rule.id); }}
-                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Delete"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </td>
+                </th>
+                <th className="py-3 px-4 text-left">
+                  <button className="flex items-center gap-1 text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    ID <ArrowUpDown size={12} />
+                  </button>
+                </th>
+                <th className="py-3 px-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Name</th>
+                <th className="py-3 px-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Tag</th>
+                <th className="py-3 px-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+                <th className="py-3 px-4 text-right"></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rules.map((rule) => (
+                <tr
+                  key={rule.id}
+                  onClick={() => onEditRule(rule)}
+                  className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors group cursor-pointer">
+                  <td className="py-3 px-4">
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.includes(rule.id)}
+                      onChange={() => toggleRow(rule.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className="text-sm font-bold text-blue-600">{rule.id}</span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-2">
+                      <div className="h-6 w-6 rounded bg-gray-100 flex items-center justify-center">
+                        <BrainCircuit size={14} className="text-gray-500" />
+                      </div>
+                      <span className="text-sm font-bold text-gray-900">{rule.name}</span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-1.5">
+                      {rule.tags?.slice(0, 2).map((tag, index) => (
+                        <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${rule.status === 'Active' ? 'bg-green-50 text-green-700' : rule.status === 'Testing' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>
+                      {rule.status}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onCopyRule(rule); }}
+                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Copy"
+                      >
+                        <Copy size={16} />
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onEditRule(rule); }}
+                        className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        title="Edit"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onDeleteRule(rule.id); }}
+                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

@@ -1,129 +1,161 @@
-import React from 'react';
 import {
   Users,
-  FileText,
   Activity,
-  ArrowUpRight,
-  ChevronRight
+  CheckCircle2,
+  Database
 } from 'lucide-react';
 
 export function Dashboard() {
   const stats = [
     {
-      label: 'Total Patients',
-      value: '1,284',
-      icon: Users,
-      trend: '+12%',
-      color: 'blue'
+      label: 'Conversations',
+      value: '15',
+      trend: '+1 this week',
+      icon: Activity,
+      className: 'bg-gradient-to-br from-[#4ea39d] to-[#4338ca] text-white'
     },
     {
       label: 'Active Protocols',
-      value: '42',
-      icon: FileText,
-      trend: '+5%',
-      color: 'indigo'
+      value: '39',
+      icon: Activity,
+      className: 'bg-black text-white'
     },
     {
-      label: 'Conversations',
-      value: '856',
-      icon: Activity,
-      trend: '+8%',
-      color: 'emerald'
+      label: 'My Patients',
+      value: '7',
+      icon: Users,
+      className: 'bg-gradient-to-br from-[#f59e0b] to-[#ea580c] text-white'
+    },
+    {
+      label: 'Airtable Companions',
+      value: '8',
+      icon: Database,
+      className: 'bg-[#5b9bb5] text-white relative overflow-hidden',
+      mesh: true
     }
   ];
 
-  const shortcuts = [
-    {
-      label: 'Patients',
-      icon: Users,
-      path: 'all-patients',
-      description: 'Manage patient records'
-    },
-    {
-      label: 'Protocols',
-      icon: FileText,
-      path: 'protocols',
-      description: 'View & edit protocols'
-    },
-    {
-      label: 'Companions',
-      icon: Activity,
-      path: 'companions',
-      description: 'AI companion settings'
-    },
-    {
-      label: 'AI Rules',
-      icon: FileText,
-      path: 'ai-rules',
-      description: 'Configure reasoning'
-    }
+  const recentActivity = [
+    { id: 1, action: 'Sent message To Patient', user: 'abhilasha4042@gmail.com', time: 'about 19 hours ago' },
+    { id: 2, action: 'Sent message To Patient', user: 'abhilasha4042@gmail.com', time: 'about 20 hours ago' },
+    { id: 3, action: 'Sent message To Patient', user: 'abhilasha4042@gmail.com', time: 'about 21 hours ago' }
+  ];
+
+  const recentPatients = [
+    { id: 1, name: 'anshul', time: '1 day ago' },
+    { id: 2, name: 'Charlie Singh', time: '1 day ago' },
+    { id: 3, name: 'anshul', time: '1 day ago' }
   ];
 
   return (
-    <div className="space-y-8 p-4 md:p-8">
-      {/* Hero Section / Welcome (Optional, or just start with Stats) */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900">Welcome back, Abhilasha</h2>
-        <p className="text-gray-500 mt-1">Here's what's happening in your clinic today.</p>
+    <div className="space-y-10">
+      {/* Welcome Section */}
+      <div className="flex flex-col gap-1">
+        <h1 className="text-4xl font-bold text-black tracking-tight">Welcome, abhilasha</h1>
+        <p className="text-lg font-medium text-black/80">Here's your clinic overview</p>
+
+        <button className="mt-8 w-fit px-5 py-2.5 bg-black text-white rounded-lg font-semibold text-sm transition-transform hover:scale-[1.02] active:scale-[0.98]">
+          Add Protocol
+        </button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
         {stats.map((stat, i) => (
           <div
             key={i}
-            className="group relative overflow-hidden bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300"
+            className={`relative min-h-[180px] p-8 rounded-[24px] ${stat.className} transition-transform hover:scale-[1.02] cursor-default group shadow-sm`}
           >
-            <div className={`absolute top-0 right-0 w-24 h-24 bg-${stat.color}-500/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110`} />
+            {stat.mesh && (
+               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)] opacity-50" />
+            )}
             
-            <div className="flex items-start justify-between relative z-10">
-              <div>
-                <p className="text-sm font-medium text-gray-500">{stat.label}</p>
-                <div className="flex items-baseline gap-2 mt-2">
-                  <p className="text-3xl font-bold text-gray-900 tracking-tight">
-                    {stat.value}
-                  </p>
-                  <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full bg-green-50 text-green-700 flex items-center gap-0.5`}>
-                    <ArrowUpRight size={12} />
+            <div className="flex flex-col h-full justify-between relative z-10">
+              <div className="flex justify-between items-start">
+                 <span className="text-lg font-bold opacity-90">{stat.label}</span>
+                 <stat.icon size={22} className="opacity-80" />
+              </div>
+              
+              <div className="mt-auto space-y-1">
+                <span className="text-5xl font-bold tracking-tight block">{stat.value}</span>
+                {stat.trend && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full bg-white/10 text-[10px] font-bold backdrop-blur-sm">
+                    <Activity size={10} className="mr-1" />
                     {stat.trend}
                   </span>
-                </div>
-              </div>
-              <div className={`h-10 w-10 rounded-xl bg-${stat.color}-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                <stat.icon size={20} className={`text-${stat.color}-600`} />
+                )}
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Quick Access */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Quick Access</h3>
+      {/* Grid for detailed info */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Conversation Quality */}
+        <div className="bg-white rounded-[32px] p-8 shadow-sm">
+          <h3 className="text-xl font-bold mb-6 text-black">Conversation Quality</h3>
+          <div className="space-y-6 text-sm font-semibold">
+            {[
+              { label: 'Grade A', value: 1, percent: 100 },
+              { label: 'Grade B', value: 0, percent: 0 },
+              { label: 'Grade C', value: 0, percent: 0 },
+              { label: 'Grade D', value: 0, percent: 0 },
+            ].map((grade) => (
+              <div key={grade.label} className="space-y-2">
+                <div className="flex justify-between items-center text-black/60">
+                  <span>{grade.label}</span>
+                  <span>{grade.value} ({grade.percent}%)</span>
+                </div>
+                <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-black rounded-full" 
+                    style={{ width: `${grade.percent}%` }} 
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {shortcuts.map((item, i) => (
-            <button
-              key={i}
-              className="group flex flex-col items-start gap-3 p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300 text-left h-full"
-            >
-              <div className="flex items-center justify-between w-full">
-                  <div className="h-10 w-10 rounded-lg bg-gray-50 group-hover:bg-blue-50 flex items-center justify-center transition-colors">
-                  <item.icon size={20} className="text-gray-500 group-hover:text-blue-600 transition-colors" />
+
+        {/* Recent Activity */}
+        <div className="bg-white rounded-[32px] p-8 shadow-sm">
+           <h3 className="text-xl font-bold mb-6 text-black">Recent Activity</h3>
+           <div className="space-y-4">
+              {recentActivity.map((activity) => (
+                <div key={activity.id} className="flex gap-4 p-4 rounded-2xl border border-gray-100 transition-colors hover:bg-gray-50 group">
+                  <div className="h-11 w-11 flex-shrink-0 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center">
+                    <CheckCircle2 size={20} />
                   </div>
-                  <ChevronRight size={16} className="text-gray-300 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
-              </div>
-              <div>
-                <span className="block text-sm font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
-                  {item.label}
-                </span>
-                <span className="text-xs text-gray-500 mt-0.5 block">
-                  {item.description}
-                </span>
-              </div>
-            </button>
-          ))}
+                  <div className="min-w-0">
+                    <p className="font-bold text-black truncate">{activity.action}</p>
+                    <p className="text-xs text-black/50 font-medium truncate">{activity.user}</p>
+                    <p className="text-[11px] text-black/40 font-bold mt-1 flex items-center gap-1">
+                       <Activity size={10} />
+                       {activity.time}
+                    </p>
+                  </div>
+                </div>
+              ))}
+           </div>
+        </div>
+
+        {/* Recent Patients */}
+        <div className="bg-white rounded-[32px] p-8 shadow-sm">
+           <h3 className="text-xl font-bold mb-6 text-black">Recent Patients</h3>
+           <div className="space-y-4">
+              {recentPatients.map((patient) => (
+                <div key={patient.id} className="flex gap-4 p-4 rounded-2xl border border-gray-100 transition-colors hover:bg-gray-50 group">
+                  <div className="h-11 w-11 flex-shrink-0 bg-gray-100 text-black/50 rounded-full flex items-center justify-center">
+                    <Users size={20} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-black">{patient.name}</p>
+                    <p className="text-[11px] text-black/40 font-bold mt-0.5">{patient.time}</p>
+                  </div>
+                </div>
+              ))}
+           </div>
         </div>
       </div>
     </div>

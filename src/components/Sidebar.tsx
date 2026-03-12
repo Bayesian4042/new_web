@@ -3,7 +3,6 @@ import {
   Briefcase,
   Users,
   Library,
-  ChevronDown,
   ChevronRight,
   Home,
   Settings,
@@ -99,10 +98,6 @@ export function Sidebar({
           label: 'AI Rules'
         },
         {
-          id: 'plans',
-          label: 'Plans'
-        },
-        {
           id: 'followups',
           label: 'Followups'
         },
@@ -119,6 +114,10 @@ export function Sidebar({
         {
           id: 'otc-lists',
           label: 'OTC Lists'
+        },
+        {
+          id: 'plans',
+          label: 'Plans'
         }]
     },
     {
@@ -173,10 +172,6 @@ export function Sidebar({
           label: 'AI Rules'
         },
         {
-          id: 'plans',
-          label: 'Plans'
-        },
-        {
           id: 'followups',
           label: 'Followups'
         },
@@ -193,6 +188,10 @@ export function Sidebar({
         {
           id: 'otc-lists',
           label: 'OTC Lists'
+        },
+        {
+          id: 'plans',
+          label: 'Plans'
         }]
     },
     {
@@ -206,7 +205,7 @@ export function Sidebar({
 
   if (collapsed) {
     return (
-      <aside className="w-16 bg-white border-r border-gray-200 h-screen flex flex-col fixed left-0 top-0 z-30">
+      <aside className="w-16 bg-white h-screen flex flex-col fixed left-0 top-0 z-30">
         <div className="h-12 flex items-center justify-center border-b border-gray-100">
           <div className="h-8 w-8 rounded-lg bg-gray-900 flex items-center justify-center text-white font-bold text-sm">
             M
@@ -218,7 +217,7 @@ export function Sidebar({
               key={item.id}
               onClick={() => setActiveView(item.id)}
               className={`h-9 w-9 flex items-center justify-center rounded-lg transition-colors ${activeView === item.id || (item.children?.some(c => c.id === activeView))
-                ? 'bg-gray-900 text-white shadow-sm'
+                ? 'bg-[#efeffe] text-[#6366f1] shadow-sm'
                 : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
                 }`}
               title={item.label}
@@ -246,23 +245,16 @@ export function Sidebar({
 
   }
   return (
-    <aside className="w-56 bg-white border-r border-gray-200 h-screen flex flex-col fixed left-0 top-0 z-30">
+    <aside className="w-56 bg-white h-screen flex flex-col fixed left-0 top-0 z-30">
       {/* Logo / App Switcher */}
-      <div className="h-12 flex items-center justify-between px-3 border-b border-gray-100">
+      <div className="h-16 flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-lg bg-gray-900 flex items-center justify-center text-white font-bold text-xs">
-            M
-          </div>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold text-gray-900 leading-tight">
-              CRM
-            </span>
-            <span className="text-[10px] text-gray-400 leading-tight">
-              MediCore
+            <span className="text-sm font-bold text-gray-900 leading-tight tracking-tight">
+              GEMA AI
             </span>
           </div>
         </div>
-        <ChevronDown size={14} className="text-gray-400" />
       </div>
 
       {/* Navigation */}
@@ -277,7 +269,7 @@ export function Sidebar({
               <button
                 key={item.id}
                 onClick={() => setActiveView(item.id)}
-                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-sm transition-colors ${activeView === item.id ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}>
+                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-sm transition-colors ${activeView === item.id ? 'bg-[#efeffe] text-[#6366f1] font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}>
 
                 {item.icon}
                 {item.label}
@@ -306,7 +298,7 @@ export function Sidebar({
                     <button
                       key={child.id}
                       onClick={() => setActiveView(child.id)}
-                      className={`w-full flex items-center px-2.5 py-1.5 rounded-md text-sm transition-colors ${activeView === child.id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
+                      className={`w-full flex items-center px-2.5 py-1.5 rounded-lg text-sm transition-colors ${activeView === child.id ? 'bg-[#efeffe] text-[#6366f1] font-semibold' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
 
                       {child.label}
                     </button>
