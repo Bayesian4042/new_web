@@ -34,6 +34,7 @@ interface TestMessage {
 }
 interface CompanionFormProps {
   onClose: () => void;
+  onSave?: (data: any) => void;
   onChange: (data: any) => void;
   initialData?: any;
   userRole: 'admin' | 'clinic';
@@ -264,7 +265,7 @@ const templateItems: SideSheetItem[] = [
     category: 'Chronic Care'
   }];
 
-export function CompanionForm({ onClose, onChange, initialData, userRole }: CompanionFormProps) {
+export function CompanionForm({ onClose, onSave, onChange, initialData, userRole }: CompanionFormProps) {
   console.log('User Role in CompanionForm:', userRole); // Use userRole to fix lint
   const isNewCompanion = !initialData;
   const [companionType, setCompanionType] = useState<
@@ -560,10 +561,23 @@ export function CompanionForm({ onClose, onChange, initialData, userRole }: Comp
   };
 
   useEffect(() => {
-    if (companionType === 'personalized' && patients.length > 1) {
-      setPatients([patients[0]]);
-    } else if (patients.length === 0) {
-      handleAddPatient();
+    if (companionType === 'personalized') {
+      setPatients(prev => {
+        if (prev.length > 1) {
+          setEditingPatientIndex(0);
+          return [prev[0]];
+        }
+        return prev;
+      });
+    } else {
+      // general mode: ensure at least 1 blank patient exists
+      setPatients(prev => {
+        if (prev.length === 0) {
+          setEditingPatientIndex(0);
+          return [{ name: '', countryCode: '+1', phoneNumber: '' }];
+        }
+        return prev;
+      });
     }
   }, [companionType]);
   const getItemById = (
@@ -723,12 +737,29 @@ export function CompanionForm({ onClose, onChange, initialData, userRole }: Comp
             </Button>
             <Button
               onClick={() => {
-                // Data is already synced via onChange
-                onClose();
+                if (onSave) {
+                  onSave({
+                    name: companionTitle,
+                    type: companionType,
+                    patients,
+                    selectedShortcuts,
+                    selectedDocuments,
+                    selectedPlans,
+                    aiPrompt,
+                    followupMessage,
+                    frequency,
+                    duration,
+                    preferredTime,
+                    assignedClinics: selectedClinics,
+                    assignedCategories: selectedCategories
+                  });
+                } else {
+                  onClose();
+                }
               }}
               className="bg-gray-900 text-white hover:bg-gray-800 shadow-sm"
             >
-              Save Changes
+              Update
             </Button>
           </div>
         </div>
@@ -845,7 +876,7 @@ export function CompanionForm({ onClose, onChange, initialData, userRole }: Comp
                         </div>
                         <div>
                           <p className="text-sm font-bold text-gray-900">
-                            {patient.name || 'Unnamed Patient'}
+                            {patient.name || `Patient ${index + 1}`}
                           </p>
                           <div className="flex items-center gap-3 mt-1">
                             <span className="flex items-center gap-1 text-xs text-gray-500">
@@ -1485,6 +1516,81 @@ export function CompanionForm({ onClose, onChange, initialData, userRole }: Comp
                   ))}
                 </div>
               )}
+            </div>
+          </section>
+
+          <div className="h-8" />
+
+          {/* Assigned Patients Summary Chip UI */}
+          <section className="mb-12 scroll-mt-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                    <UserIcon size={18} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900">Assigned Patients</h3>
+                    <p className="text-sm text-gray-500">
+                      {patients.filter(p => p.name.trim() || p.phoneNumber.trim()).length} saved · {patients.length} total
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {(() => {
+                const savedPatients = patients
+                  .map((p, i) => ({ ...p, originalIndex: i }))
+                  .filter(p => p.name.trim() || p.phoneNumber.trim());
+
+                if (savedPatients.length === 0) {
+                  return (
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                        <UserIcon size={22} className="text-gray-400" />
+                      </div>
+                      <p className="text-sm font-semibold text-gray-500">No patients saved yet</p>
+                      <p className="text-xs text-gray-400 mt-1">Fill in a patient's name and phone above, then their info will appear here</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {savedPatients.map((patient) => (
+                      <div
+                        key={patient.originalIndex}
+                        className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-xl group hover:border-blue-300 hover:shadow-sm transition-all"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
+                            {patient.name.trim()
+                              ? patient.name.trim().charAt(0).toUpperCase()
+                              : (patient.originalIndex + 1)}
+                          </div>
+                          <div className="flex flex-col">
+                            <p className="text-sm font-bold text-gray-900 leading-tight">
+                              {patient.name.trim() || `Patient ${patient.originalIndex + 1}`}
+                            </p>
+                            <p className="text-[10px] text-gray-500 font-medium tracking-tight mt-0.5">
+                              {patient.phoneNumber.trim()
+                                ? `${patient.countryCode} ${patient.phoneNumber}`
+                                : 'No phone'}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleRemovePatient(patient.originalIndex)}
+                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                          title="Remove patient"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           </section>
 

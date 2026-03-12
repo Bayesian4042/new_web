@@ -7,10 +7,11 @@ export interface Companion {
   name: string;
   type?: string;
   role: string;
-  status: 'Active' | 'Draft' | 'Archived';
+  status: 'Active' | 'Draft' | 'Archived' | 'Review';
   users: number;
-  createdOn: string;
   createdBy: string;
+  createdOn: string;
+  source?: 'Protocol' | 'Companion';
 }
 
 interface CompanionsProps {
@@ -95,6 +96,7 @@ export function Companions({ onAddCompanion, onEditCompanion, onCopyCompanion, o
               <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Name</th>
               <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Role</th>
               <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Status</th>
+              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Source</th>
               <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Users</th>
               <th className="py-3 px-3 text-right"></th>
             </tr>
@@ -134,12 +136,24 @@ export function Companions({ onAddCompanion, onEditCompanion, onCopyCompanion, o
                   <span
                     className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${companion.status === 'Active'
                       ? 'bg-green-50 text-green-700'
-                      : companion.status === 'Draft'
-                        ? 'bg-yellow-50 text-yellow-700'
-                        : 'bg-gray-100 text-gray-600'
+                      : companion.status === 'Review'
+                        ? 'bg-blue-50 text-blue-700'
+                        : companion.status === 'Draft'
+                          ? 'bg-yellow-50 text-yellow-700'
+                          : 'bg-gray-100 text-gray-600'
                       }`}
                   >
                     {companion.status}
+                  </span>
+                </td>
+                <td className="py-3 px-3">
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${companion.source === 'Protocol'
+                      ? 'bg-blue-50 text-blue-700 border border-blue-100'
+                      : 'bg-gray-50 text-gray-600 border border-gray-200'
+                      }`}
+                  >
+                    {companion.source === 'Protocol' ? 'Preloaded' : 'Custom'}
                   </span>
                 </td>
                 <td className="py-3 px-3">
