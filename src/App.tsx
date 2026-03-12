@@ -6,7 +6,7 @@ import { Companions, Companion } from './pages/workspace/Companions';
 import { Protocols, Protocol } from './pages/workspace/Protocols';
 import { PatientList } from './pages/patients/PatientList';
 import { AIRules, AIRule } from './pages/library/AIRules';
-import { Plans, Plan } from './pages/library/Plans';
+import { Plans, Plan } from './pages/otc/Plans';
 import { Followups, Followup } from './pages/library/Followups';
 import { HealthAssistant } from './pages/ai-system/HealthAssistant';
 import { Conversations } from './pages/ai-system/Conversations';
@@ -20,12 +20,13 @@ import { FollowupForm } from './pages/library/FollowupForm';
 import { KnowledgeBase, KBItem } from './pages/library/KnowledgeBase';
 import { KnowledgeBaseForm } from './pages/library/KnowledgeBaseForm';
 import { Button } from './components/ui/Button';
-import { PlanForm } from './pages/library/PlanForm';
+import { PlanForm } from './pages/otc/PlanForm';
 import { Clinics, mockClinics, Clinic } from './pages/setup/Clinics';
 import { ClinicForm } from './pages/setup/ClinicForm';
 import { ClinicDetail } from './pages/setup/ClinicDetail';
 import { OTCLists, OTCList } from './pages/otc/OTCLists';
 import { OTCListForm } from './pages/otc/OTCListForm';
+import { useOTCStore } from './store/useOTCStore';
 import { PatientCompanions, PatientCompanion } from './pages/workspace/PatientCompanions';
 import { PatientCompanionForm } from './pages/workspace/PatientCompanionForm';
 
@@ -83,10 +84,7 @@ const INITIAL_PLANS: Plan[] = [
     steps: 12,
     createdOn: '02-02-2026',
     content: '<p>Standard recovery protocol for post-orthopedic surgery.</p>',
-    products: [
-      { id: '1', name: 'Pain Relief (Ibuprofen)', type: 'Medication', instruction: 'Take 400mg every 6 hours as needed.', timeOfDay: ['M', 'E'], price: '12.50 €' },
-      { id: '2', name: 'Physical Therapy Guide', type: 'Digital Resource', instruction: 'Follow exercises twice daily.', timeOfDay: ['M', 'L'], price: '0.00 €' }
-    ]
+    products: []
   },
   {
     id: 'PLAN-0002',
@@ -100,6 +98,8 @@ const INITIAL_PLANS: Plan[] = [
     products: []
   }
 ];
+
+const CURRENT_DOCTOR_NAME = 'Dr. Sarah Smith';
 
 const INITIAL_KB: KBItem[] = [
   {
@@ -275,30 +275,6 @@ const INITIAL_COMPANIONS: Companion[] = [
   }
 ];
 
-const INITIAL_OTC_LISTS: OTCList[] = [
-  {
-    id: 'OTC-0001',
-    name: 'Cold & Flu Bundle',
-    productsCount: 5,
-    createdOn: '02-02-2026',
-    lastUpdated: '2h ago'
-  },
-  {
-    id: 'OTC-0002',
-    name: 'Pain Management Kit',
-    productsCount: 3,
-    createdOn: '01-02-2026',
-    lastUpdated: '1d ago'
-  },
-  {
-    id: 'OTC-0003',
-    name: 'Allergy Relief Pack',
-    productsCount: 4,
-    createdOn: '31-01-2026',
-    lastUpdated: '3d ago'
-  }
-];
-
 export function App() {
   const [activeView, setActiveView] = useState('dashboard');
   const [userRole, setUserRole] = useState<'admin' | 'clinic'>('clinic');
@@ -337,7 +313,7 @@ export function App() {
   const [followups, setFollowups] = useState<Followup[]>(INITIAL_FOLLOWUPS);
   const [companions, setCompanions] = useState<Companion[]>(INITIAL_COMPANIONS);
   const [protocols, setProtocols] = useState<Protocol[]>(INITIAL_PROTOCOLS);
-  const [otcLists, setOtcLists] = useState<OTCList[]>(INITIAL_OTC_LISTS);
+  const { otcLists, setOtcLists } = useOTCStore();
   const [patientCompanions, setPatientCompanions] = useState<PatientCompanion[]>([]);
   const [showPatientCompanionForm, setShowPatientCompanionForm] = useState(false);
   const [editingPatientCompanion, setEditingPatientCompanion] = useState<PatientCompanion | null>(null);
@@ -560,7 +536,8 @@ export function App() {
         ...list,
         name: otcListDraft.name,
         productsCount: otcListDraft.products?.length || 0,
-        lastUpdated: 'Now'
+        lastUpdated: 'Now',
+        products: otcListDraft.products || []
       } : list));
     } else {
       const newList: OTCList = {
@@ -568,7 +545,8 @@ export function App() {
         name: otcListDraft.name,
         productsCount: otcListDraft.products?.length || 0,
         createdOn: new Date().toISOString().split('T')[0],
-        lastUpdated: 'Now'
+        lastUpdated: 'Now',
+        products: otcListDraft.products || []
       };
       setOtcLists(prev => [newList, ...prev]);
     }
@@ -767,6 +745,8 @@ export function App() {
           onChange={setPlanDraft}
           initialData={editingPlan}
           userRole={userRole}
+          doctorName={CURRENT_DOCTOR_NAME}
+          otcLists={otcLists}
           onSubmit={handlePlanSubmit}
           onCancel={() => {
             setShowPlanForm(false);
@@ -1429,11 +1409,15 @@ export function App() {
 
         {renderHeader()}
 
-        <main
-          className={`flex-1 min-h-0 bg-white ${showCompanionForm || showProtocolForm ? 'overflow-hidden' : 'overflow-y-auto p-6'}`}>
-
-          <div className={showCompanionForm || showProtocolForm ? 'h-full' : 'max-w-screen-3xl mx-auto'}>
-            {renderContent()}
+             <main
+          className={`flex-1 min-h-0 bg-white ${showCompanionForm || showProtocolForm ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+          
+          <div className="h-full">
+            <div className={`h-full w-full bg-[var(--accent)] ${showCompanionForm || showProtocolForm ? '' : 'rounded-tl-[40px] overflow-y-auto'}`}>
+               <div className={showCompanionForm || showProtocolForm ? 'h-full' : 'max-w-screen-3xl mx-auto p-8'}>
+                {renderContent()}
+              </div>
+            </div>
           </div>
         </main>
       </div>

@@ -8,7 +8,14 @@ export interface SideSheetItem {
   price?: string;
   category?: string;
   icon?: React.ReactNode;
-  products?: { id: string; name: string; price: string }[];
+  products?: {
+    id: string;
+    name: string;
+    price: string;
+    instruction?: string;
+    timeOfDay?: string[];
+    color?: string;
+  }[];
 }
 interface SideSheetProps {
   isOpen: boolean;
@@ -156,16 +163,73 @@ export function SideSheet({
                           Contains {item.products.length} products
                         </p>
                         <div className="space-y-1.5">
-                          {item.products.map((product) => (
-                            <div key={product.id} className={`flex items-center justify-between py-1 px-2 rounded ${isSelected ? 'bg-blue-100/50' : 'bg-gray-50'}`}>
-                              <span className={`text-xs ${isSelected ? 'text-blue-800' : 'text-gray-600'}`}>
-                                {product.name}
-                              </span>
-                              <span className={`text-xs font-medium ${isSelected ? 'text-blue-600' : 'text-gray-500'}`}>
-                                {product.price}
-                              </span>
-                            </div>
-                          ))}
+                          {item.products.map((product) => {
+                            const times = product.timeOfDay || [];
+                            const hasMeta = product.instruction || times.length > 0 || product.color;
+                            const bgStyle = product.color
+                              ? { backgroundColor: product.color }
+                              : undefined;
+                            return (
+                                <div
+                                  key={product.id}
+                                  className="py-2 px-2 rounded"
+                                  style={bgStyle}
+                                >
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    {product.color && (
+                                      <span
+                                        className="h-3 w-3 rounded-full border border-white shadow-sm flex-shrink-0"
+                                        style={{ backgroundColor: product.color }}
+                                      />
+                                    )}
+                                    <span
+                                      className={`text-xs truncate ${isSelected ? 'text-blue-800' : 'text-gray-600'}`}
+                                    >
+                                      {product.name}
+                                    </span>
+                                  </div>
+                                  <span
+                                    className={`text-xs font-medium flex-shrink-0 ${isSelected ? 'text-blue-600' : 'text-gray-500'}`}
+                                  >
+                                    {product.price}
+                                  </span>
+                                </div>
+
+                                {hasMeta && (
+                                  <div className="mt-1 pl-5 space-y-0.5">
+                                    {product.instruction && (
+                                      <p
+                                        className={`text-[10px] leading-snug line-clamp-2 ${
+                                          isSelected ? 'text-blue-700' : 'text-gray-500'
+                                        }`}
+                                      >
+                                        {product.instruction}
+                                      </p>
+                                    )}
+                                    {times.length > 0 && (
+                                      <div className="flex items-center gap-1">
+                                        {['M', 'N', 'L', 'E'].map((char) => (
+                                          <span
+                                            key={char}
+                                            className={`h-5 w-5 rounded-full border text-[9px] font-bold flex items-center justify-center ${
+                                              times.includes(char)
+                                                ? isSelected
+                                                  ? 'bg-blue-600 border-blue-600 text-white'
+                                                  : 'bg-gray-900 border-gray-900 text-white'
+                                                : 'border-gray-300 text-gray-400'
+                                            }`}
+                                          >
+                                            {char}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}

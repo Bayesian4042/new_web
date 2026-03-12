@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Plus, Search, MoreVertical, Edit2, Copy, Trash2, Package } from 'lucide-react';
+import { Plus, Search, Edit2, Copy, Trash2, Package, Filter, ArrowUpDown } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
+import type { OTCProduct } from './OTCListForm';
 
 export interface OTCList {
     id: string;
@@ -8,6 +9,7 @@ export interface OTCList {
     productsCount: number;
     createdOn: string;
     lastUpdated: string;
+    products?: OTCProduct[];
 }
 
 interface OTCListsProps {
@@ -20,7 +22,6 @@ interface OTCListsProps {
 
 export function OTCLists({ onAddList, onEditList, onCopyList, onDeleteList, lists }: OTCListsProps) {
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
     const filteredLists = lists.filter(list =>
         list.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -28,84 +29,64 @@ export function OTCLists({ onAddList, onEditList, onCopyList, onDeleteList, list
 
     return (
         <div className="space-y-6">
-            {/* Header */}
+            {/* Page Header */}
             <div className="flex items-center justify-between">
-                <div className="flex-1 max-w-md">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search OTC lists..."
-                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                        />
-                    </div>
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight">OTC Lists</h1>
+                    <p className="text-gray-500 mt-1">Manage and organize over-the-counter medicine bundles</p>
                 </div>
-                <Button
-                    onClick={onAddList}
-                    className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                <Button 
+                    onClick={onAddList} 
+                    className="bg-gray-900 hover:bg-black text-white rounded-xl shadow-sm px-5 py-2.5 flex items-center gap-2 transition-all active:scale-95"
                 >
                     <Plus size={18} />
-                    New OTC List
+                    <span className="font-bold">New OTC List</span>
                 </Button>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                            <Package size={20} />
-                        </div>
-                        <div>
-                            <p className="text-xs text-gray-500 font-medium">Total Lists</p>
-                            <p className="text-2xl font-bold text-gray-900">{lists.length}</p>
-                        </div>
-                    </div>
+            {/* Toolbar */}
+            <div className="flex items-center gap-3 bg-white p-2 rounded-xl border border-gray-200 shadow-sm">
+                <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search OTC lists..."
+                        className="w-full pl-9 pr-4 py-2 text-sm border-none focus:ring-0 text-gray-900 placeholder-gray-400"
+                    />
                 </div>
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-green-50 flex items-center justify-center text-green-600">
-                            <Package size={20} />
-                        </div>
-                        <div>
-                            <p className="text-xs text-gray-500 font-medium">Total Products</p>
-                            <p className="text-2xl font-bold text-gray-900">
-                                {lists.reduce((acc, list) => acc + list.productsCount, 0)}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
-                            <Package size={20} />
-                        </div>
-                        <div>
-                            <p className="text-xs text-gray-500 font-medium">Avg Products/List</p>
-                            <p className="text-2xl font-bold text-gray-900">
-                                {lists.length > 0 ? Math.round(lists.reduce((acc, list) => acc + list.productsCount, 0) / lists.length) : 0}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+
+                <div className="h-6 w-px bg-gray-200 mx-1" />
+
+                <button className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-100">
+                    <Filter size={16} />
+                    <span>Filter</span>
+                </button>
             </div>
+
+
 
             {/* Table */}
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-gray-200 bg-gray-50/50">
-                                <th className="text-left py-3 px-4 text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    List Name
+                            <tr className="border-b border-gray-200 bg-gray-50/30">
+                                <th className="text-left py-3 px-4">
+                                    <div className="flex items-center gap-1 text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                        List Name
+                                        <ArrowUpDown size={12} className="text-gray-400" />
+                                    </div>
                                 </th>
                                 <th className="text-center py-3 px-4 text-xs font-bold text-gray-700 uppercase tracking-wider">
                                     Products
                                 </th>
                                 <th className="text-left py-3 px-4 text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    Created
+                                    <div className="flex items-center gap-1 text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                        Created
+                                        <ArrowUpDown size={12} className="text-gray-400" />
+                                    </div>
                                 </th>
                                 <th className="text-left py-3 px-4 text-xs font-bold text-gray-700 uppercase tracking-wider">
                                     Last Updated
@@ -132,15 +113,13 @@ export function OTCLists({ onAddList, onEditList, onCopyList, onDeleteList, list
                                 filteredLists.map((list) => (
                                     <tr
                                         key={list.id}
-                                        className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors group"
+                                        onClick={() => onEditList(list)}
+                                        className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors group cursor-pointer"
                                     >
                                         <td className="py-3 px-4">
-                                            <button
-                                                onClick={() => onEditList(list)}
-                                                className="text-sm font-bold text-gray-900 hover:text-blue-600 transition-colors text-left"
-                                            >
+                                            <span className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
                                                 {list.name}
-                                            </button>
+                                            </span>
                                         </td>
                                         <td className="py-3 px-4 text-center">
                                             <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700">
@@ -154,34 +133,31 @@ export function OTCLists({ onAddList, onEditList, onCopyList, onDeleteList, list
                                             <span className="text-xs text-gray-500">{list.lastUpdated}</span>
                                         </td>
                                         <td className="py-3 px-4">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => onEditList(list)}
-                                                    className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-all"
+                                            <div className="flex items-center justify-end gap-1">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onEditList(list);
+                                                    }}
+                                                    className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                                                     title="Edit"
                                                 >
-                                                    <Edit2 size={14} />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
+                                                    <Edit2 size={16} />
+                                                </button>
+                                                <button
                                                     onClick={() => onCopyList(list)}
-                                                    className="h-8 w-8 p-0 text-gray-400 hover:text-green-600 hover:bg-green-50 opacity-0 group-hover:opacity-100 transition-all"
+                                                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                                     title="Duplicate"
                                                 >
-                                                    <Copy size={14} />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
+                                                    <Copy size={16} />
+                                                </button>
+                                                <button
                                                     onClick={() => onDeleteList(list.id)}
-                                                    className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
+                                                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                                     title="Delete"
                                                 >
-                                                    <Trash2 size={14} />
-                                                </Button>
+                                                    <Trash2 size={16} />
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>

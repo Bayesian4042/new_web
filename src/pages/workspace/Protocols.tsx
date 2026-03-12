@@ -96,131 +96,133 @@ export function Protocols({ onEdit, onCopy, onDelete, onAssignPatients, onAdd, u
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-200">
-              <th className="w-10 py-3 px-3">
-                <input
-                  type="checkbox"
-                  checked={selectedRows.length === protocols.length}
-                  onChange={toggleAll}
-                  className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
-                />
-              </th>
-              <th className="py-3 px-3 text-left">
-                <button className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-700">
-                  Protocol Name
-                  <ArrowUpDown size={14} />
-                </button>
-              </th>
-              <th className="py-3 px-3 text-left">
-                <button className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-700">
-                  Category
-                  <ArrowUpDown size={14} />
-                </button>
-              </th>
-              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Status</th>
-              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Enrolled</th>
-              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Duration</th>
-              <th className="py-3 px-3 text-left text-sm font-medium text-gray-500">Created</th>
-              <th className="py-3 px-3 text-right text-sm font-medium text-gray-500">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {protocols.map((protocol) => (
-              <tr
-                key={protocol.id}
-                onClick={() => onEdit(protocol)}
-                className={`border-b border-gray-50 hover:bg-gray-50/80 transition-colors cursor-pointer ${selectedRows.includes(protocol.id) ? 'bg-blue-50/30' : ''
-                  }`}
-              >
-                <td className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-200 bg-gray-50/30">
+                <th className="w-10 py-3 px-4">
                   <input
                     type="checkbox"
-                    checked={selectedRows.includes(protocol.id)}
-                    onChange={() => toggleRow(protocol.id)}
+                    checked={selectedRows.length === protocols.length && protocols.length > 0}
+                    onChange={toggleAll}
                     className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
                   />
-                </td>
-                <td className="py-3 px-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                      <FileText size={18} />
-                    </div>
-                    <span className="text-sm font-medium text-gray-900">{protocol.name}</span>
-                  </div>
-                </td>
-                <td className="py-3 px-3 text-sm text-gray-600">{protocol.category}</td>
-                <td className="py-3 px-3">
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${protocol.status === 'Active'
-                      ? 'bg-green-100 text-green-700'
-                      : protocol.status === 'Review'
-                        ? 'bg-amber-100 text-amber-700'
-                        : 'bg-gray-100 text-gray-700'
-                      }`}
-                  >
-                    {protocol.status}
-                  </span>
-                </td>
-                <td className="py-3 px-3 text-sm text-gray-600 font-medium">{protocol.enrolled} patients</td>
-                <td className="py-3 px-3 text-sm text-gray-600">{protocol.duration} days</td>
-                <td className="py-3 px-3 text-sm text-gray-500">{protocol.createdOn}</td>
-                <td className="py-3 px-3 text-right" onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center justify-end gap-1">
-                    {userRole === 'admin' ? (
-                      <>
-                        <button
-                          onClick={() => onEdit(protocol)}
-                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                          title="Edit"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button
-                          onClick={() => onCopy?.(protocol)}
-                          className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
-                          title="Copy"
-                        >
-                          <Copy size={16} />
-                        </button>
-                        <button
-                          onClick={() => onDelete?.(protocol.id)}
-                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onAssignPatients?.(protocol);
-                          }}
-                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                        >
-                          <UserPlus size={14} />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete?.(protocol.id);
-                          }}
-                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </td>
+                </th>
+                <th className="py-3 px-4 text-left">
+                  <button className="flex items-center gap-1 text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    Protocol Name
+                    <ArrowUpDown size={12} />
+                  </button>
+                </th>
+                <th className="py-3 px-4 text-left">
+                  <button className="flex items-center gap-1 text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    Category
+                    <ArrowUpDown size={12} />
+                  </button>
+                </th>
+                <th className="py-3 px-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+                <th className="py-3 px-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Enrolled</th>
+                <th className="py-3 px-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Duration</th>
+                <th className="py-3 px-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Created</th>
+                <th className="py-3 px-4 text-right"></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {protocols.map((protocol) => (
+                <tr
+                  key={protocol.id}
+                  onClick={() => onEdit(protocol)}
+                  className={`border-b border-gray-50 hover:bg-gray-50/80 transition-colors cursor-pointer group ${selectedRows.includes(protocol.id) ? 'bg-blue-50/30' : ''
+                    }`}
+                >
+                  <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.includes(protocol.id)}
+                      onChange={() => toggleRow(protocol.id)}
+                      className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
+                    />
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                        <FileText size={18} />
+                      </div>
+                      <span className="text-sm font-bold text-gray-900">{protocol.name}</span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 text-sm text-gray-600 font-medium">{protocol.category}</td>
+                  <td className="py-3 px-4">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ${protocol.status === 'Active'
+                        ? 'bg-green-100 text-green-700'
+                        : protocol.status === 'Review'
+                          ? 'bg-amber-100 text-amber-700'
+                          : 'bg-gray-100 text-gray-700'
+                        }`}
+                    >
+                      {protocol.status}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-sm text-gray-600 font-bold">{protocol.enrolled} patients</td>
+                  <td className="py-3 px-4 text-sm text-gray-600 font-medium">{protocol.duration} days</td>
+                  <td className="py-3 px-4 text-sm text-gray-500 font-medium">{protocol.createdOn}</td>
+                  <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {userRole === 'admin' ? (
+                        <>
+                          <button
+                            onClick={() => onEdit(protocol)}
+                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                            title="Edit"
+                          >
+                            <Edit2 size={15} />
+                          </button>
+                          <button
+                            onClick={() => onCopy?.(protocol)}
+                            className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+                            title="Copy"
+                          >
+                            <Copy size={15} />
+                          </button>
+                          <button
+                            onClick={() => onDelete?.(protocol.id)}
+                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onAssignPatients?.(protocol);
+                            }}
+                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                          >
+                            <UserPlus size={14} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDelete?.(protocol.id);
+                            }}
+                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

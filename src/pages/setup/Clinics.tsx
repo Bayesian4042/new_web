@@ -191,7 +191,7 @@ export function Clinics({ clinics, onAddClinic, onViewClinic, onCopyClinic, onDe
             {/* Table Card */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 {/* Toolbar */}
-                <div className="flex items-center justify-between py-3 px-4 border-b border-gray-100">
+                <div className="flex items-center justify-between py-3 px-4 border-b border-gray-100 bg-gray-50/10">
                     <div className="flex items-center gap-2">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
@@ -200,11 +200,11 @@ export function Clinics({ clinics, onAddClinic, onViewClinic, onCopyClinic, onDe
                                 placeholder="Search clinics..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-9 pr-4 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-64 transition-all"
+                                className="w-64 pl-9 pr-3 py-1.5 text-sm bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 rounded-lg transition-all"
                             />
                         </div>
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 font-medium">
                         Showing <span className="font-bold text-gray-900">{filteredClinics.length}</span> of <span className="font-bold text-gray-900">{clinics.length}</span> clinics
                     </div>
                 </div>
@@ -213,38 +213,36 @@ export function Clinics({ clinics, onAddClinic, onViewClinic, onCopyClinic, onDe
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="bg-gray-50/50 border-b border-gray-100">
+                            <tr className="bg-gray-50/30 border-b border-gray-200">
                                 <th className="py-3 px-4 text-left w-12">
                                     <input
                                         type="checkbox"
                                         checked={selectedRows.length === clinics.length}
                                         onChange={(e) => toggleAll(e.target.checked)}
-                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
                                     />
                                 </th>
                                 <th className="py-3 px-3 text-left">
-                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Clinic Details</span>
+                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Clinic Details</span>
                                 </th>
                                 <th className="py-3 px-3 text-left">
-                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Metrics</span>
+                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Metrics</span>
                                 </th>
                                 <th className="py-3 px-3 text-left">
                                     <button
                                         onClick={handleActivitySort}
-                                        className="flex items-center gap-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition-colors"
+                                        className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest hover:text-gray-900 transition-colors"
                                     >
                                         Last Activity
-                                        {activitySort === 'none' && <ArrowUpDown size={12} className="text-gray-300" />}
-                                        {activitySort === 'desc' && <ArrowDown size={12} className="text-blue-600" />}
-                                        {activitySort === 'asc' && <ArrowUp size={12} className="text-blue-600" />}
+                                        {activitySort === 'none' && <ArrowUpDown size={10} className="text-gray-400" />}
+                                        {activitySort === 'desc' && <ArrowDown size={10} className="text-blue-600" />}
+                                        {activitySort === 'asc' && <ArrowUp size={10} className="text-blue-600" />}
                                     </button>
                                 </th>
                                 <th className="py-3 px-3 text-left">
-                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Status</span>
+                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Status</span>
                                 </th>
-                                <th className="py-3 px-3 text-right">
-                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</span>
-                                </th>
+                                <th className="py-3 px-3 text-right"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -252,43 +250,43 @@ export function Clinics({ clinics, onAddClinic, onViewClinic, onCopyClinic, onDe
                                 <tr
                                     key={clinic.id}
                                     onClick={() => onViewClinic(clinic)}
-                                    className="hover:bg-blue-50/30 transition-colors group cursor-pointer"
+                                    className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group cursor-pointer"
                                 >
                                     <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
                                         <input
                                             type="checkbox"
                                             checked={selectedRows.includes(clinic.id)}
                                             onChange={() => toggleRow(clinic.id)}
-                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                            className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
                                         />
                                     </td>
                                     <td className="py-3 px-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                                                <Building2 className="text-blue-600" size={20} />
+                                            <div className="h-9 w-9 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0 border border-indigo-100 shadow-sm transition-transform group-hover:scale-105">
+                                                <Building2 className="text-indigo-600" size={18} />
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-2">
                                                     <p className="text-sm font-bold text-gray-900">{clinic.name}</p>
-                                                    <span className="text-xs text-gray-400 font-mono">#{clinic.id}</span>
+                                                    <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded font-mono font-bold uppercase">#{clinic.id}</span>
                                                 </div>
-                                                <p className="text-xs text-gray-500">{clinic.ownerEmail}</p>
+                                                <p className="text-xs text-gray-500 font-medium">{clinic.ownerEmail}</p>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="py-3 px-3">
                                         <div className="flex gap-4">
                                             <div>
-                                                <p className="text-xs text-gray-400 uppercase">Patients</p>
-                                                <p className="text-sm font-semibold text-gray-900">{clinic.patientCount}</p>
+                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Patients</p>
+                                                <p className="text-sm font-bold text-gray-900">{clinic.patientCount}</p>
                                             </div>
                                             <div>
-                                                <p className="text-xs text-gray-400 uppercase">Users</p>
-                                                <p className="text-sm font-semibold text-gray-900">{clinic.metrics?.users || 0}</p>
+                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Users</p>
+                                                <p className="text-sm font-bold text-gray-900">{clinic.metrics?.users || 0}</p>
                                             </div>
                                             <div>
-                                                <p className="text-xs text-gray-400 uppercase">DB Size</p>
-                                                <p className="text-sm font-semibold text-gray-900">{clinic.metrics?.dbSize || '-'}</p>
+                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">DB Size</p>
+                                                <p className="text-sm font-bold text-gray-900">{clinic.metrics?.dbSize || '-'}</p>
                                             </div>
                                         </div>
                                     </td>
@@ -296,10 +294,10 @@ export function Clinics({ clinics, onAddClinic, onViewClinic, onCopyClinic, onDe
                                         <div className="flex items-center gap-2">
                                             <Clock size={14} className="text-gray-400" />
                                             <div>
-                                                <p className="text-xs font-medium text-gray-700">
+                                                <p className="text-xs font-bold text-gray-700">
                                                     {clinic.lastActivity?.login ? new Date(clinic.lastActivity.login).toLocaleDateString() : 'Never'}
                                                 </p>
-                                                <p className="text-[10px] text-gray-400 truncate max-w-[120px]" title={clinic.lastActivity?.lastEvent}>
+                                                <p className="text-[10px] font-medium text-gray-400 truncate max-w-[120px]" title={clinic.lastActivity?.lastEvent}>
                                                     {clinic.lastActivity?.lastEvent || 'No activity'}
                                                 </p>
                                             </div>
@@ -307,19 +305,19 @@ export function Clinics({ clinics, onAddClinic, onViewClinic, onCopyClinic, onDe
                                     </td>
                                     <td className="py-3 px-3">
                                         <span
-                                            className={`px-2 py-1 rounded-full text-xs font-bold ${clinic.status === 'Active'
-                                                ? 'bg-green-50 text-green-700 border border-green-100'
-                                                : 'bg-gray-50 text-gray-600 border border-gray-100'
+                                            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${clinic.status === 'Active'
+                                                ? 'bg-green-50 text-green-700'
+                                                : 'bg-gray-100 text-gray-600'
                                                 }`}
                                         >
                                             {clinic.status}
                                         </span>
                                     </td>
                                     <td className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
-                                        <div className="flex items-center justify-end gap-1">
+                                        <div className="flex items-center justify-end gap-1 transition-opacity">
                                             <button
                                                 onClick={() => handleCopy(clinic)}
-                                                className="h-8 w-8 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center"
+                                                className="h-8 w-8 rounded-lg hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 transition-colors flex items-center justify-center"
                                                 title="Copy"
                                             >
                                                 <Copy size={16} />
@@ -341,10 +339,12 @@ export function Clinics({ clinics, onAddClinic, onViewClinic, onCopyClinic, onDe
 
                 {/* Empty State */}
                 {filteredClinics.length === 0 && (
-                    <div className="py-12 text-center">
-                        <Building2 className="mx-auto text-gray-300 mb-3" size={48} />
-                        <p className="text-gray-500 font-medium">No clinics found</p>
-                        <p className="text-sm text-gray-400 mt-1">Try adjusting your search</p>
+                    <div className="py-16 text-center bg-white border-t border-gray-50">
+                        <div className="h-12 w-12 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100 shadow-sm">
+                            <Building2 className="text-gray-300" size={24} />
+                        </div>
+                        <p className="text-sm font-bold text-gray-900">No clinics found</p>
+                        <p className="text-xs text-gray-500 mt-1 font-medium">Try adjusting your search criteria</p>
                     </div>
                 )}
             </div>
