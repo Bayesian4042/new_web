@@ -70,8 +70,8 @@ export function Sidebar({
           label: 'Companions'
         },
         {
-          id: 'protocols',
-          label: 'Protocols'
+          id: 'patient-companions',
+          label: 'Patient Companions'
         }]
     },
     {

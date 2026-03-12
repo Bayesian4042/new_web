@@ -26,6 +26,8 @@ import { ClinicForm } from './pages/setup/ClinicForm';
 import { ClinicDetail } from './pages/setup/ClinicDetail';
 import { OTCLists, OTCList } from './pages/otc/OTCLists';
 import { OTCListForm } from './pages/otc/OTCListForm';
+import { PatientCompanions, PatientCompanion } from './pages/workspace/PatientCompanions';
+import { PatientCompanionForm } from './pages/workspace/PatientCompanionForm';
 
 const INITIAL_RULES: AIRule[] = [
   {
@@ -228,7 +230,8 @@ const INITIAL_COMPANIONS: Companion[] = [
     status: 'Active',
     users: 124,
     createdBy: 'Dr. Sarah Smith',
-    createdOn: '02-02-2026'
+    createdOn: '02-02-2026',
+    source: 'Companion'
   },
   {
     id: 'CMP-0002',
@@ -237,7 +240,8 @@ const INITIAL_COMPANIONS: Companion[] = [
     status: 'Active',
     users: 856,
     createdBy: 'Nurse Johnson',
-    createdOn: '01-02-2026'
+    createdOn: '01-02-2026',
+    source: 'Companion'
   },
   {
     id: 'CMP-0003',
@@ -246,7 +250,8 @@ const INITIAL_COMPANIONS: Companion[] = [
     status: 'Draft',
     users: 0,
     createdBy: 'Dr. Mike Wilson',
-    createdOn: '31-01-2026'
+    createdOn: '31-01-2026',
+    source: 'Companion'
   },
   {
     id: 'CMP-0004',
@@ -255,7 +260,8 @@ const INITIAL_COMPANIONS: Companion[] = [
     status: 'Archived',
     users: 45,
     createdBy: 'Nutritionist Jane',
-    createdOn: '28-01-2026'
+    createdOn: '28-01-2026',
+    source: 'Companion'
   },
   {
     id: 'CMP-0005',
@@ -264,7 +270,8 @@ const INITIAL_COMPANIONS: Companion[] = [
     status: 'Active',
     users: 342,
     createdBy: 'Dr. Sarah Smith',
-    createdOn: '25-01-2026'
+    createdOn: '25-01-2026',
+    source: 'Companion'
   }
 ];
 
@@ -331,6 +338,10 @@ export function App() {
   const [companions, setCompanions] = useState<Companion[]>(INITIAL_COMPANIONS);
   const [protocols, setProtocols] = useState<Protocol[]>(INITIAL_PROTOCOLS);
   const [otcLists, setOtcLists] = useState<OTCList[]>(INITIAL_OTC_LISTS);
+  const [patientCompanions, setPatientCompanions] = useState<PatientCompanion[]>([]);
+  const [showPatientCompanionForm, setShowPatientCompanionForm] = useState(false);
+  const [editingPatientCompanion, setEditingPatientCompanion] = useState<PatientCompanion | null>(null);
+  const [patientCompanionDraft, setPatientCompanionDraft] = useState<any>(null);
 
   const handleClinicSubmit = (data: any) => {
     if (editingClinic && !editingClinic.isCopy) {
@@ -587,8 +598,106 @@ export function App() {
             setEditingCompanion(null);
             setCompanionDraft(null);
           }}
+          onSave={(data) => {
+            // 1. If patients are assigned, create individual Patient Companions
+            if (data.patients && data.patients.length > 0) {
+              const newInstances = data.patients.map((p: any, idx: number) => ({
+                id: `PCMP-${Date.now()}-${idx}`,
+                name: `${data.name} - ${p.name || `Patient ${idx + 1}`}`,
+                role: data.role || 'Companion',
+                status: 'Active' as const,
+                users: 1,
+                createdBy: userRole === 'admin' ? 'Super Admin' : 'Clinic Staff',
+                createdOn: new Date().toISOString().split('T')[0],
+                patients: [p],
+                // Include ALL configuration data (Exact Copy)
+                companionType: data.type,
+                aiPrompt: data.aiPrompt,
+                selectedShortcuts: data.selectedShortcuts,
+                selectedDocuments: data.selectedDocuments,
+                selectedPlans: data.selectedPlans,
+                followupType: data.followupType,
+                followupMessage: data.followupMessage,
+                frequency: data.frequency,
+                duration: data.duration,
+                preferredTime: data.preferredTime,
+                scheduledEvents: data.scheduledEvents,
+                assignedClinics: data.assignedClinics,
+                assignedCategories: data.assignedCategories,
+                source: data.name // Use template name as source
+              }));
+              setPatientCompanions(prev => [...prev, ...newInstances]);
+            }
+
+            // 2. Save the companion template but with empty patients
+            const templateData = {
+              ...data,
+              patients: [], // Clear patients as per user request
+              source: 'Companion' as const
+            };
+
+            if (editingCompanion && editingCompanion.id) {
+              setCompanions(prev => prev.map(c => c.id === editingCompanion.id ? { ...c, ...templateData } : c));
+            } else {
+              const newTemplate = {
+                ...templateData,
+                id: `CMP-${Date.now()}`,
+                status: 'Active' as const,
+                users: 0,
+                role: data.role || 'Companion',
+                createdBy: userRole === 'admin' ? 'Super Admin' : 'Clinic Staff',
+                createdOn: new Date().toISOString().split('T')[0]
+              };
+              setCompanions(prev => [...prev, newTemplate as any]);
+            }
+
+            setShowCompanionForm(false);
+            setEditingCompanion(null);
+            setCompanionDraft(null);
+          }}
           onChange={setCompanionDraft}
           initialData={editingCompanion}
+          userRole={userRole}
+        />
+      );
+    }
+
+    // Show Patient companion form when active
+    if (showPatientCompanionForm && activeView === 'patient-companions') {
+      return (
+        <PatientCompanionForm
+          onClose={() => {
+            setShowPatientCompanionForm(false);
+            setEditingPatientCompanion(null);
+            setPatientCompanionDraft(null);
+          }}
+          onSave={(data) => {
+            if (editingPatientCompanion && (editingPatientCompanion as any).id) {
+              setPatientCompanions(prev => prev.map(c =>
+                (c as any).id === (editingPatientCompanion as any).id ? { ...c, ...data } : c
+              ));
+            } else {
+              const newInstance = {
+                ...data,
+                id: `PCMP-${Date.now()}`,
+                status: 'Active' as const,
+                users: 1,
+                createdBy: userRole === 'admin' ? 'Super Admin' : 'Clinic Staff',
+                createdOn: new Date().toISOString().split('T')[0],
+              };
+              setPatientCompanions(prev => [...prev, newInstance]);
+            }
+            setShowPatientCompanionForm(false);
+            setEditingPatientCompanion(null);
+            setPatientCompanionDraft(null);
+          }}
+          onChange={setPatientCompanionDraft}
+          onNavigateToPatient={(patientId) => {
+            setSelectedPatientId(patientId);
+            setActiveView('all-patients');
+            setShowPatientCompanionForm(false);
+          }}
+          initialData={editingPatientCompanion}
           userRole={userRole}
         />
       );
@@ -602,8 +711,12 @@ export function App() {
             setShowProtocolForm(false);
             setEditingProtocol(null);
           }}
-          onSave={() => {
-            console.log('Save protocol triggered - implementation pending refactor');
+          onSave={(data: Protocol) => {
+            if (editingProtocol && editingProtocol.id) {
+              setProtocols(prev => prev.map(p => p.id === editingProtocol.id ? data : p));
+            } else {
+              setProtocols(prev => [...prev, data]);
+            }
             setShowProtocolForm(false);
             setEditingProtocol(null);
           }}
@@ -709,6 +822,23 @@ export function App() {
       case 'dashboard':
         return <Dashboard />;
       case 'companions':
+        const displayCompanions = userRole === 'admin'
+          ? companions.map(c => ({ ...c, source: 'Companion' as const }))
+          : [
+            ...companions.map(c => ({ ...c, source: 'Companion' as const })),
+            ...protocols
+              .filter(p => p.assignedClinics?.includes('clinic-1'))
+              .map(p => ({
+                id: p.id,
+                name: p.name,
+                role: p.category,
+                status: p.status,
+                users: p.enrolled,
+                createdBy: 'Admin',
+                createdOn: p.createdOn,
+                source: 'Protocol' as const
+              }))
+          ];
         return <Companions
           onAddCompanion={() => {
             setEditingCompanion(null);
@@ -720,7 +850,27 @@ export function App() {
           }}
           onCopyCompanion={handleCopyCompanion}
           onDeleteCompanion={handleDeleteCompanion}
-          companions={companions}
+          companions={displayCompanions}
+        />;
+      case 'patient-companions':
+        return <PatientCompanions
+          onAdd={() => {
+            setActiveView('companions');
+          }}
+          onEdit={(companion) => {
+            setEditingPatientCompanion(companion);
+            setShowPatientCompanionForm(true);
+          }}
+          onCopy={(companion) => {
+            setEditingPatientCompanion({ ...companion, id: `${companion.id}-copy`, name: `${companion.name} (Copy)` });
+            setShowPatientCompanionForm(true);
+          }}
+          onDelete={(id) => {
+            if (confirm('Are you sure you want to delete this patient companion?')) {
+              setPatientCompanions(prev => prev.filter(c => c.id !== id));
+            }
+          }}
+          companions={patientCompanions}
         />;
       case 'protocols':
         return <Protocols

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
     Plus,
     Calendar,
@@ -16,10 +16,13 @@ import {
     ChevronRight,
     Phone,
     Clock,
-    ChevronDown
+    ChevronDown,
+    Settings,
+    Building2
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { SideSheet, SideSheetItem } from '../../components/ui/SideSheet';
+import { ClinicSelector } from '../../components/ui/ClinicSelector';
 
 interface TestMessage {
     id: string;
@@ -43,11 +46,12 @@ export interface Protocol {
     selectedShortcuts?: string[];
     selectedDocuments?: string[];
     selectedPlans?: string[];
+    categories?: string[];
 }
 
 interface ProtocolFormProps {
     onClose: () => void;
-    onSave: () => void;
+    onSave: (data: Protocol) => void;
     initialData?: Protocol | null;
     userRole: 'admin' | 'clinic';
 }
@@ -59,7 +63,8 @@ type FormSection =
     'ai-rules' |
     'knowledge-base' |
     'plan-links' |
-    'follow-up';
+    'follow-up' |
+    'admin-settings';
 
 type SheetType = 'shortcuts' | 'documents' | 'plans' | 'templates' | 'followups' | null;
 
@@ -144,6 +149,8 @@ export function ProtocolForm({ onClose, onSave, initialData, userRole }: Protoco
     ]);
     const [patients, setPatients] = useState<Patient[]>([]);
     const [editingPatientIndex, setEditingPatientIndex] = useState<number | null>(null);
+    const [selectedClinics, setSelectedClinics] = useState<string[]>(initialData?.assignedClinics || []);
+    const [selectedCategories, setSelectedCategories] = useState<string[]>(initialData?.categories || []);
 
     const isNewProtocol = !initialData;
 
@@ -195,18 +202,25 @@ export function ProtocolForm({ onClose, onSave, initialData, userRole }: Protoco
             label: 'Follow-up',
             icon: Bell,
             required: false
+        },
+        {
+            id: 'admin-settings' as const,
+            label: 'Admin Settings',
+            icon: Building2,
+            required: false
         }
     ];
 
     // Filter out patient-details for admin users
-    const sections = userRole === 'admin' 
-        ? allSections.filter(s => s.id !== 'patient-details')
-        : allSections;
+    const sections = allSections.filter(s => {
+        if (userRole === 'admin') return s.id !== 'patient-details';
+        return s.id !== 'admin-settings';
+    });
 
     const isSectionComplete = (sectionId: FormSection): boolean => {
         switch (sectionId) {
             case 'protocol-type': return protocolTitle.length > 0;
-            case 'patient-details': return patients.length > 0 && patients.every(p => p.name.trim() && p.phoneNumber.trim());
+            case 'patient-details': return userRole === 'admin' ? true : (patients.length > 0 && patients.every(p => p.name.trim() && p.phoneNumber.trim()));
             case 'ai-rules': return aiRules.length > 10;
             default: return true;
         }
@@ -233,7 +247,8 @@ export function ProtocolForm({ onClose, onSave, initialData, userRole }: Protoco
         'ai-rules': useRef<HTMLElement>(null),
         'knowledge-base': useRef<HTMLElement>(null),
         'plan-links': useRef<HTMLElement>(null),
-        'follow-up': useRef<HTMLElement>(null)
+        'follow-up': useRef<HTMLElement>(null),
+        'admin-settings': useRef<HTMLElement>(null)
     };
 
     const scrollToSection = (sectionId: FormSection) => {
@@ -326,6 +341,26 @@ export function ProtocolForm({ onClose, onSave, initialData, userRole }: Protoco
             };
         }
         setPatients(newPatients);
+    };
+
+    const handleSubmit = () => {
+        const protocolData: Protocol = {
+            id: initialData?.id || `PRT-${Math.floor(Math.random() * 10000)}`,
+            name: protocolTitle,
+            category: selectedCategories[0] || 'General',
+            status: initialData?.status || 'Draft',
+            enrolled: initialData?.enrolled || 0,
+            duration: duration,
+            createdOn: initialData?.createdOn || new Date().toISOString().split('T')[0],
+            aiRules: aiRules,
+            followupMessage: followupMessage,
+            assignedClinics: selectedClinics,
+            categories: selectedCategories,
+            selectedShortcuts: selectedShortcuts,
+            selectedDocuments: selectedDocuments,
+            selectedPlans: selectedPlans
+        };
+        onSave(protocolData);
     };
 
     const handleSendTestMessage = () => {
@@ -763,7 +798,7 @@ export function ProtocolForm({ onClose, onSave, initialData, userRole }: Protoco
                         </section>
 
                         {/* Section 6: Follow-up */}
-                        <section ref={sectionRefs['follow-up']} className="mb-12 scroll-mt-6 pb-20">
+                        <section ref={sectionRefs['follow-up']} className="scroll-mt-6">
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="h-10 w-10 rounded-xl bg-pink-100 flex items-center justify-center">
                                     <Bell size={18} className="text-pink-600" />
@@ -1004,6 +1039,28 @@ export function ProtocolForm({ onClose, onSave, initialData, userRole }: Protoco
                                 )}
                             </div>
                         </section>
+
+                        {/* Section 7: Admin Settings */}
+                        {userRole === 'admin' && (
+                            <section ref={sectionRefs['admin-settings']} className="scroll-mt-6 mb-24">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="h-10 w-10 rounded-xl bg-gray-100 flex items-center justify-center">
+                                        <Settings size={18} className="text-gray-600" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-semibold text-gray-900">Admin Settings</h3>
+                                        <p className="text-sm text-gray-500">Assignment and categorization</p>
+                                    </div>
+                                </div>
+                                <ClinicSelector
+                                    selectedClinics={selectedClinics}
+                                    onSelectionChange={setSelectedClinics}
+                                    selectedCategories={selectedCategories}
+                                    onCategoriesChange={setSelectedCategories}
+                                    userRole={userRole}
+                                />
+                            </section>
+                        )}
                     </div>
                 </div>
 
@@ -1040,6 +1097,12 @@ export function ProtocolForm({ onClose, onSave, initialData, userRole }: Protoco
                             </button>
                         </div>
                     </div>
+                </div>
+
+                {/* Footer */}
+                <div className="fixed bottom-0 right-0 left-48 bg-white/80 backdrop-blur-md border-t border-gray-200 p-4 flex justify-end gap-3 z-30">
+                    <Button variant="outline" onClick={onClose} className="px-6 h-10 font-bold border-gray-200 hover:bg-gray-50">Cancel</Button>
+                    <Button onClick={handleSubmit} className="bg-gray-900 text-white hover:bg-gray-800 px-8 h-10 font-bold shadow-sm">Update</Button>
                 </div>
             </div>
 
