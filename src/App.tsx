@@ -19,13 +19,21 @@ import { AIRuleForm } from './pages/library/AIRuleForm';
 import { FollowupForm } from './pages/library/FollowupForm';
 import { KnowledgeBase, KBItem } from './pages/library/KnowledgeBase';
 import { KnowledgeBaseForm } from './pages/library/KnowledgeBaseForm';
+import { TextBlocks } from './pages/library/TextBlocks';
+import { DEFAULT_TEXT_BLOCKS } from './lib/textBlocks';
+import type { TextBlock } from './lib/textBlocks';
 import { Button } from './components/ui/Button';
 import { PlanForm } from './pages/otc/PlanForm';
+import { PlanForm2 } from './pages/otc/PlanForm2';
 import { Clinics, mockClinics, Clinic } from './pages/setup/Clinics';
 import { ClinicForm } from './pages/setup/ClinicForm';
 import { ClinicDetail } from './pages/setup/ClinicDetail';
 import { OTCLists, OTCList } from './pages/otc/OTCLists';
 import { OTCListForm } from './pages/otc/OTCListForm';
+import { AssignedPlans } from './pages/otc/AssignedPlans';
+import { BuiltPlans } from './pages/library/BuiltPlans';
+import { ActivePlans } from './pages/library/ActivePlans';
+import { Cards } from './pages/library/Cards';
 import { useOTCStore } from './store/useOTCStore';
 import { PatientCompanions, PatientCompanion } from './pages/workspace/PatientCompanions';
 import { PatientCompanionForm } from './pages/workspace/PatientCompanionForm';
@@ -84,7 +92,13 @@ const INITIAL_PLANS: Plan[] = [
     steps: 12,
     createdOn: '02-02-2026',
     content: '<p>Standard recovery protocol for post-orthopedic surgery.</p>',
-    products: []
+    products: [],
+    artifacts: [
+      { id: 'art-001', type: 'document', title: 'Wound Care Instructions', fileName: 'Wound_Care.pdf', fileSize: '1.2 MB', visualCategory: 'exercise', backgroundKey: 'exercise-3' },
+      { id: 'art-002', type: 'document', title: 'Post-Op Activity Guide', fileName: 'Activity_Guide.pdf', fileSize: '2.4 MB', visualCategory: 'people', backgroundKey: 'people-5' },
+      { id: 'art-003', type: 'link', title: 'Recovery Video Tutorial', url: 'https://med.edu/post-op-recovery', visualCategory: 'abstract', backgroundKey: 'abstract-2' },
+      { id: 'art-004', type: 'voice', title: 'Voice note from Dr. Sarah Smith', visualCategory: 'voice', backgroundKey: 'voice-1' },
+    ]
   },
   {
     id: 'PLAN-0002',
@@ -95,7 +109,14 @@ const INITIAL_PLANS: Plan[] = [
     duration: 'Ongoing',
     steps: 8,
     createdOn: '01-02-2026',
-    products: []
+    products: [],
+    artifacts: [
+      { id: 'art-005', type: 'document', title: 'Blood Sugar Monitoring Guide', fileName: 'Glucose_Monitoring.pdf', fileSize: '0.8 MB', visualCategory: 'diet', backgroundKey: 'diet-2' },
+      { id: 'art-006', type: 'link', title: 'ADA Diabetes Guidelines 2026', url: 'https://diabetes.org/guidelines', visualCategory: 'abstract', backgroundKey: 'abstract-7' },
+      { id: 'art-007', type: 'document', title: 'Insulin Dosage Chart', fileName: 'Insulin_Chart.pdf', fileSize: '0.5 MB', visualCategory: 'otc', backgroundKey: 'otc-4' },
+      { id: 'art-008', type: 'voice', title: 'Dietary advice from Dr. Sarah Smith', visualCategory: 'voice', backgroundKey: 'voice-3' },
+      { id: 'art-009', type: 'link', title: 'Patient Portal Login', url: 'https://portal.medicore.com', visualCategory: 'colors', backgroundKey: 'color-3', backgroundColor: '#1d5d9a' },
+    ]
   }
 ];
 
@@ -291,6 +312,9 @@ export function App() {
   const [editingKB, setEditingKB] = useState<KBItem | null>(null);
   const [showPlanForm, setShowPlanForm] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
+  const [showPlanForm2, setShowPlanForm2] = useState(false);
+  const [editingPlan2, setEditingPlan2] = useState<Plan | null>(null);
+  const [planDraft2, setPlanDraft2] = useState<any>(null);
   const [language, setLanguage] = useState<'en' | 'es'>('en');
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [showClinicForm, setShowClinicForm] = useState(false);
@@ -310,6 +334,7 @@ export function App() {
   const [rules, setRules] = useState<AIRule[]>(INITIAL_RULES);
   const [plans, setPlans] = useState<Plan[]>(INITIAL_PLANS);
   const [kbItems, setKbItems] = useState<KBItem[]>(INITIAL_KB);
+  const [textBlocks, setTextBlocks] = useState<TextBlock[]>(DEFAULT_TEXT_BLOCKS);
   const [followups, setFollowups] = useState<Followup[]>(INITIAL_FOLLOWUPS);
   const [companions, setCompanions] = useState<Companion[]>(INITIAL_COMPANIONS);
   const [protocols, setProtocols] = useState<Protocol[]>(INITIAL_PROTOCOLS);
@@ -471,6 +496,30 @@ export function App() {
     setPlanDraft(null);
   };
 
+  const handlePlanSubmit2 = () => {
+    if (!planDraft2) return;
+    const finalData = {
+      ...planDraft2,
+      category: planDraft2.assignedCategories?.[0] || 'General'
+    };
+    if (editingPlan2 && editingPlan2.id) {
+      setPlans(prev => prev.map(p => p.id === editingPlan2.id ? { ...p, ...finalData } : p));
+    } else {
+      const newPlan: Plan = {
+        ...finalData,
+        id: `PLAN-${(plans.length + 1).toString().padStart(4, '0')}`,
+        createdOn: new Date().toISOString().split('T')[0],
+        status: 'Active',
+        steps: finalData.products?.length || 0,
+        duration: 'Multiple weeks'
+      };
+      setPlans(prev => [newPlan, ...prev]);
+    }
+    setShowPlanForm2(false);
+    setEditingPlan2(null);
+    setPlanDraft2(null);
+  };
+
   const handleKBSubmit = () => {
     if (!kbDraft) return;
     if (editingKB && editingKB.id) {
@@ -568,7 +617,7 @@ export function App() {
 
   const renderContent = () => {
     // Show companion form when active
-    if (showCompanionForm && activeView === 'companions') {
+    if (showCompanionForm && activeView === 'companions-list') {
       return (
         <CompanionForm
           onClose={() => {
@@ -757,6 +806,31 @@ export function App() {
       );
     }
 
+    // Show Plan 2 form when active
+    if (showPlanForm2 && activeView === 'plans2') {
+      return (
+        <PlanForm2
+          onChange={setPlanDraft2}
+          initialData={editingPlan2}
+          userRole={userRole}
+          doctorName={CURRENT_DOCTOR_NAME}
+          otcLists={otcLists}
+          onSubmit={handlePlanSubmit2}
+          onCancel={() => {
+            setShowPlanForm2(false);
+            setEditingPlan2(null);
+            setPlanDraft2(null);
+          }}
+          onCreateOTCPackage={() => {
+            setShowPlanForm2(false);
+            setEditingPlan2(null);
+            setPlanDraft2(null);
+            setActiveView('otc-lists');
+          }}
+        />
+      );
+    }
+
     // Show Followup form when active
     if (showFollowupForm && activeView === 'followups') {
       return (
@@ -801,7 +875,7 @@ export function App() {
     switch (activeView) {
       case 'dashboard':
         return <Dashboard />;
-      case 'companions':
+      case 'companions-list':
         const displayCompanions = userRole === 'admin'
           ? companions.map(c => ({ ...c, source: 'Companion' as const }))
           : [
@@ -835,7 +909,7 @@ export function App() {
       case 'patient-companions':
         return <PatientCompanions
           onAdd={() => {
-            setActiveView('companions');
+            setActiveView('companions-list');
           }}
           onEdit={(companion) => {
             setEditingPatientCompanion(companion);
@@ -905,6 +979,69 @@ export function App() {
           onDelete={handleDeletePlan}
           plans={plans}
         />;
+      case 'plans2':
+        return <Plans
+          onAdd={() => setShowPlanForm2(true)}
+          onEdit={(plan) => {
+            setEditingPlan2(plan);
+            setShowPlanForm2(true);
+          }}
+          onCopy={(plan) => {
+            setEditingPlan2({ ...plan, id: '', name: `${plan.name} (Copy)` });
+            setShowPlanForm2(true);
+          }}
+          onDelete={handleDeletePlan}
+          plans={plans}
+        />;
+      case 'assigned-plans':
+        return <AssignedPlans
+          plans={plans}
+          onEditPlan={(plan) => {
+            setEditingPlan2(plan);
+            setShowPlanForm2(true);
+            setActiveView('plans2');
+          }}
+        />;
+      case 'built-plans':
+        return <BuiltPlans
+          plans={plans}
+          onAdd={() => {
+            setEditingPlan2(null);
+            setShowPlanForm2(true);
+            setActiveView('plans2');
+          }}
+          onEdit={(plan) => {
+            setEditingPlan2(plan);
+            setShowPlanForm2(true);
+            setActiveView('plans2');
+          }}
+          onCopy={(plan) => {
+            setEditingPlan2({ ...plan, id: '', name: `${plan.name} (Copy)` });
+            setShowPlanForm2(true);
+            setActiveView('plans2');
+          }}
+          onDelete={handleDeletePlan}
+          onAssign={(plan) => {
+            // Mark plan as assigned — move to active state
+            setPlans(prev => prev.map(p =>
+              p.id === plan.id ? { ...p, status: 'Active' as const } : p
+            ));
+            setActiveView('active-plans');
+          }}
+        />;
+      case 'active-plans':
+        return <ActivePlans
+          plans={plans.filter(p => ((p as any).assignedPatients?.length ?? 0) > 0)}
+          onEditPlan={(plan) => {
+            setEditingPlan2(plan);
+            setShowPlanForm2(true);
+            setActiveView('plans2');
+          }}
+          onNavigateToPatient={(patientId) => {
+            setSelectedPatientId(patientId);
+            setActiveView('all-patients');
+          }}
+        />;
       case 'followups':
         return <Followups
           onAddFollowup={() => {
@@ -932,6 +1069,20 @@ export function App() {
           onCopyItem={handleCopyKB}
           onDeleteItem={handleDeleteKB}
           items={kbItems}
+        />;
+      case 'text-blocks':
+        return <TextBlocks
+          blocks={textBlocks}
+          onSave={setTextBlocks}
+        />;
+      case 'cards':
+        return <Cards
+          plans={plans}
+          onGoToPlan={(plan) => {
+            setEditingPlan2(plan);
+            setShowPlanForm2(true);
+            setActiveView('plans2');
+          }}
         />;
       case 'otc-lists':
         return <OTCLists
@@ -1013,16 +1164,16 @@ export function App() {
   };
 
   const getPageInfo = () => {
-    if (showCompanionForm && activeView === 'companions') {
+    if (showCompanionForm && activeView === 'companions-list') {
       return {
         title: 'New Companion',
-        breadcrumb: 'Workspace / Companions'
+        breadcrumb: 'Companions'
       };
     }
     if (showProtocolForm && activeView === 'protocols') {
       return {
         title: 'New Protocol',
-        breadcrumb: 'Workspace / Protocols'
+        breadcrumb: 'Companions / Protocols'
       };
     }
 
@@ -1030,7 +1181,7 @@ export function App() {
     if (showAIRuleForm && activeView === 'ai-rules') {
       return {
         title: editingAIRule ? 'Edit AI Rule' : 'New AI Rule',
-        breadcrumb: 'Library / AI Rules'
+        breadcrumb: 'Companions / AI Rules'
       };
     }
 
@@ -1045,13 +1196,17 @@ export function App() {
         title: 'Home',
         breadcrumb: 'Overview'
       },
-      companions: {
+      'companions-list': {
         title: 'Companions',
-        breadcrumb: 'Workspace'
+        breadcrumb: 'Companions'
+      },
+      'patient-companions': {
+        title: 'Patient Companions',
+        breadcrumb: 'Companions'
       },
       protocols: {
         title: 'Protocols',
-        breadcrumb: 'Workspace'
+        breadcrumb: 'Companions'
       },
       'all-patients': {
         title: 'All Patients',
@@ -1063,23 +1218,47 @@ export function App() {
       },
       'ai-rules': {
         title: 'AI Rules',
-        breadcrumb: 'Library'
+        breadcrumb: 'Companions'
       },
-      plans: {
-        title: 'Plans',
-        breadcrumb: 'Library'
+      'shortcut-intents': {
+        title: 'Shortcut Intents',
+        breadcrumb: 'Companions'
       },
       followups: {
-        title: 'Followups',
-        breadcrumb: 'Library'
+        title: 'Follow Ups',
+        breadcrumb: 'Companions'
       },
       'knowledge-base': {
         title: 'Knowledge Base',
-        breadcrumb: 'Library'
+        breadcrumb: 'Companions'
+      },
+      plans: {
+        title: 'Plans',
+        breadcrumb: 'Plans'
+      },
+      plans2: {
+        title: 'Plans',
+        breadcrumb: 'Plans'
+      },
+      'built-plans': {
+        title: 'Built Plans',
+        breadcrumb: 'Plans'
+      },
+      'active-plans': {
+        title: 'Active Plans',
+        breadcrumb: 'Plans'
+      },
+      'text-blocks': {
+        title: 'Text Blocks',
+        breadcrumb: 'Plans'
+      },
+      cards: {
+        title: 'Cards',
+        breadcrumb: 'Plans'
       },
       'otc-lists': {
-        title: 'OTC Lists',
-        breadcrumb: 'OTC'
+        title: 'OTC Products',
+        breadcrumb: 'Plans'
       },
       'health-assistant': {
         title: 'Health Assistant',
@@ -1134,11 +1313,11 @@ export function App() {
   // Let's implement the specific headers if a form is active.
   const renderHeader = () => {
     // Custom header for Companions form
-    if (showCompanionForm && activeView === 'companions') {
+    if (showCompanionForm && activeView === 'companions-list') {
       return (
         <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20 shadow-sm">
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-500 font-medium">Workspace</span>
+            <span className="text-gray-500 font-medium">Companions</span>
             <span className="text-gray-300">/</span>
             <span className="text-gray-500 font-medium">Companions</span>
             <span className="text-gray-300">/</span>
@@ -1187,7 +1366,7 @@ export function App() {
       return (
         <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20 shadow-sm">
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-500 font-medium">Library</span>
+            <span className="text-gray-500 font-medium">Companions</span>
             <span className="text-gray-300">/</span>
             <span className="text-gray-500 font-medium">AI Rules</span>
             <span className="text-gray-300">/</span>
@@ -1209,7 +1388,7 @@ export function App() {
       return (
         <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20 shadow-sm">
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-500 font-medium">Workspace</span>
+            <span className="text-gray-500 font-medium">Companions</span>
             <span className="text-gray-300">/</span>
             <span className="text-gray-500 font-medium">Protocols</span>
             <span className="text-gray-300">/</span>
@@ -1259,7 +1438,7 @@ export function App() {
       return (
         <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20 shadow-sm">
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-500 font-medium">Library</span>
+            <span className="text-gray-500 font-medium">Plans</span>
             <span className="text-gray-300">/</span>
             <span className="text-gray-500 font-medium">Plans</span>
             <span className="text-gray-300">/</span>
@@ -1277,14 +1456,37 @@ export function App() {
       );
     }
 
+    // Custom header for Plan 2 form
+    if (showPlanForm2 && activeView === 'plans2') {
+      return (
+        <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20 shadow-sm">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-500 font-medium">Plans</span>
+            <span className="text-gray-300">/</span>
+            <span className="text-gray-500 font-medium">Plans</span>
+            <span className="text-gray-300">/</span>
+            {editingPlan2 ? (
+              <>
+                <span className="text-gray-500 font-medium">{editingPlan2.name}</span>
+                <span className="text-gray-300">/</span>
+                <span className="font-semibold text-gray-900">Edit</span>
+              </>
+            ) : (
+              <span className="font-semibold text-gray-900">New Plan</span>
+            )}
+          </div>
+        </header>
+      );
+    }
+
     // Custom header for Followup form
     if (showFollowupForm && activeView === 'followups') {
       return (
         <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20 shadow-sm">
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-500 font-medium">Library</span>
+            <span className="text-gray-500 font-medium">Companions</span>
             <span className="text-gray-300">/</span>
-            <span className="text-gray-500 font-medium">Followups</span>
+            <span className="text-gray-500 font-medium">Follow Ups</span>
             <span className="text-gray-300">/</span>
             {editingFollowup ? (
               <>
@@ -1305,7 +1507,7 @@ export function App() {
       return (
         <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20 shadow-sm">
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-500 font-medium">Library</span>
+            <span className="text-gray-500 font-medium">Companions</span>
             <span className="text-gray-300">/</span>
             <span className="text-gray-500 font-medium">Knowledge Base</span>
             <span className="text-gray-300">/</span>
@@ -1328,9 +1530,9 @@ export function App() {
       return (
         <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20 shadow-sm">
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-500 font-medium">OTC</span>
+            <span className="text-gray-500 font-medium">Plans</span>
             <span className="text-gray-300">/</span>
-            <span className="text-gray-500 font-medium">OTC Lists</span>
+            <span className="text-gray-500 font-medium">OTC Products</span>
             <span className="text-gray-300">/</span>
             {editingOTCList ? (
               <>

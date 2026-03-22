@@ -12,6 +12,18 @@ import {
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
+export interface PlanArtifact {
+  id: string;
+  type: 'document' | 'link' | 'voice';
+  title: string;
+  fileName?: string;
+  fileSize?: string;
+  url?: string;
+  visualCategory: string;
+  backgroundKey: string;
+  backgroundColor?: string;
+}
+
 export interface Plan {
   id: string;
   name: string;
@@ -23,6 +35,7 @@ export interface Plan {
   assignedCategories?: string[];
   content?: string;
   products?: any[];
+  artifacts?: PlanArtifact[];
 }
 
 interface PlansProps {

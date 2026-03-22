@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   FileText,
   Link as LinkIcon,
@@ -10,6 +10,13 @@ import {
   Pill,
   Globe,
   Files,
+  X,
+  Mic,
+  Square,
+  Play,
+  Pause,
+  RotateCcw,
+  Check,
 } from "lucide-react";
 import {
   DndContext,
@@ -206,6 +213,197 @@ const TIMES = [
   { label: "Late", char: "L" },
   { label: "Evening", char: "E" },
 ];
+
+type RecorderState = "idle" | "recording" | "recorded";
+
+function VoiceNoteRecorder() {
+  const [recorderState, setRecorderState] = useState<RecorderState>("idle");
+  const [elapsed, setElapsed] = useState(0);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [bars, setBars] = useState<number[]>(Array(28).fill(3));
+
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const animFrameRef = useRef<number | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const formatTime = (s: number) =>
+    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+
+  const animateBars = useCallback(() => {
+    if (!analyserRef.current) return;
+    const data = new Uint8Array(analyserRef.current.frequencyBinCount);
+    analyserRef.current.getByteFrequencyData(data);
+    const step = Math.floor(data.length / 28);
+    setBars(
+      Array.from({ length: 28 }, (_, i) => {
+        const val = data[i * step] ?? 0;
+        return Math.max(3, Math.round((val / 255) * 40));
+      }),
+    );
+    animFrameRef.current = requestAnimationFrame(animateBars);
+  }, []);
+
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+
+      const audioCtx = new AudioContext();
+      const source = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 128;
+      source.connect(analyser);
+      analyserRef.current = analyser;
+
+      const recorder = new MediaRecorder(stream);
+      chunksRef.current = [];
+      recorder.ondataavailable = (e) => chunksRef.current.push(e.data);
+      recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        setAudioUrl(URL.createObjectURL(blob));
+      };
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+
+      setElapsed(0);
+      setRecorderState("recording");
+      timerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000);
+      animFrameRef.current = requestAnimationFrame(animateBars);
+    } catch {
+      // microphone permission denied — silently ignore
+    }
+  }, [animateBars]);
+
+  const stopRecording = useCallback(() => {
+    mediaRecorderRef.current?.stop();
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    setBars(Array(28).fill(3));
+    setRecorderState("recorded");
+  }, []);
+
+  const reset = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setAudioUrl(null);
+    setIsPlaying(false);
+    setElapsed(0);
+    setBars(Array(28).fill(3));
+    setRecorderState("idle");
+  }, []);
+
+  const togglePlay = useCallback(() => {
+    if (!audioUrl) return;
+    if (!audioRef.current) {
+      audioRef.current = new Audio(audioUrl);
+      audioRef.current.onended = () => setIsPlaying(false);
+    }
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play();
+      setIsPlaying(true);
+    }
+  }, [audioUrl, isPlaying]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      audioRef.current?.pause();
+    };
+  }, []);
+
+  return (
+    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-4">
+      {/* Waveform / status row */}
+      <div className="flex items-center gap-3">
+        <div className="flex items-end gap-[2px] h-10 flex-1">
+          {bars.map((h, i) => (
+            <div
+              key={i}
+              className={`flex-1 rounded-full transition-all duration-75 ${
+                recorderState === "recording"
+                  ? "bg-red-500"
+                  : recorderState === "recorded"
+                    ? "bg-gray-400"
+                    : "bg-gray-300"
+              }`}
+              style={{ height: `${h}px` }}
+            />
+          ))}
+        </div>
+        <span
+          className={`text-xs font-mono font-semibold tabular-nums w-10 text-right shrink-0 ${
+            recorderState === "recording" ? "text-red-500" : "text-gray-500"
+          }`}
+        >
+          {formatTime(elapsed)}
+        </span>
+      </div>
+
+      {/* Controls */}
+      <div className="flex items-center justify-center gap-3">
+        {recorderState === "idle" && (
+          <button
+            type="button"
+            onClick={startRecording}
+            className="flex items-center gap-2 px-5 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white text-xs font-semibold shadow-sm transition-all"
+          >
+            <Mic size={14} />
+            Record
+          </button>
+        )}
+
+        {recorderState === "recording" && (
+          <button
+            type="button"
+            onClick={stopRecording}
+            className="flex items-center gap-2 px-5 py-2 rounded-full bg-gray-900 hover:bg-black text-white text-xs font-semibold shadow-sm transition-all"
+          >
+            <Square size={12} />
+            Stop
+          </button>
+        )}
+
+        {recorderState === "recorded" && (
+          <>
+            <button
+              type="button"
+              onClick={reset}
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 text-xs font-semibold transition-all"
+            >
+              <RotateCcw size={13} />
+              Redo
+            </button>
+            <button
+              type="button"
+              onClick={togglePlay}
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-xs font-semibold transition-all"
+            >
+              {isPlaying ? <Pause size={13} /> : <Play size={13} />}
+              {isPlaying ? "Pause" : "Play"}
+            </button>
+            <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
+              <Check size={13} />
+              Recorded
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export function PlanForm({
   initialData,
@@ -465,15 +663,18 @@ export function PlanForm({
     );
   };
 
-  const openCardModal = () => {
-    // reset to default Abstract card each time
-    setCardDraft({
-      type: "abstract",
-      visualCategory: "abstract",
-      backgroundKey: CARD_STYLE_IDS.abstract[0]?.id,
-      title: "",
-      description: "",
-    });
+  const openCardModal = (existingCard?: PlanCard) => {
+    if (existingCard) {
+      setCardDraft({ ...existingCard });
+    } else {
+      setCardDraft({
+        type: "abstract",
+        visualCategory: "abstract",
+        backgroundKey: CARD_STYLE_IDS.abstract[0]?.id,
+        title: "",
+        description: "",
+      });
+    }
     setIsCardModalOpen(true);
   };
 
@@ -551,17 +752,20 @@ export function PlanForm({
     if (!cardDraft.type || !cardDraft.backgroundKey) {
       return;
     }
+    const isVoice = cardDraft.type === "voice";
     const newCard: PlanCard = {
-      id: `card-${Date.now()}`,
+      id: cardDraft.id || `card-${Date.now()}`,
       type: cardDraft.type,
-      title: (cardDraft.title || "").trim() || "Card Title",
+      title: isVoice
+        ? `Voice note from ${doctorName}`
+        : (cardDraft.title || "").trim() || "Card Title",
       description: cardDraft.description || "",
       visualCategory:
         (cardDraft.visualCategory as CardVisualCategory) || "abstract",
       backgroundKey: cardDraft.backgroundKey,
       backgroundColor: cardDraft.backgroundColor,
     };
-    setCards((prev) => [...prev, newCard]);
+    setCards([newCard]);
     closeCardModal();
   };
 
@@ -890,79 +1094,90 @@ export function PlanForm({
           <Card className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h2 className="text-sm font-bold text-gray-900">Cards</h2>
+                <h2 className="text-sm font-bold text-gray-900">Card</h2>
                 <p className="text-[11px] text-gray-500">
-                  Attach cards to this plan.
+                  One card can be attached to this plan.
                 </p>
               </div>
-              <Button
-                onClick={openCardModal}
-                size="sm"
-                className="gap-1.5 bg-gray-900 text-white hover:bg-black h-8 text-xs"
-              >
-                <Plus size={14} />
-                Add
-              </Button>
+              {cards.length === 0 && (
+                <Button
+                  onClick={() => openCardModal()}
+                  size="sm"
+                  className="gap-1.5 bg-gray-900 text-white hover:bg-black h-8 text-xs"
+                >
+                  <Plus size={14} />
+                  Add
+                </Button>
+              )}
             </div>
 
             {cards.length === 0 ? (
-              <div className="flex items-center justify-center py-6 border-2 border-dashed border-gray-100 rounded-lg bg-gray-50/50">
-                <p className="text-xs text-gray-400 font-medium">
-                  No cards added yet
+              <button
+                onClick={() => openCardModal()}
+                className="w-full flex flex-col items-center justify-center gap-2 py-8 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50 hover:border-gray-400 hover:bg-gray-100/50 transition-all group"
+              >
+                <div className="h-9 w-9 rounded-full bg-gray-200 group-hover:bg-gray-300 flex items-center justify-center transition-colors">
+                  <Plus size={16} className="text-gray-500" />
+                </div>
+                <p className="text-xs text-gray-400 font-medium group-hover:text-gray-600">
+                  Add a card
                 </p>
-              </div>
+              </button>
             ) : (
-              <div className="grid grid-cols-1 gap-3">
-                {cards.map((card) => {
-                  const category = card.visualCategory as CardVisualCategory;
-                  const selectedStyle = CARD_STYLE_IDS[category].find(
-                    (s) => s.id === card.backgroundKey,
-                  );
-
-                  const style =
-                    category === "colors" && card.backgroundColor
-                      ? { backgroundColor: card.backgroundColor }
-                      : selectedStyle?.img
-                        ? {
-                            backgroundImage: `url(${selectedStyle.img})`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                          }
-                        : {
-                            backgroundImage:
-                              "linear-gradient(135deg, #111827, #4b5563)",
-                          };
-
-                  return (
-                    <div
-                      key={card.id}
-                      className="relative rounded-2xl p-4 text-white shadow-sm overflow-hidden min-h-[140px] flex flex-col justify-start items-start text-left"
-                      style={style as React.CSSProperties}
-                    >
-                      <div>
-                        <h3 className="mt-1 text-lg font-bold line-clamp-4">
-                          {card.title}
-                        </h3>
-                        {card.description && (
-                          <p className="mt-1 text-xl opacity-90 line-clamp-4">
-                            {card.description}
-                          </p>
-                        )}
-                      </div>
-                      <button
-                        onClick={() =>
-                          setCards((prev) =>
-                            prev.filter((c) => c.id !== card.id),
-                          )
+              (() => {
+                const card = cards[0];
+                const category = card.visualCategory as CardVisualCategory;
+                const selectedStyle = CARD_STYLE_IDS[category].find(
+                  (s) => s.id === card.backgroundKey,
+                );
+                const cardStyle =
+                  category === "colors" && card.backgroundColor
+                    ? { backgroundColor: card.backgroundColor }
+                    : selectedStyle?.img
+                      ? {
+                          backgroundImage: `url(${selectedStyle.img})`,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
                         }
-                        className="absolute top-2 right-2 h-6 w-6 rounded-full bg-black/30 hover:bg-black/50 flex items-center justify-center text-xs"
+                      : {
+                          backgroundImage:
+                            "linear-gradient(135deg, #111827, #4b5563)",
+                        };
+
+                return (
+                  <div className="relative group">
+                    <div
+                      className="relative rounded-2xl p-4 text-white shadow-sm overflow-hidden min-h-[140px] flex flex-col justify-start items-start text-left"
+                      style={cardStyle as React.CSSProperties}
+                    >
+                      <h3 className="mt-1 text-lg font-bold line-clamp-4">
+                        {card.title}
+                      </h3>
+                      {card.description && (
+                        <p className="mt-1 text-sm opacity-90 line-clamp-3">
+                          {card.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openCardModal(card)}
+                        className="flex-1 h-7 text-xs gap-1"
                       >
-                        ×
+                        Edit
+                      </Button>
+                      <button
+                        onClick={() => setCards([])}
+                        className="h-7 w-7 flex items-center justify-center rounded-md border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-all"
+                      >
+                        <Trash2 size={13} />
                       </button>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })()
             )}
           </Card>
 
@@ -992,235 +1207,213 @@ export function PlanForm({
 
       {/* Card Creator Side Sheet */}
       {isCardModalOpen && (
-        <div className="fixed inset-y-0 right-0 z-50 w-full max-w-xl bg-white shadow-xl flex flex-col">
-          <div className="absolute inset-0 bg-black/10 -z-10" />
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/20 z-40 transition-opacity"
+            onClick={closeCardModal}
+          />
 
-          {/* Header with title + primary actions */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-white">
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-semibold text-gray-900">Add Card</h2>
+          {/* Side Sheet Panel */}
+          <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-xl flex flex-col animate-in slide-in-from-right duration-300">
+            {/* Header */}
+            <div className="flex items-start justify-between px-5 py-4 border-b border-gray-200 bg-white">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {cardDraft.id ? "Edit Card" : "Add Card"}
+                </h2>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  Customise the card attached to this plan.
+                </p>
+              </div>
               <button
                 onClick={closeCardModal}
-                className="text-gray-400 hover:text-gray-600"
+                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
               >
-                ×
+                <X size={20} />
               </button>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={closeCardModal}>
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleCardSave}
-                disabled={!cardDraft.type || !cardDraft.backgroundKey}
-                className="bg-gray-900 text-white hover:bg-black disabled:opacity-40"
-              >
-                Add Card
-              </Button>
-            </div>
-          </div>
 
-          {/* Body */}
-          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-            {/* Step 1: Type (visual category) */}
-            <div>
-              <p className="text-xs font-semibold text-gray-600 mb-2">
-                1. Choose card type
-              </p>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { id: "abstract", label: "Abstract" },
-                  { id: "people", label: "People" },
-                  { id: "exercise", label: "Exercise" },
-                  { id: "diet", label: "Diet" },
-                  { id: "otc", label: "OTC" },
-                  { id: "colors", label: "Colors" },
-                  { id: "voice", label: "Voice Note" },
-                ].map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => handleCardTypeSelect(t.id as CardType)}
-                    className={`px-2 py-2 text-[11px] rounded-lg border text-center bg-white ${
-                      cardDraft.type === t.id
-                        ? "border-gray-900 shadow-sm text-gray-900"
-                        : "border-gray-200 text-gray-700 hover:border-gray-400"
-                    }`}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Step 2: Style thumbnails for the chosen type (not needed for voice) */}
-            {cardDraft.type && cardDraft.type !== "voice" && (
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full">
+              {/* Step 1: Type */}
               <div>
-                <p className="text-xs font-semibold text-gray-600 mb-2">
-                  2. Choose background
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  Card type
                 </p>
-
-                <div className="grid grid-cols-4 md:grid-cols-6 gap-2 max-h-44 overflow-y-auto">
-                  {CARD_STYLE_IDS[cardDraft.type as CardVisualCategory].map(
-                    (style) => (
-                      <button
-                        key={style.id}
-                        type="button"
-                        onClick={() =>
-                          handleCardStyleSelect(
-                            cardDraft.type as CardVisualCategory,
-                            style.id,
-                          )
-                        }
-                        className={`h-12 rounded-xl border overflow-hidden ${
-                          cardDraft.backgroundKey === style.id
-                            ? "border-gray-900 ring-2 ring-gray-900/40"
-                            : "border-gray-200"
-                        }`}
-                        style={
-                          cardDraft.type === "colors" && style.color
-                            ? { backgroundColor: style.color }
-                            : undefined
-                        }
-                      >
-                        {cardDraft.type !== "colors" && style.img && (
-                          <div
-                            className="w-full h-full"
-                            style={{
-                              backgroundImage: `url(${style.img})`,
-                              backgroundSize: "cover",
-                              backgroundPosition: "center",
-                            }}
-                          />
-                        )}
-                      </button>
-                    ),
-                  )}
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { id: "abstract", label: "Abstract" },
+                    { id: "people", label: "People" },
+                    { id: "exercise", label: "Exercise" },
+                    { id: "diet", label: "Diet" },
+                    { id: "otc", label: "OTC" },
+                    { id: "colors", label: "Colors" },
+                    { id: "voice", label: "Voice Note" },
+                  ].map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => handleCardTypeSelect(t.id as CardType)}
+                      className={`px-2 py-2 text-[11px] rounded-lg border text-center transition-all ${
+                        cardDraft.type === t.id
+                          ? "border-gray-900 bg-gray-900 text-white shadow-sm"
+                          : "border-gray-200 bg-white text-gray-700 hover:border-gray-400"
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
                 </div>
               </div>
-            )}
 
-            {/* Step 3: Content */}
-            {cardDraft.type && (
-              <div className="space-y-3">
-                <p className="text-xs font-semibold text-gray-600">
-                  3. Card content
-                </p>
-
-                {/* Preview */}
-                {(() => {
-                  const category =
-                    (cardDraft.visualCategory as CardVisualCategory) ||
-                    "abstract";
-                  const selectedStyle: CardStyleMeta | undefined =
-                    cardDraft.backgroundKey
-                      ? CARD_STYLE_IDS[category].find(
-                          (s) => s.id === cardDraft.backgroundKey,
-                        )
-                      : undefined;
-
-                  const previewStyle =
-                    category === "colors" && cardDraft.backgroundColor
-                      ? { backgroundColor: cardDraft.backgroundColor }
-                      : selectedStyle?.img
-                        ? {
-                            backgroundImage: `url(${selectedStyle.img})`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
+              {/* Step 2: Background (not for voice) */}
+              {cardDraft.type && cardDraft.type !== "voice" && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                    Background
+                  </p>
+                  <div className="grid grid-cols-6 gap-2">
+                    {CARD_STYLE_IDS[cardDraft.type as CardVisualCategory].map(
+                      (style) => (
+                        <button
+                          key={style.id}
+                          type="button"
+                          onClick={() =>
+                            handleCardStyleSelect(
+                              cardDraft.type as CardVisualCategory,
+                              style.id,
+                            )
                           }
-                        : {
-                            backgroundImage:
-                              "linear-gradient(135deg, #111827, #4b5563)",
-                          };
+                          className={`h-11 rounded-xl border-2 overflow-hidden transition-all ${
+                            cardDraft.backgroundKey === style.id
+                              ? "border-gray-900 ring-2 ring-gray-900/30 scale-105"
+                              : "border-transparent hover:border-gray-300"
+                          }`}
+                          style={
+                            cardDraft.type === "colors" && style.color
+                              ? { backgroundColor: style.color }
+                              : undefined
+                          }
+                        >
+                          {cardDraft.type !== "colors" && style.img && (
+                            <div
+                              className="w-full h-full"
+                              style={{
+                                backgroundImage: `url(${style.img})`,
+                                backgroundSize: "cover",
+                                backgroundPosition: "center",
+                              }}
+                            />
+                          )}
+                        </button>
+                      ),
+                    )}
+                  </div>
+                </div>
+              )}
 
-                  return (
-                    <div
-                      className="rounded-2xl px-4 py-4 text-white shadow-sm min-h-[180px] flex flex-col justify-start items-start text-left"
-                      style={previewStyle}
-                    >
-                      <h3 className="text-lg font-bold leading-snug">
-                        {cardDraft.title || "Type the card text here..."}
-                      </h3>
-                    </div>
-                  );
-                })()}
+              {/* Step 3: Content + live preview */}
+              {cardDraft.type && (
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Preview
+                  </p>
 
-                {cardDraft.type === "voice" ? (
-                  <div className="space-y-3 mt-2">
+                  {/* Live preview */}
+                  {(() => {
+                    const category =
+                      (cardDraft.visualCategory as CardVisualCategory) ||
+                      "abstract";
+                    const selectedStyle: CardStyleMeta | undefined =
+                      cardDraft.backgroundKey
+                        ? CARD_STYLE_IDS[category].find(
+                            (s) => s.id === cardDraft.backgroundKey,
+                          )
+                        : undefined;
+
+                    const previewStyle =
+                      category === "colors" && cardDraft.backgroundColor
+                        ? { backgroundColor: cardDraft.backgroundColor }
+                        : selectedStyle?.img
+                          ? {
+                              backgroundImage: `url(${selectedStyle.img})`,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                            }
+                          : {
+                              backgroundImage:
+                                "linear-gradient(135deg, #111827, #4b5563)",
+                            };
+
+                    const displayTitle =
+                      cardDraft.type === "voice"
+                        ? `Voice note from ${doctorName}`
+                        : cardDraft.title;
+
+                    return (
+                      <div
+                        className="rounded-2xl px-4 py-4 text-white shadow-sm min-h-[160px] flex flex-col justify-start items-start text-left"
+                        style={previewStyle}
+                      >
+                        <h3 className="text-lg font-bold leading-snug">
+                          {displayTitle || (
+                            <span className="opacity-40 italic font-normal text-base">
+                              Type the card text below…
+                            </span>
+                          )}
+                        </h3>
+                      </div>
+                    );
+                  })()}
+
+                  {cardDraft.type === "voice" ? (
+                    <VoiceNoteRecorder />
+                  ) : (
                     <div>
                       <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                        Card title
+                        Text on card
                       </label>
-                      <Input
-                        type="text"
-                        value={
-                          cardDraft.title || `Voice note from ${doctorName}`
-                        }
+                      <textarea
+                        value={cardDraft.title || ""}
                         onChange={(e) =>
                           setCardDraft((prev) => ({
                             ...prev,
                             title: e.target.value,
                           }))
                         }
-                        className="w-full text-sm"
-                        placeholder="Title shown to the patient"
+                        rows={3}
+                        className="w-full border border-gray-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 resize-none"
+                        placeholder="What should the patient read on this card?"
                       />
                     </div>
-                    <div className="flex items-center justify-center">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const voiceStyles = CARD_STYLE_IDS.voice;
-                          if (!voiceStyles || voiceStyles.length === 0) return;
-                          const random =
-                            voiceStyles[
-                              Math.floor(Math.random() * voiceStyles.length)
-                            ];
-                          setCardDraft((prev) => ({
-                            ...prev,
-                            type: "voice",
-                            visualCategory: "voice",
-                            backgroundKey: random.id,
-                            backgroundColor: undefined,
-                            title:
-                              prev.title && prev.title.trim().length > 0
-                                ? prev.title
-                                : `Voice note from ${doctorName}`,
-                            description: "",
-                          }));
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-semibold bg-gray-900 text-white shadow-sm hover:bg-black"
-                      >
-                        <span className="inline-flex h-4 w-4 rounded-full bg-white/10 items-center justify-center">
-                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                        </span>
-                        Record voice
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                      Text on card
-                    </label>
-                    <textarea
-                      value={cardDraft.title || ""}
-                      onChange={(e) =>
-                        setCardDraft((prev) => ({
-                          ...prev,
-                          title: e.target.value,
-                        }))
-                      }
-                      rows={3}
-                      className="w-full border border-gray-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 resize-none"
-                      placeholder="What should the patient read on this card?"
-                    />
-                  </div>
-                )}
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-5 py-4 border-t border-gray-200 bg-gray-50">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-400">
+                  {cardDraft.id ? "Editing card" : "New card"}
+                </span>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={closeCardModal}>
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleCardSave}
+                    disabled={!cardDraft.type || !cardDraft.backgroundKey}
+                    className="bg-gray-900 text-white hover:bg-black disabled:opacity-40"
+                  >
+                    {cardDraft.id ? "Save Changes" : "Add Card"}
+                  </Button>
+                </div>
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

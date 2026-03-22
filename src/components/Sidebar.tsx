@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import {
-  Briefcase,
   Users,
-  Library,
   ChevronRight,
   Home,
   Settings,
   PanelLeftClose,
   Building2,
-  Pill
+  Bot,
+  ClipboardList
 } from
   'lucide-react';
 
@@ -21,14 +20,17 @@ interface SidebarProps {
   language: 'en' | 'es';
   setLanguage: (lang: 'en' | 'es') => void;
 }
+type NavChild = {
+  id: string;
+  label: string;
+  isSubParent?: boolean;
+  children?: { id: string; label: string }[];
+};
 type NavItem = {
   id: string;
   label: string;
   icon: React.ReactNode;
-  children?: {
-    id: string;
-    label: string;
-  }[];
+  children?: NavChild[];
 };
 export function Sidebar({
   activeView,
@@ -40,12 +42,12 @@ export function Sidebar({
   setLanguage
 }: SidebarProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    workspace: true,
+    companions: true,
     patients: true,
-    library: true,
-    otc: true,
-    ai: true,
-    setup: true
+    plans: true,
+    setup: true,
+    '_sub_cmp_vars': true,
+    '_sub_plan_vars': true,
   });
   const toggleSection = (section: string) => {
     setExpanded((prev) => ({
@@ -53,152 +55,75 @@ export function Sidebar({
       [section]: !prev[section]
     }));
   };
-  const clinicNavItems: NavItem[] = [
+  const companionChildren: NavChild[] = [
+    { id: 'companions-list', label: 'Companions' },
+    { id: 'patient-companions', label: 'Patient Companions' },
     {
-      id: 'dashboard',
-      label: 'Home',
-      icon: <Home size={16} />
-    },
-    {
-      id: 'workspace',
-      label: 'Workspace',
-      icon: <Briefcase size={16} />,
+      id: '_sub_cmp_vars',
+      label: 'Variables',
+      isSubParent: true,
       children: [
-        {
-          id: 'companions',
-          label: 'Companions'
-        },
-        {
-          id: 'patient-companions',
-          label: 'Patient Companions'
-        }]
-    },
-    {
-      id: 'patients',
-      label: 'Patient Management',
-      icon: <Users size={16} />,
-      children: [
-        {
-          id: 'all-patients',
-          label: 'All Patients'
-        },
-        {
-          id: 'conversations-table',
-          label: 'Conversations'
-        }
+        { id: 'ai-rules', label: 'AI Rules' },
+        { id: 'shortcut-intents', label: 'Shortcut Intents' },
+        { id: 'knowledge-base', label: 'Knowledge Base' },
+        { id: 'followups', label: 'Follow Ups' },
       ]
     },
+  ];
+
+  const planChildren: NavChild[] = [
+    { id: 'plans2', label: 'Plans' },
+    { id: 'active-plans', label: 'Active Plans' },
+    { id: 'otc-lists', label: 'OTC Products' },
     {
-      id: 'library',
-      label: 'Library',
-      icon: <Library size={16} />,
+      id: '_sub_plan_vars',
+      label: 'Variables',
+      isSubParent: true,
       children: [
-        {
-          id: 'ai-rules',
-          label: 'AI Rules'
-        },
-        {
-          id: 'followups',
-          label: 'Followups'
-        },
-        {
-          id: 'knowledge-base',
-          label: 'Knowledge Base'
-        }]
+        { id: 'text-blocks', label: 'Text Blocks' },
+        { id: 'cards', label: 'Cards' },
+      ]
     },
+  ];
+
+  const clinicNavItems: NavItem[] = [
+    { id: 'dashboard', label: 'Home', icon: <Home size={16} /> },
+    { id: 'companions', label: 'Companions', icon: <Bot size={16} />, children: companionChildren },
     {
-      id: 'otc',
-      label: 'OTC',
-      icon: <Pill size={16} />,
+      id: 'patients',
+      label: 'Patients',
+      icon: <Users size={16} />,
       children: [
-        {
-          id: 'otc-lists',
-          label: 'OTC Lists'
-        },
-        {
-          id: 'plans',
-          label: 'Plans'
-        }]
+        { id: 'all-patients', label: 'All Patients' },
+        { id: 'conversations-table', label: 'Conversations' }
+      ]
     },
+    { id: 'plans', label: 'Plans', icon: <ClipboardList size={16} />, children: planChildren },
     {
       id: 'setup',
       label: 'Setup',
       icon: <Settings size={16} />,
       children: [
-        {
-          id: 'settings',
-          label: 'Settings'
-        },
-        {
-          id: 'users',
-          label: 'Members'
-        }
+        { id: 'settings', label: 'Settings' },
+        { id: 'users', label: 'Members' }
       ]
-    }];
+    }
+  ];
 
   const adminNavItems: NavItem[] = [
-    {
-      id: 'dashboard',
-      label: 'Home',
-      icon: <Home size={16} />
-    },
-    {
-      id: 'protocols',
-      label: 'Protocols',
-      icon: <Briefcase size={16} />
-    },
+    { id: 'dashboard', label: 'Home', icon: <Home size={16} /> },
+    { id: 'companions', label: 'Companions', icon: <Bot size={16} />, children: companionChildren },
     {
       id: 'patients',
-      label: 'Patient Management',
+      label: 'Patients',
       icon: <Users size={16} />,
       children: [
-        {
-          id: 'all-patients',
-          label: 'All Patients'
-        },
-        {
-          id: 'conversations-table',
-          label: 'Conversations'
-        }
+        { id: 'all-patients', label: 'All Patients' },
+        { id: 'conversations-table', label: 'Conversations' }
       ]
     },
-    {
-      id: 'library',
-      label: 'Library',
-      icon: <Library size={16} />,
-      children: [
-        {
-          id: 'ai-rules',
-          label: 'AI Rules'
-        },
-        {
-          id: 'followups',
-          label: 'Followups'
-        },
-        {
-          id: 'knowledge-base',
-          label: 'Knowledge Base'
-        }]
-    },
-    {
-      id: 'otc',
-      label: 'OTC',
-      icon: <Pill size={16} />,
-      children: [
-        {
-          id: 'otc-lists',
-          label: 'OTC Lists'
-        },
-        {
-          id: 'plans',
-          label: 'Plans'
-        }]
-    },
-    {
-      id: 'clinics',
-      label: 'Clinics',
-      icon: <Building2 size={16} />
-    }
+    { id: 'plans', label: 'Plans', icon: <ClipboardList size={16} />, children: planChildren },
+    { id: 'clinics', label: 'Clinics', icon: <Building2 size={16} /> }
   ];
 
   const navItems = userRole === 'admin' ? adminNavItems : clinicNavItems;
@@ -216,9 +141,12 @@ export function Sidebar({
             <button
               key={item.id}
               onClick={() => setActiveView(item.id)}
-              className={`h-9 w-9 flex items-center justify-center rounded-lg transition-colors ${activeView === item.id || (item.children?.some(c => c.id === activeView))
-                ? 'bg-[#efeffe] text-[#6366f1] shadow-sm'
-                : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
+              className={`h-9 w-9 flex items-center justify-center rounded-lg transition-colors ${
+                activeView === item.id || item.children?.some(c =>
+                  c.isSubParent ? c.children?.some(gc => gc.id === activeView) : c.id === activeView
+                )
+                  ? 'bg-[#efeffe] text-[#6366f1] shadow-sm'
+                  : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
                 }`}
               title={item.label}
             >
@@ -263,7 +191,11 @@ export function Sidebar({
           const isExpanded = expanded[item.id];
           const hasChildren = item.children && item.children.length > 0;
           const isParentActive =
-            hasChildren && item.children?.some((c) => c.id === activeView);
+            hasChildren && item.children?.some((c) =>
+              c.isSubParent
+                ? c.children?.some(gc => gc.id === activeView)
+                : c.id === activeView
+            );
           if (!hasChildren) {
             return (
               <button
@@ -295,13 +227,44 @@ export function Sidebar({
               {isExpanded &&
                 <div className="ml-6 space-y-0.5 border-l border-gray-100 pl-2">
                   {item.children?.map((child) =>
-                    <button
-                      key={child.id}
-                      onClick={() => setActiveView(child.id)}
-                      className={`w-full flex items-center px-2.5 py-1.5 rounded-lg text-sm transition-colors ${activeView === child.id ? 'bg-[#efeffe] text-[#6366f1] font-semibold' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
-
-                      {child.label}
-                    </button>
+                    child.isSubParent ? (
+                      <div key={child.id}>
+                        <button
+                          onClick={() => toggleSection(child.id)}
+                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-sm transition-colors ${
+                            child.children?.some(gc => gc.id === activeView)
+                              ? 'text-gray-900 font-semibold'
+                              : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                          }`}
+                        >
+                          <span>{child.label}</span>
+                          <ChevronRight
+                            size={11}
+                            className={`text-gray-400 transition-transform ${expanded[child.id] ? 'rotate-90' : ''}`}
+                          />
+                        </button>
+                        {expanded[child.id] && (
+                          <div className="ml-3 space-y-0.5 border-l border-gray-100 pl-2">
+                            {child.children?.map(gc => (
+                              <button
+                                key={gc.id}
+                                onClick={() => setActiveView(gc.id)}
+                                className={`w-full flex items-center px-2.5 py-1.5 rounded-lg text-sm transition-colors ${activeView === gc.id ? 'bg-[#efeffe] text-[#6366f1] font-semibold' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
+                              >
+                                {gc.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <button
+                        key={child.id}
+                        onClick={() => setActiveView(child.id)}
+                        className={`w-full flex items-center px-2.5 py-1.5 rounded-lg text-sm transition-colors ${activeView === child.id ? 'bg-[#efeffe] text-[#6366f1] font-semibold' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
+                        {child.label}
+                      </button>
+                    )
                   )}
                 </div>
               }

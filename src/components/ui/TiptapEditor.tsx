@@ -17,9 +17,10 @@ interface TiptapEditorProps {
   content: string;
   onChange: (content: string) => void;
   placeholder?: string;
+  contentClassName?: string;
 }
 
-export function TiptapEditor({ content, onChange, placeholder = 'Start writing...' }: TiptapEditorProps) {
+export function TiptapEditor({ content, onChange, placeholder = 'Start writing...', contentClassName }: TiptapEditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -31,7 +32,7 @@ export function TiptapEditor({ content, onChange, placeholder = 'Start writing..
     content,
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-[250px] px-4 py-3',
+        class: `prose prose-sm max-w-none focus:outline-none px-4 py-3 ${contentClassName ?? 'min-h-[250px]'}`,
         'data-placeholder': placeholder
       }
     },
