@@ -90,7 +90,7 @@ export function Cards({ plans, onGoToPlan }: CardsProps) {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('All');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
-  const [sortField, setSortField] = useState<'title' | 'type' | 'plan'>('plan');
+  const [sortField, setSortField] = useState<'title' | 'type'>('title');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   const allCards = useMemo<CardWithSource[]>(() => {
@@ -124,8 +124,7 @@ export function Cards({ plans, onGoToPlan }: CardsProps) {
   const sorted = [...filtered].sort((a, b) => {
     let cmp = 0;
     if (sortField === 'title') cmp = a.title.localeCompare(b.title);
-    else if (sortField === 'type') cmp = a.type.localeCompare(b.type);
-    else cmp = a.planName.localeCompare(b.planName);
+    else cmp = a.type.localeCompare(b.type);
     return sortDir === 'asc' ? cmp : -cmp;
   });
 
@@ -254,23 +253,10 @@ export function Cards({ plans, onGoToPlan }: CardsProps) {
                   <th className="py-3 px-5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                     File / URL
                   </th>
-                  <th className="py-3 px-5 text-left">
-                    <button onClick={() => toggleSort('plan')} className="flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-widest hover:text-gray-800">
-                      Plan <ArrowUpDown size={10} className={sortField === 'plan' ? 'text-indigo-500' : 'text-gray-300'} />
-                    </button>
-                  </th>
-                  <th className="py-3 px-5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                    Category
-                  </th>
-                  <th className="py-3 px-5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                    Style
-                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {sorted.map((card) => {
-                  const plan = plans.find((p) => p.id === card.planId);
-                  return (
+                {sorted.map((card) => (
                     <tr key={card.id} className="hover:bg-indigo-50/20 transition-colors group">
 
                       {/* Card visual column — the actual card rendered tall */}
@@ -333,32 +319,9 @@ export function Cards({ plans, onGoToPlan }: CardsProps) {
                         )}
                       </td>
 
-                      {/* Plan */}
-                      <td className="py-3 px-5">
-                        <div className="flex items-center gap-2">
-                          <div className="h-6 w-6 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
-                            <ClipboardList size={11} className="text-indigo-500" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-xs font-semibold text-gray-800 truncate max-w-[120px]">{card.planName}</p>
-                            <p className="text-[10px] text-gray-400">{card.planCategory}</p>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Plan category */}
-                      <td className="py-3 px-5">
-                        <span className="text-xs text-gray-500">{card.planCategory}</span>
-                      </td>
-
-                      {/* Visual style */}
-                      <td className="py-3 px-5">
-                        <span className="text-xs text-gray-400 capitalize">{card.visualCategory}</span>
-                      </td>
 
                     </tr>
-                  );
-                })}
+                ))}
               </tbody>
             </table>
           </div>
@@ -368,7 +331,6 @@ export function Cards({ plans, onGoToPlan }: CardsProps) {
         <div className="space-y-8">
           {Object.entries(grouped).map(([planId, cards]) => {
             const first = cards[0];
-            const plan = plans.find((p) => p.id === planId);
             return (
               <div key={planId}>
                 <div className="flex items-center gap-2 mb-3">
