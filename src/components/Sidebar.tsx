@@ -24,7 +24,7 @@ type NavChild = {
   id: string;
   label: string;
   isSubParent?: boolean;
-  children?: { id: string; label: string }[];
+  children?: { id: string; label: string; comingSoon?: boolean }[];
 };
 type NavItem = {
   id: string;
@@ -57,10 +57,10 @@ export function Sidebar({
   };
   const companionChildren: NavChild[] = [
     { id: 'companions-list', label: 'Companions' },
-    { id: 'patient-companions', label: 'Patient Companions' },
+    { id: 'patient-companions', label: 'Active Companions' },
     {
       id: '_sub_cmp_vars',
-      label: 'Variables',
+      label: 'Intelligence',
       isSubParent: true,
       children: [
         { id: 'ai-rules', label: 'AI Rules' },
@@ -74,14 +74,15 @@ export function Sidebar({
   const planChildren: NavChild[] = [
     { id: 'plans2', label: 'Plans' },
     { id: 'active-plans', label: 'Active Plans' },
-    { id: 'otc-lists', label: 'OTC Products' },
     {
       id: '_sub_plan_vars',
-      label: 'Variables',
+      label: 'Resources',
       isSubParent: true,
       children: [
         { id: 'text-blocks', label: 'Text Blocks' },
         { id: 'cards', label: 'Cards' },
+        { id: 'otc-lists', label: 'OTC List' },
+        { id: 'meds-lists', label: 'Med List', comingSoon: true },
       ]
     },
   ];
@@ -248,10 +249,13 @@ export function Sidebar({
                             {child.children?.map(gc => (
                               <button
                                 key={gc.id}
-                                onClick={() => setActiveView(gc.id)}
-                                className={`w-full flex items-center px-2.5 py-1.5 rounded-lg text-sm transition-colors ${activeView === gc.id ? 'bg-[#efeffe] text-[#6366f1] font-semibold' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
+                                onClick={() => !gc.comingSoon && setActiveView(gc.id)}
+                                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-sm transition-colors ${gc.comingSoon ? 'cursor-default text-gray-400' : activeView === gc.id ? 'bg-[#efeffe] text-[#6366f1] font-semibold' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
                               >
-                                {gc.label}
+                                <span>{gc.label}</span>
+                                {gc.comingSoon && (
+                                  <span className="text-[9px] font-bold uppercase tracking-wide bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full">Soon</span>
+                                )}
                               </button>
                             ))}
                           </div>

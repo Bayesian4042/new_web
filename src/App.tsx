@@ -1257,7 +1257,7 @@ export function App() {
         breadcrumb: 'Plans'
       },
       'otc-lists': {
-        title: 'OTC Products',
+        title: 'OTC List',
         breadcrumb: 'Plans'
       },
       'health-assistant': {
@@ -1532,7 +1532,7 @@ export function App() {
           <div className="flex items-center gap-2 text-sm">
             <span className="text-gray-500 font-medium">Plans</span>
             <span className="text-gray-300">/</span>
-            <span className="text-gray-500 font-medium">OTC Products</span>
+            <span className="text-gray-500 font-medium">OTC List</span>
             <span className="text-gray-300">/</span>
             {editingOTCList ? (
               <>

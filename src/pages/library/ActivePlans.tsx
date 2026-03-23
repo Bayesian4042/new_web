@@ -8,7 +8,6 @@ import {
   Filter,
   X,
   Lock,
-  AlertTriangle,
   UserCircle,
 } from 'lucide-react';
 import type { Plan } from '../otc/Plans';
@@ -40,20 +39,99 @@ interface ActivePlansProps {
   onNavigateToPatient?: (patientId: string) => void;
 }
 
+const DUMMY_ROWS: ActivePlanRow[] = [
+  {
+    patientId: 'dummy-p1',
+    patientName: 'Maria Gonzalez',
+    patientEmail: 'maria.g@email.com',
+    planId: 'PLAN-0001',
+    planName: 'Post-Surgery Recovery',
+    planStatus: 'Active',
+    planCategory: 'Orthopedics',
+    assignedOn: '2026-03-10',
+    plan: { id: 'PLAN-0001', name: 'Post-Surgery Recovery', category: 'Orthopedics', status: 'Active', duration: '6 weeks', steps: 12, createdOn: '2026-03-10' },
+  },
+  {
+    patientId: 'dummy-p2',
+    patientName: 'James Thornton',
+    patientEmail: 'j.thornton@clinic.com',
+    planId: 'PLAN-0002',
+    planName: 'Diabetes Management',
+    planStatus: 'Active',
+    planCategory: 'Chronic Care',
+    assignedOn: '2026-03-08',
+    plan: { id: 'PLAN-0002', name: 'Diabetes Management', category: 'Chronic Care', status: 'Active', duration: 'Ongoing', steps: 8, createdOn: '2026-03-08' },
+  },
+  {
+    patientId: 'dummy-p3',
+    patientName: 'Sofia Andersen',
+    patientEmail: 'sofia.a@mail.com',
+    planId: 'PLAN-0003',
+    planName: 'Hypertension Monitoring',
+    planStatus: 'Active',
+    planCategory: 'Cardiology',
+    assignedOn: '2026-03-05',
+    plan: { id: 'PLAN-0003', name: 'Hypertension Monitoring', category: 'Cardiology', status: 'Active', duration: '12 weeks', steps: 6, createdOn: '2026-03-05' },
+  },
+  {
+    patientId: 'dummy-p4',
+    patientName: 'Liam Patel',
+    patientPhone: '+1 (555) 234-5678',
+    planId: 'PLAN-0001',
+    planName: 'Post-Surgery Recovery',
+    planStatus: 'Active',
+    planCategory: 'Orthopedics',
+    assignedOn: '2026-03-12',
+    plan: { id: 'PLAN-0001', name: 'Post-Surgery Recovery', category: 'Orthopedics', status: 'Active', duration: '6 weeks', steps: 12, createdOn: '2026-03-12' },
+  },
+  {
+    patientId: 'dummy-p5',
+    patientName: 'Aisha Nkosi',
+    patientEmail: 'aisha.nkosi@health.org',
+    planId: 'PLAN-0004',
+    planName: 'Anxiety CBT Module 1',
+    planStatus: 'Draft',
+    planCategory: 'Mental Health',
+    assignedOn: '2026-02-28',
+    plan: { id: 'PLAN-0004', name: 'Anxiety CBT Module 1', category: 'Mental Health', status: 'Draft', duration: '4 weeks', steps: 5, createdOn: '2026-02-28' },
+  },
+  {
+    patientId: 'dummy-p6',
+    patientName: 'Carlos Rivera',
+    patientEmail: 'c.rivera@webmail.com',
+    planId: 'PLAN-0002',
+    planName: 'Diabetes Management',
+    planStatus: 'Active',
+    planCategory: 'Chronic Care',
+    assignedOn: '2026-03-01',
+    plan: { id: 'PLAN-0002', name: 'Diabetes Management', category: 'Chronic Care', status: 'Active', duration: 'Ongoing', steps: 8, createdOn: '2026-03-01' },
+  },
+  {
+    patientId: 'dummy-p7',
+    patientName: 'Emily Walsh',
+    patientEmail: 'emily.walsh@med.com',
+    planId: 'PLAN-0005',
+    planName: 'Prenatal Care – Trimester 1',
+    planStatus: 'Active',
+    planCategory: 'Obstetrics',
+    assignedOn: '2026-03-15',
+    plan: { id: 'PLAN-0005', name: 'Prenatal Care – Trimester 1', category: 'Obstetrics', status: 'Active', duration: '12 weeks', steps: 9, createdOn: '2026-03-15' },
+  },
+];
+
 export function ActivePlans({ plans, onEditPlan, onNavigateToPatient }: ActivePlansProps) {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortField, setSortField] = useState<'patient' | 'plan' | 'date'>('date');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
-  const [editConfirm, setEditConfirm] = useState<ActivePlanRow | null>(null);
 
-  // Flatten assigned patients from plans into rows
-  const rows: ActivePlanRow[] = [];
+  // Flatten assigned patients from real plans into rows, then merge with dummy data
+  const realRows: ActivePlanRow[] = [];
   plans.forEach((plan) => {
     const patients: AssignedPatient[] = (plan as any).assignedPatients || [];
     patients.forEach((p) => {
-      rows.push({
+      realRows.push({
         patientId: p.id,
         patientName: p.name,
         patientEmail: p.email,
@@ -67,6 +145,7 @@ export function ActivePlans({ plans, onEditPlan, onNavigateToPatient }: ActivePl
       });
     });
   });
+  const rows: ActivePlanRow[] = [...realRows, ...DUMMY_ROWS];
 
   const filtered = rows.filter((r) => {
     const q = search.toLowerCase();
@@ -233,7 +312,8 @@ export function ActivePlans({ plans, onEditPlan, onNavigateToPatient }: ActivePl
                 {sorted.map((row, idx) => (
                   <tr
                     key={`${row.planId}-${row.patientId}-${idx}`}
-                    className="hover:bg-amber-50/20 transition-colors group"
+                    onClick={() => onEditPlan(row.plan)}
+                    className="hover:bg-amber-50/20 transition-colors group cursor-pointer"
                   >
                     {/* Patient */}
                     <td className="py-3 px-4">
@@ -288,7 +368,7 @@ export function ActivePlans({ plans, onEditPlan, onNavigateToPatient }: ActivePl
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         {onNavigateToPatient && (
                           <button
-                            onClick={() => onNavigateToPatient(row.patientId)}
+                            onClick={(e) => { e.stopPropagation(); onNavigateToPatient(row.patientId); }}
                             className="p-1.5 text-gray-300 hover:text-violet-500 hover:bg-violet-50 rounded-lg transition-colors"
                             title="View patient"
                           >
@@ -296,7 +376,7 @@ export function ActivePlans({ plans, onEditPlan, onNavigateToPatient }: ActivePl
                           </button>
                         )}
                         <button
-                          onClick={() => setEditConfirm(row)}
+                          onClick={(e) => { e.stopPropagation(); onEditPlan(row.plan); }}
                           className="p-1.5 text-gray-300 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
                           title="Edit patient plan"
                         >
@@ -312,87 +392,7 @@ export function ActivePlans({ plans, onEditPlan, onNavigateToPatient }: ActivePl
         )}
       </div>
 
-      {/* Edit confirmation dialog */}
-      {editConfirm && (
-        <EditConfirmDialog
-          row={editConfirm}
-          onConfirm={() => {
-            onEditPlan(editConfirm.plan);
-            setEditConfirm(null);
-          }}
-          onNavigateToPatient={
-            onNavigateToPatient
-              ? () => {
-                  onNavigateToPatient(editConfirm.patientId);
-                  setEditConfirm(null);
-                }
-              : undefined
-          }
-          onCancel={() => setEditConfirm(null)}
-        />
-      )}
     </div>
   );
 }
 
-function EditConfirmDialog({
-  row,
-  onConfirm,
-  onNavigateToPatient,
-  onCancel,
-}: {
-  row: ActivePlanRow;
-  onConfirm: () => void;
-  onNavigateToPatient?: () => void;
-  onCancel: () => void;
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 space-y-4">
-        <div className="flex items-start gap-3">
-          <div className="h-10 w-10 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
-            <AlertTriangle size={20} className="text-amber-500" />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-base font-bold text-gray-900">Edit Active Plan</h3>
-            <p className="text-sm text-gray-500 mt-1">
-              You are about to edit{' '}
-              <span className="font-semibold text-gray-700">"{row.planName}"</span> which is currently
-              assigned to{' '}
-              <span className="font-semibold text-gray-700">{row.patientName}</span>.
-            </p>
-            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-2">
-              Changes will only affect this patient's version of the plan, not the original in Built Plans.
-            </p>
-          </div>
-          <button onClick={onCancel} className="text-gray-300 hover:text-gray-500 shrink-0">
-            <X size={16} />
-          </button>
-        </div>
-        <div className="flex flex-col gap-2 pt-1">
-          {onNavigateToPatient && (
-            <button
-              onClick={onNavigateToPatient}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 rounded-xl transition-colors"
-            >
-              <UserCircle size={15} />
-              Go to Patient Page
-            </button>
-          )}
-          <button
-            onClick={onConfirm}
-            className="w-full px-4 py-2 text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-colors"
-          >
-            Edit Here (Active Plans)
-          </button>
-          <button
-            onClick={onCancel}
-            className="w-full px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
