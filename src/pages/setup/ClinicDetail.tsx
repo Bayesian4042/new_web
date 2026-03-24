@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Building2, Database, Users, Shield, Activity, FileText, Clock, Calendar, ArrowLeft, Edit2, X, Save, ChevronDown } from 'lucide-react';
+import { Building2, Database, Users, Shield, Activity, FileText, Clock, Calendar, ArrowLeft, Edit2, X, Save, ChevronDown, CreditCard } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Clinic } from './Clinics';
+import { ClinicBillingTab } from '../billing/ClinicBillingTab';
 
 interface ClinicDetailProps {
     clinic: Clinic;
@@ -27,6 +28,7 @@ const TIMEZONES = [
 ];
 
 export function ClinicDetail({ clinic, onBack, onSave }: ClinicDetailProps) {
+    const [activeTab, setActiveTab] = useState<'overview' | 'billing'>('overview');
     const [isEditing, setIsEditing] = useState(false);
     const [clinicName, setClinicName] = useState(clinic.name);
     const [ownerEmail, setOwnerEmail] = useState(clinic.ownerEmail);
@@ -123,6 +125,43 @@ export function ClinicDetail({ clinic, onBack, onSave }: ClinicDetailProps) {
                     )}
                 </div>
             </div>
+
+            {/* Tabs */}
+            <div className="flex items-center gap-1 border-b border-gray-200">
+                <button
+                    onClick={() => setActiveTab('overview')}
+                    className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
+                        activeTab === 'overview'
+                            ? 'border-blue-600 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                >
+                    <Activity size={14} />
+                    Overview
+                </button>
+                <button
+                    onClick={() => setActiveTab('billing')}
+                    className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
+                        activeTab === 'billing'
+                            ? 'border-blue-600 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                >
+                    <CreditCard size={14} />
+                    Billing
+                    {clinic.billingStatus === 'payment_failed' && (
+                        <span className="h-2 w-2 rounded-full bg-red-500 inline-block" />
+                    )}
+                </button>
+            </div>
+
+            {/* Billing Tab */}
+            {activeTab === 'billing' && (
+                <ClinicBillingTab clinicId={clinic.id} />
+            )}
+
+            {/* Overview Tab content */}
+            {activeTab === 'overview' && <>
 
             {/* Activity Overview */}
             <section className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
@@ -389,6 +428,8 @@ export function ClinicDetail({ clinic, onBack, onSave }: ClinicDetailProps) {
                     )) || <p className="text-sm text-gray-400 italic">No recent activity recorded.</p>}
                 </div>
             </section>
+
+            </>}
         </div>
     );
 }

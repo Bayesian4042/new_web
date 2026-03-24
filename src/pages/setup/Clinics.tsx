@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Building2, Plus, Copy, Trash2, Search, Clock, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
+import { BILLING_PLANS } from '../billing/billingData';
 
 export interface Clinic {
     id: string;
@@ -29,6 +30,12 @@ export interface Clinic {
         date: string;
         user: string;
     }[];
+    // Billing fields
+    planId?: string;
+    whitelistFlag?: boolean;
+    billingStatus?: 'current' | 'payment_failed' | 'whitelist' | 'inactive';
+    commitmentEndDate?: string;
+    stripeCustomerId?: string;
 }
 
 export const mockClinics: Clinic[] = [
@@ -57,7 +64,12 @@ export const mockClinics: Clinic[] = [
             { id: '1', action: 'System Backup Completed', date: '2026-02-04T02:00:00', user: 'System' },
             { id: '2', action: 'New User Added', date: '2026-02-03T14:30:00', user: 'admin@mainclinic.com' },
             { id: '3', action: 'Protocol Modified', date: '2026-02-03T11:15:00', user: 'dr.smith@mainclinic.com' }
-        ]
+        ],
+        planId: 'starter',
+        whitelistFlag: false,
+        billingStatus: 'current',
+        commitmentEndDate: '2026-07-15',
+        stripeCustomerId: 'cus_mock_001',
     },
     {
         id: 'CLN-002',
@@ -82,7 +94,12 @@ export const mockClinics: Clinic[] = [
         },
         activityHistory: [
             { id: '1', action: 'Staff Meeting Notes Added', date: '2026-02-03T16:00:00', user: 'manager@northwing.com' }
-        ]
+        ],
+        planId: 'growth',
+        whitelistFlag: false,
+        billingStatus: 'payment_failed',
+        commitmentEndDate: '2026-07-20',
+        stripeCustomerId: 'cus_mock_002',
     },
     {
         id: 'CLN-003',
@@ -106,7 +123,12 @@ export const mockClinics: Clinic[] = [
         },
         activityHistory: [
             { id: '1', action: 'Clinic Account Created', date: '2026-02-01T09:00:00', user: 'Super Admin' }
-        ]
+        ],
+        planId: 'lite',
+        whitelistFlag: true,
+        billingStatus: 'whitelist',
+        commitmentEndDate: '2026-09-10',
+        stripeCustomerId: undefined,
     }
 ];
 
@@ -242,6 +264,9 @@ export function Clinics({ clinics, onAddClinic, onViewClinic, onCopyClinic, onDe
                                 <th className="py-3 px-3 text-left">
                                     <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Status</span>
                                 </th>
+                                <th className="py-3 px-3 text-left">
+                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Billing</span>
+                                </th>
                                 <th className="py-3 px-3 text-right"></th>
                             </tr>
                         </thead>
@@ -312,6 +337,31 @@ export function Clinics({ clinics, onAddClinic, onViewClinic, onCopyClinic, onDe
                                         >
                                             {clinic.status}
                                         </span>
+                                    </td>
+                                    <td className="py-3 px-3">
+                                        <div className="space-y-1">
+                                            {clinic.whitelistFlag ? (
+                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700">
+                                                    Whitelist
+                                                </span>
+                                            ) : (
+                                                <>
+                                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                                        clinic.billingStatus === 'current' ? 'bg-green-100 text-green-700' :
+                                                        clinic.billingStatus === 'payment_failed' ? 'bg-red-100 text-red-700' :
+                                                        'bg-gray-100 text-gray-500'
+                                                    }`}>
+                                                        {clinic.billingStatus === 'current' ? 'Paid' :
+                                                         clinic.billingStatus === 'payment_failed' ? 'Failed' : 'Inactive'}
+                                                    </span>
+                                                    {clinic.planId && (
+                                                        <p className="text-[10px] text-gray-500 font-medium">
+                                                            {BILLING_PLANS.find(p => p.id === clinic.planId)?.name ?? clinic.planId}
+                                                        </p>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
                                         <div className="flex items-center justify-end gap-1 transition-opacity">

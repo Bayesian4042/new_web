@@ -37,6 +37,7 @@ import { Cards } from './pages/library/Cards';
 import { useOTCStore } from './store/useOTCStore';
 import { PatientCompanions, PatientCompanion } from './pages/workspace/PatientCompanions';
 import { PatientCompanionForm } from './pages/workspace/PatientCompanionForm';
+import { BillingOverview } from './pages/billing/BillingOverview';
 
 const INITIAL_RULES: AIRule[] = [
   {
@@ -1149,6 +1150,8 @@ export function App() {
         return <Users />;
       case 'settings':
         return <Settings />;
+      case 'billing':
+        return <BillingOverview />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-[60vh] text-gray-400">
@@ -1287,6 +1290,10 @@ export function App() {
       'clinic-detail': {
         title: viewingClinic?.name || 'Clinic Details',
         breadcrumb: 'Setup / Clinics'
+      },
+      billing: {
+        title: 'Billing',
+        breadcrumb: 'Setup'
       }
     };
     return (

@@ -106,7 +106,8 @@ export function Sidebar({
       icon: <Settings size={16} />,
       children: [
         { id: 'settings', label: 'Settings' },
-        { id: 'users', label: 'Members' }
+        { id: 'users', label: 'Members' },
+        { id: 'billing', label: 'Billing' },
       ]
     }
   ];
