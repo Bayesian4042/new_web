@@ -14,6 +14,7 @@ import {
   Lock,
   Download,
   RefreshCw,
+  Sparkles,
 } from 'lucide-react';
 import {
   BillingAccount,
@@ -33,9 +34,10 @@ import {
 import { Progress } from '../../components/ui/Progress';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
+import { SubscribeWizard } from './SubscribeWizard';
 
-// The clinic-facing billing page uses CLN-001 (Starter, healthy) as default
-const DEFAULT_CLINIC_ID = 'CLN-001';
+// The clinic-facing billing page uses CLN-004 (no plan) as default for demo
+const DEFAULT_CLINIC_ID = 'CLN-004';
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 
@@ -672,17 +674,125 @@ function PaymentSettingsTab({ account }: { account: BillingAccount }) {
   );
 }
 
+// ─── No Plan Empty State ──────────────────────────────────────────────────────
+
+function NoPlanEmptyState({ onGetStarted }: { onGetStarted: () => void }) {
+  return (
+    <div className="space-y-6">
+      {/* Page header */}
+      <div>
+        <h1 className="text-xl font-bold text-gray-900">Billing</h1>
+        <p className="text-sm text-gray-500 mt-0.5">Manage your subscription, usage and invoices</p>
+      </div>
+
+      {/* Hero empty state card */}
+      <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 p-10 flex flex-col items-center text-center space-y-5">
+        <div className="h-16 w-16 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg">
+          <Sparkles size={28} className="text-white" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-black text-gray-900">No active subscription</h2>
+          <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
+            Choose a plan to unlock patient activations, SMS messaging, and AI companion features
+            for your clinic.
+          </p>
+        </div>
+
+        <Button
+          onClick={onGetStarted}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-2.5 text-sm font-bold shadow-md hover:shadow-lg transition-all"
+        >
+          Get Started — Choose a Plan
+        </Button>
+
+        <p className="text-xs text-gray-400">
+          Setup is free · 6-month commitment · No hidden fees
+        </p>
+      </div>
+
+      {/* Feature highlights */}
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          {
+            icon: <Users size={18} className="text-indigo-600" />,
+            title: 'Patient Activations',
+            desc: 'Each plan includes a monthly allowance. Extra patients billed at per-unit rates.',
+            bg: 'bg-indigo-50',
+          },
+          {
+            icon: <MessageSquare size={18} className="text-purple-600" />,
+            title: 'SMS Messaging',
+            desc: 'SMS allowance grows dynamically as you activate more patients.',
+            bg: 'bg-purple-50',
+          },
+          {
+            icon: <Activity size={18} className="text-green-600" />,
+            title: 'Usage Tracking',
+            desc: 'Real-time meters track your usage across patients, SMS and active patients.',
+            bg: 'bg-green-50',
+          },
+        ].map((item) => (
+          <div key={item.title} className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+            <div className={`h-10 w-10 rounded-lg ${item.bg} flex items-center justify-center`}>
+              {item.icon}
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-900">{item.title}</p>
+              <p className="text-xs text-gray-500 mt-1 leading-relaxed">{item.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Locked tabs hint */}
+      <div className="flex items-center gap-2 text-xs text-gray-400">
+        <Lock size={11} />
+        Invoice history and payment settings will be available once you subscribe.
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 type TabId = 'overview' | 'invoices' | 'payment';
 
 export function BillingOverview() {
   const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const [showWizard, setShowWizard] = useState(false);
+  const [account, setAccount] = useState<BillingAccount>(
+    () => mockBillingAccounts[DEFAULT_CLINIC_ID]
+  );
 
-  // In a real app this would come from the logged-in clinic context
-  const account = mockBillingAccounts[DEFAULT_CLINIC_ID];
-  const plan = getPlanById(account.planId)!;
+  const isNoPlan = account.billingStatus === 'no_plan';
+  const plan = account.planId ? getPlanById(account.planId) : undefined;
 
+  // Show wizard when clinic clicks "Get Started"
+  if (isNoPlan && showWizard) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">Billing</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Subscribe to activate your clinic</p>
+        </div>
+        <SubscribeWizard
+          clinicId={account.clinicId}
+          prefillEmail={account.billingEmail}
+          onComplete={(newAccount) => {
+            setAccount(newAccount);
+            setShowWizard(false);
+          }}
+        />
+      </div>
+    );
+  }
+
+  // Show empty state when no plan
+  if (isNoPlan) {
+    return <NoPlanEmptyState onGetStarted={() => setShowWizard(true)} />;
+  }
+
+  // Normal billing view (plan active)
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
     { id: 'overview', label: 'Overview', icon: <Activity size={14} /> },
     { id: 'invoices', label: 'Invoices', icon: <FileText size={14} /> },
@@ -719,7 +829,7 @@ export function BillingOverview() {
       </div>
 
       {/* Tab content */}
-      {activeTab === 'overview' && <OverviewTab account={account} plan={plan} />}
+      {activeTab === 'overview' && plan && <OverviewTab account={account} plan={plan} />}
       {activeTab === 'invoices' && <InvoicesTab account={account} />}
       {activeTab === 'payment' && <PaymentSettingsTab account={account} />}
     </div>

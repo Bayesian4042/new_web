@@ -129,6 +129,36 @@ export const mockClinics: Clinic[] = [
         billingStatus: 'whitelist',
         commitmentEndDate: '2026-09-10',
         stripeCustomerId: undefined,
+    },
+    {
+        id: 'CLN-004',
+        name: 'New Clinic',
+        ownerEmail: 'admin@newclinic.com',
+        details: 'Recently onboarded clinic — no billing plan assigned yet',
+        categories: ['General Medicine'],
+        timezone: 'America/New_York',
+        createdOn: '2026-03-24',
+        patientCount: 0,
+        status: 'Active',
+        metrics: {
+            users: 1,
+            roles: 1,
+            behaviours: 0,
+            otcLists: 0,
+            dbSize: '0 MB'
+        },
+        lastActivity: {
+            login: '2026-03-24T09:00:00',
+            lastEvent: 'Account Created'
+        },
+        activityHistory: [
+            { id: '1', action: 'Clinic Account Created', date: '2026-03-24T09:00:00', user: 'Super Admin' }
+        ],
+        planId: undefined,
+        whitelistFlag: false,
+        billingStatus: 'no_plan',
+        commitmentEndDate: undefined,
+        stripeCustomerId: undefined,
     }
 ];
 
@@ -340,7 +370,11 @@ export function Clinics({ clinics, onAddClinic, onViewClinic, onCopyClinic, onDe
                                     </td>
                                     <td className="py-3 px-3">
                                         <div className="space-y-1">
-                                            {clinic.whitelistFlag ? (
+                                            {clinic.billingStatus === 'no_plan' ? (
+                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-500">
+                                                    No Plan
+                                                </span>
+                                            ) : clinic.whitelistFlag ? (
                                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700">
                                                     Whitelist
                                                 </span>

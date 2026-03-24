@@ -46,9 +46,9 @@ export interface PaymentMethod {
 
 export interface BillingAccount {
   clinicId: string;
-  planId: string;
+  planId: string | null; // null when no plan assigned yet
   whitelistFlag: boolean;
-  billingStatus: 'current' | 'payment_failed' | 'whitelist' | 'inactive';
+  billingStatus: 'current' | 'payment_failed' | 'whitelist' | 'inactive' | 'no_plan';
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
   billingEmail: string;
@@ -438,6 +438,36 @@ export const mockBillingAccounts: Record<string, BillingAccount> = {
       activePatientLimit: 20,
       billingCycleStart: '2026-03-01',
       billingCycleEnd: '2026-03-31',
+    },
+    invoices: [],
+    pendingPlanChange: null,
+  },
+
+  'CLN-004': {
+    clinicId: 'CLN-004',
+    planId: null,
+    whitelistFlag: false,
+    billingStatus: 'no_plan',
+    stripeCustomerId: null,
+    stripeSubscriptionId: null,
+    billingEmail: 'admin@newclinic.com',
+    billingAddress: {
+      line1: '',
+      city: '',
+      postalCode: '',
+      country: 'US',
+    },
+    taxId: null,
+    commitmentEndDate: '',
+    paymentMethod: null,
+    usage: {
+      patientsActivatedThisCycle: 0,
+      smsAllowance: 0,
+      smsSentThisCycle: 0,
+      activePatientsCurrentCount: 0,
+      activePatientLimit: 0,
+      billingCycleStart: '',
+      billingCycleEnd: '',
     },
     invoices: [],
     pendingPlanChange: null,
