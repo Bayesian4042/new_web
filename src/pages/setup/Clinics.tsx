@@ -33,7 +33,18 @@ export interface Clinic {
     // Billing fields
     planId?: string;
     whitelistFlag?: boolean;
-    billingStatus?: 'current' | 'payment_failed' | 'whitelist' | 'inactive';
+    billingStatus?:
+        | 'draft'
+        | 'no_plan'
+        | 'pending'
+        | 'current'
+        | 'past_due'
+        | 'payment_failed'
+        | 'suspended'
+        | 'cancelled'
+        | 'archived'
+        | 'whitelist'
+        | 'inactive';
     commitmentEndDate?: string;
     stripeCustomerId?: string;
 }
@@ -159,6 +170,69 @@ export const mockClinics: Clinic[] = [
         billingStatus: 'no_plan',
         commitmentEndDate: undefined,
         stripeCustomerId: undefined,
+    },
+    {
+        id: 'CLN-005',
+        name: 'Sunrise Care',
+        ownerEmail: 'draft@sunriseclinic.com',
+        details: 'Draft onboarding, Stripe setup pending',
+        categories: ['General Medicine'],
+        timezone: 'America/Chicago',
+        createdOn: '2026-03-28',
+        patientCount: 0,
+        status: 'Inactive',
+        metrics: {
+            users: 0,
+            roles: 0,
+            behaviours: 0,
+            otcLists: 0,
+            dbSize: '0 MB'
+        },
+        billingStatus: 'draft',
+    },
+    {
+        id: 'CLN-006',
+        name: 'Evergreen Clinic',
+        ownerEmail: 'ops@evergreenclinic.com',
+        details: 'Payment retries exhausted, temporarily suspended',
+        categories: ['Family Medicine'],
+        timezone: 'America/Los_Angeles',
+        createdOn: '2026-01-05',
+        patientCount: 58,
+        status: 'Active',
+        metrics: {
+            users: 9,
+            roles: 3,
+            behaviours: 94,
+            otcLists: 4,
+            dbSize: '1.4 GB'
+        },
+        billingStatus: 'suspended',
+        planId: 'starter',
+        commitmentEndDate: '2026-08-30',
+        stripeCustomerId: 'cus_mock_006',
+    },
+    {
+        id: 'CLN-007',
+        name: 'Heritage Health',
+        ownerEmail: 'archive@heritagehealth.com',
+        details: 'Archived account after retention period',
+        categories: ['Cardiology'],
+        timezone: 'America/New_York',
+        createdOn: '2025-05-10',
+        patientCount: 0,
+        status: 'Inactive',
+        metrics: {
+            users: 0,
+            roles: 0,
+            behaviours: 0,
+            otcLists: 0,
+            dbSize: '120 MB'
+        },
+        billingStatus: 'archived',
+        planId: 'growth',
+        commitmentEndDate: '2025-12-10',
+        stripeCustomerId: 'cus_mock_007',
     }
 ];
 
@@ -382,10 +456,18 @@ export function Clinics({ clinics, onAddClinic, onViewClinic, onCopyClinic, onDe
                                                 <>
                                                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                                                         clinic.billingStatus === 'current' ? 'bg-green-100 text-green-700' :
+                                                        clinic.billingStatus === 'draft' ? 'bg-slate-100 text-slate-700' :
+                                                        clinic.billingStatus === 'past_due' ? 'bg-red-100 text-red-700' :
+                                                        clinic.billingStatus === 'suspended' ? 'bg-gray-200 text-gray-700' :
+                                                        clinic.billingStatus === 'archived' ? 'bg-gray-100 text-gray-600' :
                                                         clinic.billingStatus === 'payment_failed' ? 'bg-red-100 text-red-700' :
                                                         'bg-gray-100 text-gray-500'
                                                     }`}>
                                                         {clinic.billingStatus === 'current' ? 'Paid' :
+                                                         clinic.billingStatus === 'draft' ? 'Draft' :
+                                                         clinic.billingStatus === 'past_due' ? 'Past Due' :
+                                                         clinic.billingStatus === 'suspended' ? 'Suspended' :
+                                                         clinic.billingStatus === 'archived' ? 'Archived' :
                                                          clinic.billingStatus === 'payment_failed' ? 'Failed' : 'Inactive'}
                                                     </span>
                                                     {clinic.planId && (

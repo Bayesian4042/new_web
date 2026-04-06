@@ -48,7 +48,18 @@ export interface BillingAccount {
   clinicId: string;
   planId: string | null; // null when no plan assigned yet
   whitelistFlag: boolean;
-  billingStatus: 'current' | 'payment_failed' | 'whitelist' | 'inactive' | 'no_plan';
+  billingStatus:
+    | 'draft'
+    | 'no_plan'
+    | 'pending'
+    | 'current'
+    | 'past_due'
+    | 'payment_failed'
+    | 'suspended'
+    | 'cancelled'
+    | 'archived'
+    | 'whitelist'
+    | 'inactive';
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
   billingEmail: string;
@@ -470,6 +481,130 @@ export const mockBillingAccounts: Record<string, BillingAccount> = {
       billingCycleEnd: '',
     },
     invoices: [],
+    pendingPlanChange: null,
+  },
+
+  'CLN-005': {
+    clinicId: 'CLN-005',
+    planId: null,
+    whitelistFlag: false,
+    billingStatus: 'draft',
+    stripeCustomerId: null,
+    stripeSubscriptionId: null,
+    billingEmail: 'draft@sunriseclinic.com',
+    billingAddress: {
+      line1: '12 Sunrise Road',
+      city: 'Austin',
+      postalCode: '73301',
+      country: 'US',
+    },
+    taxId: null,
+    commitmentEndDate: '',
+    paymentMethod: null,
+    usage: {
+      patientsActivatedThisCycle: 0,
+      smsAllowance: 0,
+      smsSentThisCycle: 0,
+      activePatientsCurrentCount: 0,
+      activePatientLimit: 0,
+      billingCycleStart: '',
+      billingCycleEnd: '',
+    },
+    invoices: [],
+    pendingPlanChange: null,
+  },
+
+  'CLN-006': {
+    clinicId: 'CLN-006',
+    planId: 'starter',
+    whitelistFlag: false,
+    billingStatus: 'suspended',
+    stripeCustomerId: 'cus_mock_006',
+    stripeSubscriptionId: 'sub_mock_006',
+    billingEmail: 'ops@evergreenclinic.com',
+    billingAddress: {
+      line1: '440 Evergreen Blvd',
+      city: 'Seattle',
+      postalCode: '98101',
+      country: 'US',
+    },
+    taxId: null,
+    commitmentEndDate: '2026-08-30',
+    paymentMethod: {
+      brand: 'visa',
+      last4: '1111',
+      expMonth: 7,
+      expYear: 2027,
+      stripePaymentMethodId: 'pm_mock_006',
+    },
+    usage: {
+      patientsActivatedThisCycle: 61,
+      smsAllowance: 305,
+      smsSentThisCycle: 356,
+      activePatientsCurrentCount: 58,
+      activePatientLimit: 50,
+      billingCycleStart: '2026-03-01',
+      billingCycleEnd: '2026-03-31',
+    },
+    invoices: [
+      {
+        id: 'inv-006-001',
+        invoiceNumber: 'INV-2026-3001',
+        date: '2026-03-01',
+        periodStart: '2026-03-01',
+        periodEnd: '2026-03-31',
+        baseFee: 150,
+        extraPatientsCharge: 49.5,
+        extraSmsCharge: 25.5,
+        extraActivePatientsCharge: 0.8,
+        total: 225.8,
+        status: 'failed',
+      },
+    ],
+    pendingPlanChange: null,
+  },
+
+  'CLN-007': {
+    clinicId: 'CLN-007',
+    planId: 'growth',
+    whitelistFlag: false,
+    billingStatus: 'archived',
+    stripeCustomerId: 'cus_mock_007',
+    stripeSubscriptionId: null,
+    billingEmail: 'archive@heritagehealth.com',
+    billingAddress: {
+      line1: '88 Heritage Lane',
+      city: 'Boston',
+      postalCode: '02108',
+      country: 'US',
+    },
+    taxId: null,
+    commitmentEndDate: '2025-12-10',
+    paymentMethod: null,
+    usage: {
+      patientsActivatedThisCycle: 0,
+      smsAllowance: 0,
+      smsSentThisCycle: 0,
+      activePatientsCurrentCount: 0,
+      activePatientLimit: 0,
+      billingCycleStart: '',
+      billingCycleEnd: '',
+    },
+    invoices: [
+      {
+        id: 'inv-007-001',
+        invoiceNumber: 'INV-2025-9981',
+        date: '2025-12-01',
+        periodStart: '2025-12-01',
+        periodEnd: '2025-12-31',
+        baseFee: 300,
+        extraPatientsCharge: 0,
+        extraSmsCharge: 0,
+        extraActivePatientsCharge: 0,
+        total: 300,
+        status: 'paid',
+      },
+    ],
     pendingPlanChange: null,
   },
 };

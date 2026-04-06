@@ -7,7 +7,6 @@ import {
   Users,
   MessageSquare,
   Star,
-  Lock,
   Calendar,
   Zap,
   Info,
@@ -45,6 +44,7 @@ interface SubscribeWizardProps {
   clinicId: string;
   prefillEmail?: string;
   onComplete: (account: BillingAccount) => void;
+  initialStep?: Exclude<Step, 'success'>;
 }
 
 // ─── Step indicator ───────────────────────────────────────────────────────────
@@ -348,7 +348,6 @@ function Step2BillingDetails({
               </div>
             </div>
             <div className="border-t border-indigo-200 pt-3 flex items-start gap-2 text-xs text-indigo-600">
-              <Lock size={11} className="shrink-0 mt-0.5" />
               6-month minimum commitment. No setup fee.
             </div>
           </div>
@@ -356,7 +355,6 @@ function Step2BillingDetails({
       </div>
 
       <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-xl p-4 text-xs text-gray-600">
-        <Lock size={13} className="text-gray-400 shrink-0" />
         By continuing you agree to a <strong className="text-gray-800">6-month minimum commitment</strong> starting
         today. Early cancellation policy is subject to platform terms.
       </div>
@@ -513,7 +511,6 @@ function Step3Payment({
           </div>
 
           <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 rounded-lg p-3 border border-gray-100">
-            <Lock size={11} className="shrink-0" />
             This is a prototype. No real payment data is collected or transmitted.
           </div>
         </div>
@@ -552,7 +549,6 @@ function Step3Payment({
               </span>
             </div>
             <div className="flex items-center gap-2 text-gray-500">
-              <Lock size={12} className="text-gray-400 shrink-0" />
               <span>Cancel any time after commitment</span>
             </div>
           </div>
@@ -582,10 +578,7 @@ function Step3Payment({
               Processing...
             </span>
           ) : (
-            <>
-              <Lock size={13} className="mr-1.5" />
-              Subscribe Now — {formatEur(plan.monthlyFee)}/mo
-            </>
+            <>Subscribe Now — {formatEur(plan.monthlyFee)}/mo</>
           )}
         </Button>
       </div>
@@ -673,8 +666,13 @@ function SuccessScreen({
 
 // ─── Main Wizard Component ────────────────────────────────────────────────────
 
-export function SubscribeWizard({ clinicId, prefillEmail = '', onComplete }: SubscribeWizardProps) {
-  const [step, setStep] = useState<Step>(1);
+export function SubscribeWizard({
+  clinicId,
+  prefillEmail = '',
+  onComplete,
+  initialStep = 1,
+}: SubscribeWizardProps) {
+  const [step, setStep] = useState<Step>(initialStep);
   const [loading, setLoading] = useState(false);
   const [wizardState, setWizardState] = useState<WizardState>({
     selectedPlanId: RECOMMENDED_PLAN,
@@ -774,7 +772,7 @@ export function SubscribeWizard({ clinicId, prefillEmail = '', onComplete }: Sub
           state={wizardState}
           onChange={patch}
           onSubmit={handleSubmit}
-          onBack={() => setStep(2)}
+          onBack={() => setStep(initialStep === 3 ? 1 : 2)}
           loading={loading}
         />
       )}

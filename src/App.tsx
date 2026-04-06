@@ -37,7 +37,9 @@ import { Cards } from './pages/library/Cards';
 import { useOTCStore } from './store/useOTCStore';
 import { PatientCompanions, PatientCompanion } from './pages/workspace/PatientCompanions';
 import { PatientCompanionForm } from './pages/workspace/PatientCompanionForm';
-import { BillingOverview } from './pages/billing/BillingOverview';
+import { AdminBillingOverview } from './pages/billing/AdminBillingOverview';
+import { ClinicBillingDashboard } from './pages/billing/ClinicBillingDashboard';
+import { ClinicBillingPaymentPage } from './pages/billing/ClinicBillingPaymentPage';
 
 const INITIAL_RULES: AIRule[] = [
   {
@@ -299,7 +301,7 @@ const INITIAL_COMPANIONS: Companion[] = [
 
 export function App() {
   const [activeView, setActiveView] = useState('dashboard');
-  const [userRole, setUserRole] = useState<'admin' | 'clinic'>('clinic');
+  const [userRole, setUserRole] = useState<'admin' | 'clinic'>('admin');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showCompanionForm, setShowCompanionForm] = useState(false);
   const [editingCompanion, setEditingCompanion] = useState<any>(null);
@@ -321,6 +323,7 @@ export function App() {
   const [showClinicForm, setShowClinicForm] = useState(false);
   const [editingClinic, setEditingClinic] = useState<any>(null);
   const [viewingClinic, setViewingClinic] = useState<Clinic | null>(null);
+  const [clinicDetailInitialTab, setClinicDetailInitialTab] = useState<'overview' | 'billing'>('overview');
   const [clinics, setClinics] = useState<any[]>(mockClinics);
   const [airuleDraft, setAiruleDraft] = useState<any>(null);
   const [planDraft, setPlanDraft] = useState<any>(null);
@@ -1197,6 +1200,7 @@ export function App() {
           }}
           onViewClinic={(clinic) => {
             setViewingClinic(clinic);
+            setClinicDetailInitialTab('overview');
             setActiveView('clinic-detail');
           }}
           onCopyClinic={handleCopyClinic}
@@ -1214,13 +1218,39 @@ export function App() {
             setActiveView('clinics');
           }}
           onSave={(data) => handleClinicDetailSave(viewingClinic.id, data)}
+          initialTab={clinicDetailInitialTab}
         />;
       case 'users':
         return <Users />;
       case 'settings':
         return <Settings />;
       case 'billing':
-        return <BillingOverview />;
+      case 'billing-dashboard':
+        if (userRole === 'admin') {
+          return (
+            <AdminBillingOverview
+              onViewClinic={(clinic) => {
+                setViewingClinic(clinic);
+                setClinicDetailInitialTab('billing');
+                setActiveView('clinic-detail');
+              }}
+            />
+          );
+        }
+        return <ClinicBillingDashboard />;
+      case 'billing-payment':
+        if (userRole === 'admin') {
+          return (
+            <AdminBillingOverview
+              onViewClinic={(clinic) => {
+                setViewingClinic(clinic);
+                setClinicDetailInitialTab('billing');
+                setActiveView('clinic-detail');
+              }}
+            />
+          );
+        }
+        return <ClinicBillingPaymentPage />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-[60vh] text-gray-400">
@@ -1363,6 +1393,14 @@ export function App() {
       billing: {
         title: 'Billing',
         breadcrumb: 'Setup'
+      },
+      'billing-dashboard': {
+        title: 'Dashboard',
+        breadcrumb: 'Billing'
+      },
+      'billing-payment': {
+        title: 'Payment',
+        breadcrumb: 'Billing / Dashboard'
       }
     };
     return (
@@ -1687,12 +1725,12 @@ export function App() {
 
         {renderHeader()}
 
-             <main
+        <main
           className={`flex-1 min-h-0 bg-white ${showCompanionForm || showProtocolForm ? 'overflow-hidden' : 'overflow-y-auto'}`}>
-          
+
           <div className="h-full">
             <div className={`h-full w-full bg-[var(--accent)] ${showCompanionForm || showProtocolForm ? '' : 'rounded-tl-[40px] overflow-y-auto'}`}>
-               <div className={showCompanionForm || showProtocolForm ? 'h-full' : 'max-w-screen-3xl mx-auto p-8'}>
+              <div className={showCompanionForm || showProtocolForm ? 'h-full' : 'max-w-screen-3xl mx-auto p-8'}>
                 {renderContent()}
               </div>
             </div>

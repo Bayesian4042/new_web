@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Building2, X, ChevronDown } from 'lucide-react';
+import { Building2, X, ChevronDown, Shield, CreditCard, Clock } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Clinic } from './Clinics';
+import { BILLING_PLANS } from '../billing/billingData';
 
 interface ClinicFormProps {
     initialData?: Clinic | null;
@@ -33,6 +34,8 @@ export function ClinicForm({ initialData, onCancel, onSubmit }: ClinicFormProps)
     const [timezone, setTimezone] = useState(initialData?.timezone || 'America/New_York');
     const [categoryInput, setCategoryInput] = useState('');
     const [categories, setCategories] = useState<string[]>(initialData?.categories || []);
+    const [onboardingPath, setOnboardingPath] = useState<'assign_plan' | 'whitelist' | 'pending_plan'>('assign_plan');
+    const [selectedPlanId, setSelectedPlanId] = useState('starter');
 
     const handleAddCategory = () => {
         if (categoryInput.trim() && !categories.includes(categoryInput.trim())) {
@@ -54,13 +57,40 @@ export function ClinicForm({ initialData, onCancel, onSubmit }: ClinicFormProps)
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit({
+
+        const normalizedOwnerEmail = ownerEmail.trim();
+        const effectiveEmail = normalizedOwnerEmail;
+
+        const commitmentEndDate = (() => {
+            if (onboardingPath !== 'assign_plan') return undefined;
+            const dt = new Date();
+            dt.setMonth(dt.getMonth() + 6);
+            return dt.toISOString().split('T')[0];
+        })();
+
+        const submissionPayload: any = {
             name: clinicName,
-            ownerEmail,
+            ownerEmail: normalizedOwnerEmail || effectiveEmail,
             details,
             timezone,
-            categories
-        });
+            categories,
+            billingEmail: effectiveEmail,
+            onboardingPath,
+            whitelistFlag: onboardingPath === 'whitelist',
+            planId: onboardingPath === 'assign_plan' ? selectedPlanId : undefined,
+            billingStatus:
+                onboardingPath === 'whitelist'
+                    ? 'whitelist'
+                    : onboardingPath === 'pending_plan'
+                    ? 'no_plan'
+                    : 'current',
+            // Placeholder value for prototype until backend creates Stripe customer.
+            stripeCustomerId: onboardingPath === 'whitelist' ? undefined : 'cus_pending_creation',
+            commitmentEndDate,
+            welcomeEmailQueued: true,
+        };
+
+        onSubmit(submissionPayload);
         if (onCancel) onCancel();
     };
 
@@ -98,7 +128,6 @@ export function ClinicForm({ initialData, onCancel, onSubmit }: ClinicFormProps)
                                 value={clinicName}
                                 onChange={(e) => setClinicName(e.target.value)}
                                 placeholder="Enter clinic name"
-                                required
                                 className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
                             />
                         </div>
@@ -106,14 +135,13 @@ export function ClinicForm({ initialData, onCancel, onSubmit }: ClinicFormProps)
                         {/* Owner Email */}
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                Owner Email <span className="text-red-500">*</span>
+                                Owner Email <span className="text-gray-400 text-xs font-normal">(Optional)</span>
                             </label>
                             <input
                                 type="email"
                                 value={ownerEmail}
                                 onChange={(e) => setOwnerEmail(e.target.value)}
                                 placeholder="owner@clinic.com"
-                                required
                                 className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
                             />
                         </div>
@@ -128,7 +156,6 @@ export function ClinicForm({ initialData, onCancel, onSubmit }: ClinicFormProps)
                             <select
                                 value={timezone}
                                 onChange={(e) => setTimezone(e.target.value)}
-                                required
                                 className="w-full appearance-none px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm cursor-pointer bg-white"
                             >
                                 {TIMEZONES.map((tz) => (
@@ -155,6 +182,90 @@ export function ClinicForm({ initialData, onCancel, onSubmit }: ClinicFormProps)
                             className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm resize-none"
                         />
                     </div>
+
+                    {/* Onboarding Path */}
+                    <div className="pt-2">
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Initial Billing Setup <span className="text-red-500">*</span>
+                        </label>
+                        <div className="space-y-2">
+                            <button
+                                type="button"
+                                onClick={() => setOnboardingPath('assign_plan')}
+                                className={`w-full text-left rounded-lg border p-3 transition-all ${
+                                    onboardingPath === 'assign_plan'
+                                        ? 'border-blue-500 bg-blue-50'
+                                        : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <CreditCard size={14} className="text-blue-600" />
+                                    <p className="text-sm font-semibold text-gray-900">Assign Billing Plan Now</p>
+                                </div>
+                                <p className="text-xs text-gray-600 mt-1">
+                                    Creates Stripe Customer + Subscription. Commitment starts immediately.
+                                </p>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setOnboardingPath('whitelist')}
+                                className={`w-full text-left rounded-lg border p-3 transition-all ${
+                                    onboardingPath === 'whitelist'
+                                        ? 'border-purple-500 bg-purple-50'
+                                        : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Shield size={14} className="text-purple-600" />
+                                    <p className="text-sm font-semibold text-gray-900">Mark as Whitelist</p>
+                                </div>
+                                <p className="text-xs text-gray-600 mt-1">
+                                    Non-billable account. No Stripe subscription. Usage is still tracked.
+                                </p>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setOnboardingPath('pending_plan')}
+                                className={`w-full text-left rounded-lg border p-3 transition-all ${
+                                    onboardingPath === 'pending_plan'
+                                        ? 'border-amber-500 bg-amber-50'
+                                        : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Clock size={14} className="text-amber-600" />
+                                    <p className="text-sm font-semibold text-gray-900">Skip Plan (Pending Selection)</p>
+                                </div>
+                                <p className="text-xs text-gray-600 mt-1">
+                                    Clinic is created in pending plan state and will choose a plan later.
+                                </p>
+                            </button>
+                        </div>
+                    </div>
+
+                    {onboardingPath === 'assign_plan' && (
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                                Select Plan Tier <span className="text-red-500">*</span>
+                            </label>
+                            <div className="relative">
+                                <select
+                                    value={selectedPlanId}
+                                    onChange={(e) => setSelectedPlanId(e.target.value)}
+                                    className="w-full appearance-none px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm cursor-pointer bg-white"
+                                >
+                                    {BILLING_PLANS.map((plan) => (
+                                        <option key={plan.id} value={plan.id}>
+                                            {plan.name} - EUR {plan.monthlyFee}/mo ({plan.patientCreationAllowance} patients)
+                                        </option>
+                                    ))}
+                                </select>
+                                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                            </div>
+                        </div>
+                    )}
 
                     {/* Categories */}
                     <div>
