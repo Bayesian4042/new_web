@@ -42,10 +42,12 @@ interface CompanionFormProps {
 type FormSection =
   'companion-type' |
   'patient-details' |
+  'delivery-method' |
   'intent-shortcut' |
   'ai-prompt' |
   'knowledge-base' |
   'plan-links' |
+  'milestones' |
   'follow-up';
 type SheetType = 'shortcuts' | 'documents' | 'plans' | 'templates' | 'followups' | null;
 
@@ -60,6 +62,12 @@ interface Patient {
     cancellationPhone: string;
     instructions: string;
   };
+}
+
+interface Milestone {
+  id: string;
+  title: string;
+  description: string;
 }
 
 const followupItems: (SideSheetItem & { config?: { content: string; frequency: string; duration: string; time: string } })[] = [
@@ -276,6 +284,8 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
   const [followupType, setFollowupType] = useState<'periodical' | 'eventual'>(
     'periodical'
   );
+  const [deliveryMethod, setDeliveryMethod] = useState<'sms' | 'sms_email' | 'pdf'>('sms');
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [followupMessage, setFollowupMessage] = useState('');
   const [frequency, setFrequency] = useState('daily');
   const [duration, setDuration] = useState('7');
@@ -312,10 +322,12 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
   const sectionRefs = {
     'companion-type': useRef<HTMLElement>(null),
     'patient-details': useRef<HTMLElement>(null),
+    'delivery-method': useRef<HTMLElement>(null),
     'intent-shortcut': useRef<HTMLElement>(null),
     'ai-prompt': useRef<HTMLElement>(null),
     'knowledge-base': useRef<HTMLElement>(null),
     'plan-links': useRef<HTMLElement>(null),
+    'milestones': useRef<HTMLElement>(null),
     'follow-up': useRef<HTMLElement>(null)
   };
 
@@ -343,6 +355,12 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
       if (initialData.followupMessage) {
         setFollowupMessage(initialData.followupMessage);
       }
+      if (initialData.deliveryMethod) {
+        setDeliveryMethod(initialData.deliveryMethod);
+      }
+      if (initialData.milestones && Array.isArray(initialData.milestones)) {
+        setMilestones(initialData.milestones);
+      }
       if (initialData.assignedClinics) {
         setSelectedClinics(initialData.assignedClinics);
       }
@@ -361,6 +379,8 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
       selectedDocuments,
       selectedPlans,
       aiPrompt,
+      deliveryMethod,
+      milestones,
       followupMessage,
       frequency,
       duration,
@@ -370,7 +390,7 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
     });
   }, [
     companionTitle, companionType, patients, selectedShortcuts,
-    selectedDocuments, selectedPlans, aiPrompt, followupMessage,
+    selectedDocuments, selectedPlans, aiPrompt, deliveryMethod, milestones, followupMessage,
     frequency, duration, preferredTime, selectedClinics, selectedCategories, onChange
   ]);
 
@@ -382,12 +402,6 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
       required: true
     },
     {
-      id: 'patient-details' as const,
-      label: 'Patient Details',
-      icon: UserIcon,
-      required: true
-    },
-    {
       id: 'intent-shortcut' as const,
       label: 'Intent Shortcut',
       icon: FileText,
@@ -395,7 +409,7 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
     },
     {
       id: 'ai-prompt' as const,
-      label: 'AI Rules',
+      label: 'AI Roles',
       icon: Brain,
       required: true
     },
@@ -412,10 +426,28 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
       required: false
     },
     {
+      id: 'milestones' as const,
+      label: 'Milestones',
+      icon: Calendar,
+      required: false
+    },
+    {
       id: 'follow-up' as const,
       label: 'Follow-up',
       icon: Bell,
       required: false
+    },
+    {
+      id: 'patient-details' as const,
+      label: 'Patient Details',
+      icon: UserIcon,
+      required: true
+    },
+    {
+      id: 'delivery-method' as const,
+      label: 'Delivery Method',
+      icon: Send,
+      required: true
     }];
 
   const isSectionComplete = (sectionId: FormSection): boolean => {
@@ -432,8 +464,12 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
         return selectedDocuments.length > 0;
       case 'plan-links':
         return selectedPlans.length > 0;
+      case 'milestones':
+        return milestones.length > 0;
       case 'follow-up':
         return followupMessage.trim().length > 0;
+      case 'delivery-method':
+        return Boolean(deliveryMethod);
       default:
         return visitedSections.has(sectionId);
     }
@@ -527,6 +563,33 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
 
   const handleRemovePatient = (index: number) => {
     setPatients(patients.filter((_, i) => i !== index));
+  };
+
+  const handleAddMilestone = () => {
+    setMilestones((prev) => [
+      ...prev,
+      {
+        id: `ms-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        title: '',
+        description: '',
+      },
+    ]);
+  };
+
+  const handleUpdateMilestone = (
+    index: number,
+    field: 'title' | 'description',
+    value: string,
+  ) => {
+    setMilestones((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
+  };
+
+  const handleRemoveMilestone = (index: number) => {
+    setMilestones((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleUpdatePatient = (index: number, field: keyof Patient, value: any) => {
@@ -746,6 +809,8 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
                     selectedDocuments,
                     selectedPlans,
                     aiPrompt,
+                    deliveryMethod,
+                    milestones,
                     followupMessage,
                     frequency,
                     duration,
@@ -764,7 +829,7 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
           </div>
         </div>
 
-        <div className="max-w-3xl mx-auto py-8 px-8">
+        <div className="max-w-3xl mx-auto py-8 px-8 flex flex-col">
           {/* Section 1: Companion Type */}
           <section
             ref={sectionRefs['companion-type']}
@@ -828,6 +893,7 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
           <div className="h-8" />
 
           {/* Section: Patient Details */}
+          <div className="order-last">
           <section
             ref={sectionRefs['patient-details']}
             className="mb-12 scroll-mt-6">
@@ -1089,6 +1155,71 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
 
           <div className="h-8" />
 
+          {/* Section: Delivery Method */}
+          <section
+            ref={sectionRefs['delivery-method']}
+            className="mb-12 scroll-mt-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+                <Send size={18} className="text-indigo-600" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Choose Delivery Method <span className="text-red-500">*</span>
+                </h3>
+                <p className="text-sm text-gray-500">
+                  How should this companion be shared with the patient?
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {[
+                  {
+                    id: 'sms' as const,
+                    title: 'Link via SMS',
+                    description: 'Send plan preview link to patient phone'
+                  },
+                  {
+                    id: 'sms_email' as const,
+                    title: 'Link via SMS + Email',
+                    description: 'Send plan preview link via phone and email'
+                  },
+                  {
+                    id: 'pdf' as const,
+                    title: 'Download as PDF',
+                    description: 'Printable PDF with plan details'
+                  }
+                ].map((option) => {
+                  const active = deliveryMethod === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => setDeliveryMethod(option.id)}
+                      className={`text-left border rounded-xl p-4 transition-all ${
+                        active
+                          ? 'border-indigo-300 bg-indigo-50'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <p className={`text-sm font-semibold ${active ? 'text-indigo-900' : 'text-gray-900'}`}>
+                        {option.title}
+                      </p>
+                      <p className={`text-xs mt-1 ${active ? 'text-indigo-600' : 'text-gray-500'}`}>
+                        {option.description}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          <div className="h-8" />
+          </div>
+
           {/* Section 2: Intent Shortcut */}
           <section
             ref={sectionRefs['intent-shortcut']}
@@ -1138,7 +1269,7 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
 
           <div className="h-8" />
 
-          {/* Section 3: AI Rules */}
+          {/* Section 3: AI Roles */}
           <section ref={sectionRefs['ai-prompt']} className="mb-12 scroll-mt-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -1147,7 +1278,7 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900">
-                    AI Rules <span className="text-red-500">*</span>
+                    AI Roles <span className="text-red-500">*</span>
                   </h3>
                   <p className="text-sm text-gray-500">
                     Define how the AI should behave
@@ -1279,7 +1410,83 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
 
           <div className="h-8" />
 
-          {/* Section 6: Follow-up */}
+          {/* Section 6: Milestones */}
+          <section ref={sectionRefs['milestones']} className="mb-12 scroll-mt-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                  <Calendar size={18} className="text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    Milestones
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Optional - schedule messages around key clinical events
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 shadow-sm"
+                onClick={handleAddMilestone}>
+                <Plus size={14} />
+                Add
+              </Button>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
+              {milestones.length === 0 ? (
+                <div className="border-2 border-dashed border-gray-200 rounded-xl py-10 text-center bg-gray-50/50">
+                  <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                    <Calendar size={20} className="text-gray-400" />
+                  </div>
+                  <p className="text-sm font-semibold text-gray-500">No key events defined</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Add clinical milestones like Surgery or Discharge to schedule messages around them
+                  </p>
+                </div>
+              ) : (
+                milestones.map((milestone, index) => (
+                  <div key={milestone.id} className="border border-gray-200 rounded-xl p-3 space-y-2">
+                    <div className="flex items-start gap-2">
+                      <input
+                        type="text"
+                        value={milestone.title}
+                        onChange={(e) => handleUpdateMilestone(index, 'title', e.target.value)}
+                        placeholder="e.g. Surgery, Discharge, Treatment Start"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm font-semibold focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveMilestone(index)}
+                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                        title="Delete milestone"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      <Calendar size={14} className="inline mr-1 text-gray-400" />
+                      Date: <span className="italic text-gray-500">TBD - set when assigned to patient</span>
+                    </p>
+                    <input
+                      type="text"
+                      value={milestone.description}
+                      onChange={(e) => handleUpdateMilestone(index, 'description', e.target.value)}
+                      placeholder="Optional description (e.g. Primary surgical procedure)"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+
+          <div className="h-8" />
+
+          {/* Section 7: Follow-up */}
           <section ref={sectionRefs['follow-up']} className="mb-12 scroll-mt-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="h-10 w-10 rounded-xl bg-pink-100 flex items-center justify-center">
@@ -1521,79 +1728,6 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
 
           <div className="h-8" />
 
-          {/* Assigned Patients Summary Chip UI */}
-          <section className="mb-12 scroll-mt-6">
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                    <UserIcon size={18} className="text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900">Assigned Patients</h3>
-                    <p className="text-sm text-gray-500">
-                      {patients.filter(p => p.name.trim() || p.phoneNumber.trim()).length} saved · {patients.length} total
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {(() => {
-                const savedPatients = patients
-                  .map((p, i) => ({ ...p, originalIndex: i }))
-                  .filter(p => p.name.trim() || p.phoneNumber.trim());
-
-                if (savedPatients.length === 0) {
-                  return (
-                    <div className="flex flex-col items-center justify-center py-8 text-center">
-                      <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                        <UserIcon size={22} className="text-gray-400" />
-                      </div>
-                      <p className="text-sm font-semibold text-gray-500">No patients saved yet</p>
-                      <p className="text-xs text-gray-400 mt-1">Fill in a patient's name and phone above, then their info will appear here</p>
-                    </div>
-                  );
-                }
-
-                return (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {savedPatients.map((patient) => (
-                      <div
-                        key={patient.originalIndex}
-                        className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-xl group hover:border-blue-300 hover:shadow-sm transition-all"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
-                            {patient.name.trim()
-                              ? patient.name.trim().charAt(0).toUpperCase()
-                              : (patient.originalIndex + 1)}
-                          </div>
-                          <div className="flex flex-col">
-                            <p className="text-sm font-bold text-gray-900 leading-tight">
-                              {patient.name.trim() || `Patient ${patient.originalIndex + 1}`}
-                            </p>
-                            <p className="text-[10px] text-gray-500 font-medium tracking-tight mt-0.5">
-                              {patient.phoneNumber.trim()
-                                ? `${patient.countryCode} ${patient.phoneNumber}`
-                                : 'No phone'}
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleRemovePatient(patient.originalIndex)}
-                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                          title="Remove patient"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()}
-            </div>
-          </section>
-
           <div className="h-12" />
         </div>
       </div>
@@ -1718,7 +1852,7 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
       <SideSheet
         isOpen={activeSheet === 'templates'}
         onClose={() => setActiveSheet(null)}
-        title="AI Rules Templates"
+        title="AI Roles Templates"
         description="Start with a pre-built template"
         items={templateItems}
         selectedIds={tempSelection}

@@ -393,7 +393,7 @@ export function PatientCompanionForm({ onClose, onSave, onChange, onNavigateToPa
         },
         {
             id: 'ai-prompt' as const,
-            label: 'AI Rules',
+            label: 'AI Roles',
             icon: Brain,
             required: true
         },
@@ -974,7 +974,7 @@ export function PatientCompanionForm({ onClose, onSave, onChange, onNavigateToPa
 
                     <div className="h-8" />
 
-                    {/* Section 3: AI Rules */}
+                    {/* Section 3: AI Roles */}
                     <section ref={sectionRefs['ai-prompt']} className="mb-12 scroll-mt-6">
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-3">
@@ -983,7 +983,7 @@ export function PatientCompanionForm({ onClose, onSave, onChange, onNavigateToPa
                                 </div>
                                 <div>
                                     <h3 className="text-xl font-semibold text-gray-900">
-                                        AI Rules <span className="text-red-500">*</span>
+                                        AI Roles <span className="text-red-500">*</span>
                                     </h3>
                                     <p className="text-sm text-gray-500">
                                         Define how the AI should behave
@@ -1483,7 +1483,7 @@ export function PatientCompanionForm({ onClose, onSave, onChange, onNavigateToPa
             <SideSheet
                 isOpen={activeSheet === 'templates'}
                 onClose={() => setActiveSheet(null)}
-                title="AI Rules Templates"
+                title="AI Roles Templates"
                 description="Start with a pre-built template"
                 items={templateItems}
                 selectedIds={tempSelection}

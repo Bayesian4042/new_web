@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo, useReducer } from "react";
 import {
   FileText,
   Link as LinkIcon,
@@ -27,6 +27,7 @@ import {
   LayoutTemplate,
   Sparkles,
   Loader2,
+  Send,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
@@ -154,6 +155,78 @@ interface PlanFormProps {
   onCancel: () => void;
   otcLists: OTCList[];
   onCreateOTCPackage?: () => void;
+  plans?: any[];
+  companionTemplates?: Array<{
+    id: string;
+    name: string;
+    [key: string]: any;
+  }>;
+  onOpenCompanionFromPlan?: (payload: CompanionFromPlanPayload) => void;
+}
+
+export interface CompanionFromPlanPayload {
+  mode: "existing" | "new";
+  existingCompanionId?: string;
+  planData: {
+    name: string;
+    content: string;
+    artifacts: Artifact[];
+    products: Product[];
+    assignedClinics: string[];
+    assignedCategories: string[];
+    assignedPatients: Patient[];
+  };
+}
+
+type CompanionChoice = "existing" | "new";
+
+interface ShareFlowState {
+  step: "idle" | "confirm" | "choose";
+  choice: CompanionChoice | null;
+  templateId: string;
+}
+
+type ShareFlowAction =
+  | { type: "OPEN_CONFIRM" }
+  | { type: "OPEN_CHOOSE" }
+  | { type: "SET_CHOICE"; payload: CompanionChoice }
+  | { type: "SET_TEMPLATE"; payload: string }
+  | { type: "RESET" };
+
+const INITIAL_SHARE_FLOW_STATE: ShareFlowState = {
+  step: "idle",
+  choice: null,
+  templateId: "",
+};
+
+function shareFlowReducer(state: ShareFlowState, action: ShareFlowAction): ShareFlowState {
+  switch (action.type) {
+    case "OPEN_CONFIRM":
+      return {
+        ...state,
+        step: "confirm",
+      };
+    case "OPEN_CHOOSE":
+      return {
+        ...state,
+        step: "choose",
+      };
+    case "SET_CHOICE":
+      return {
+        ...state,
+        choice: action.payload,
+        templateId: action.payload === "new" ? "" : state.templateId,
+      };
+    case "SET_TEMPLATE":
+      return {
+        ...state,
+        templateId: action.payload,
+      };
+    case "RESET":
+      return INITIAL_SHARE_FLOW_STATE;
+    default:
+      return state;
+  }
 }
 
 const SortableProductRow: React.FC<SortableProductProps> = ({
@@ -470,6 +543,9 @@ export function PlanForm2({
   onCancel,
   otcLists,
   onCreateOTCPackage,
+  plans = [],
+  companionTemplates = [],
+  onOpenCompanionFromPlan,
 }: PlanFormProps) {
   const [mode, setMode] = useState<"create" | "import">("create");
   const [name, setName] = useState(initialData?.name || "");
@@ -484,10 +560,17 @@ export function PlanForm2({
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     initialData?.assignedCategories || [],
   );
+  const [deliveryMethod, setDeliveryMethod] = useState<"sms" | "sms_email" | "pdf">(
+    (initialData as any)?.deliveryMethod || "sms",
+  );
 
   // Patient assignment state
   const [assignedPatients, setAssignedPatients] = useState<Patient[]>([]);
   const [isPatientSheetOpen, setIsPatientSheetOpen] = useState(false);
+  const [shareFlow, dispatchShareFlow] = useReducer(
+    shareFlowReducer,
+    INITIAL_SHARE_FLOW_STATE,
+  );
 
   // Preview panel
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -498,6 +581,9 @@ export function PlanForm2({
   // AI generate panel
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [aiPatientContext, setAiPatientContext] = useState("");
+
+  // Card library sheet
+  const [isLibrarySheetOpen, setIsLibrarySheetOpen] = useState(false);
   const [aiSections, setAiSections] = useState<string[]>(["Overview", "Instructions"]);
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiError, setAiError] = useState("");
@@ -838,6 +924,7 @@ export function PlanForm2({
       assignedClinics: selectedClinics,
       assignedCategories: selectedCategories,
       assignedPatients,
+      deliveryMethod,
     });
   }, [
     name,
@@ -849,8 +936,57 @@ export function PlanForm2({
     selectedClinics,
     selectedCategories,
     assignedPatients,
+    deliveryMethod,
     onChange,
   ]);
+
+  const buildCompanionPayload = (
+    mode: "existing" | "new",
+    existingCompanionId?: string,
+  ): CompanionFromPlanPayload => ({
+    mode,
+    existingCompanionId,
+    planData: {
+      name,
+      content,
+      artifacts,
+      products,
+      assignedClinics: selectedClinics,
+      assignedCategories: selectedCategories,
+      assignedPatients,
+      deliveryMethod,
+    },
+  });
+
+  const handlePlanSaveClick = () => {
+    dispatchShareFlow({ type: "OPEN_CONFIRM" });
+  };
+
+  const handleSaveWithoutCompanion = () => {
+    dispatchShareFlow({ type: "RESET" });
+    onSubmit();
+  };
+
+  const handleSaveWithCompanion = () => {
+    dispatchShareFlow({ type: "OPEN_CHOOSE" });
+  };
+
+  const handleCompanionChoiceContinue = () => {
+    if (!shareFlow.choice) return;
+    if (shareFlow.choice === "existing" && !shareFlow.templateId) return;
+
+    onSubmit();
+    if (onOpenCompanionFromPlan) {
+      onOpenCompanionFromPlan(
+        buildCompanionPayload(
+          shareFlow.choice,
+          shareFlow.choice === "existing" ? shareFlow.templateId : undefined,
+        ),
+      );
+    }
+
+    dispatchShareFlow({ type: "RESET" });
+  };
 
   // ── Product handlers ─────────────────────────────────────────────────────────
 
@@ -1286,12 +1422,22 @@ export function PlanForm2({
                 )}
               </div>
 
-              {/* ── Artifacts ── */}
+              {/* ── Cards (formerly Artifacts) ── */}
               <div className="p-6">
-                <h2 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <FileUp size={14} className="text-indigo-500" />
-                  Attachments
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                    <FileUp size={14} className="text-indigo-500" />
+                    Cards
+                  </h2>
+                  <Button
+                    onClick={() => setIsLibrarySheetOpen(true)}
+                    size="sm"
+                    className="gap-1.5 bg-gray-900 text-white hover:bg-black h-8 text-xs px-3"
+                  >
+                    <Plus size={14} />
+                    Add
+                  </Button>
+                </div>
 
                 {/* Artifact card grid */}
                 {artifacts.length > 0 && (
@@ -1356,112 +1502,6 @@ export function PlanForm2({
                         </div>
                       </div>
                     ))}
-                  </div>
-                )}
-
-                {/* Add artifact buttons row */}
-                <div className="flex flex-wrap items-center gap-2">
-                  {/* Upload file */}
-                  <label className="cursor-pointer">
-                    <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-gray-300 bg-gray-50 hover:border-orange-400 hover:bg-orange-50/40 transition-all text-xs font-semibold text-gray-500 hover:text-orange-600">
-                      <FileUp size={13} />
-                      Upload File
-                    </div>
-                    <input
-                      type="file"
-                      multiple
-                      className="sr-only"
-                      onChange={handleFileUpload}
-                    />
-                  </label>
-
-                  {/* Add link */}
-                  {showLinkInput ? (
-                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                      <Input
-                        type="url"
-                        icon={<LinkIcon size={12} />}
-                        value={newLink}
-                        onChange={(e) => setNewLink(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") handleAddLink();
-                          if (e.key === "Escape") {
-                            setShowLinkInput(false);
-                            setNewLink("");
-                          }
-                        }}
-                        placeholder="Paste URL and press Enter…"
-                        className="text-xs flex-1"
-                        autoFocus
-                      />
-                      <Button
-                        onClick={handleAddLink}
-                        size="sm"
-                        className="bg-blue-600 hover:bg-blue-700 text-white h-8 px-3 shrink-0"
-                      >
-                        <Plus size={14} />
-                      </Button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowLinkInput(false);
-                          setNewLink("");
-                        }}
-                        className="p-1.5 text-gray-400 hover:text-gray-600 rounded transition-all shrink-0"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setShowLinkInput(true)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50/40 transition-all text-xs font-semibold text-gray-500 hover:text-blue-600"
-                    >
-                      <Globe size={13} />
-                      Add Link
-                    </button>
-                  )}
-
-                  {/* Record voice */}
-                  {!showVoiceRecorder && (
-                    <button
-                      type="button"
-                      onClick={() => setShowVoiceRecorder(true)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-gray-300 bg-gray-50 hover:border-red-400 hover:bg-red-50/40 transition-all text-xs font-semibold text-gray-500 hover:text-red-600"
-                    >
-                      <Mic size={13} />
-                      Record Voice
-                    </button>
-                  )}
-                </div>
-
-                {/* Inline voice recorder */}
-                {showVoiceRecorder && (
-                  <div className="mt-3 p-3 rounded-xl border border-gray-200 bg-gray-50/60">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
-                        <Mic size={12} className="text-red-500" />
-                        Voice Note
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowVoiceRecorder(false);
-                          handleVoiceCleared();
-                        }}
-                        className="p-1 text-gray-400 hover:text-gray-600 rounded transition-all"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                    <VoiceNoteRecorder
-                      onRecorded={() => {
-                        handleVoiceRecorded();
-                        setShowVoiceRecorder(false);
-                      }}
-                      onCleared={handleVoiceCleared}
-                    />
                   </div>
                 )}
               </div>
@@ -1546,6 +1586,59 @@ export function PlanForm2({
       </Card>
 
       {/* ── Clinic Selector ── */}
+      <Card noPadding>
+        <div className="p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Send size={14} className="text-indigo-500" />
+            <h2 className="text-sm font-bold text-gray-900">Choose Delivery Method</h2>
+          </div>
+          <p className="text-[11px] text-gray-400 mb-4">
+            Select how this plan should be delivered to the patient.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            {[
+              {
+                id: "sms" as const,
+                title: "Link via SMS",
+                description: "Send plan preview link to patient phone",
+              },
+              {
+                id: "sms_email" as const,
+                title: "Link via SMS + Email",
+                description: "Send plan preview link via phone and email",
+              },
+              {
+                id: "pdf" as const,
+                title: "Download as PDF",
+                description: "Generate printable version of the plan",
+              },
+            ].map((option) => {
+              const active = deliveryMethod === option.id;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => setDeliveryMethod(option.id)}
+                  className={`text-left border rounded-lg p-3 transition-all ${
+                    active
+                      ? "border-indigo-300 bg-indigo-50"
+                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  <p className={`text-xs font-semibold ${active ? "text-indigo-900" : "text-gray-900"}`}>
+                    {option.title}
+                  </p>
+                  <p className={`text-[11px] mt-1 ${active ? "text-indigo-600" : "text-gray-500"}`}>
+                    {option.description}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </Card>
+
+      {/* ── Clinic Selector ── */}
       <ClinicSelector
         selectedClinics={selectedClinics}
         onSelectionChange={setSelectedClinics}
@@ -1560,7 +1653,7 @@ export function PlanForm2({
           Cancel
         </Button>
         <Button
-          onClick={onSubmit}
+          onClick={handlePlanSaveClick}
           className="bg-gray-900 hover:bg-gray-800 text-white px-6"
         >
           {initialData ? "Save Changes" : "Create Plan"}
@@ -1911,6 +2004,15 @@ export function PlanForm2({
         </>
       )}
 
+      {/* ── Card Library Side Sheet ── */}
+      {isLibrarySheetOpen && (
+        <CardLibrarySideSheet
+          plans={plans}
+          onAdd={(newCards) => setArtifacts((prev) => [...prev, ...newCards])}
+          onClose={() => setIsLibrarySheetOpen(false)}
+        />
+      )}
+
       {/* ── Patient Side Sheet ── */}
       {isPatientSheetOpen && (
         <PatientSideSheet
@@ -1924,13 +2026,320 @@ export function PlanForm2({
       {isBlockSheetOpen && (
         <TextBlocksSideSheet
           onInsert={(html) => {
-            setContent((prev) => (prev ? prev + html : html));
+            setContent(html);
             setIsBlockSheetOpen(false);
           }}
           onClose={() => setIsBlockSheetOpen(false)}
         />
       )}
+
+      {shareFlow.step === "confirm" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-base font-bold text-gray-900">Send as companion?</h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  You can continue with plan-only sharing, or attach a companion now.
+                </p>
+              </div>
+              <button
+                onClick={() => dispatchShareFlow({ type: "RESET" })}
+                className="text-gray-300 hover:text-gray-500"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSaveWithoutCompanion}
+              >
+                No
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSaveWithCompanion}
+                className="bg-violet-600 hover:bg-violet-700 text-white"
+              >
+                Yes
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {shareFlow.step === "choose" && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/20 z-40"
+            onClick={() => dispatchShareFlow({ type: "RESET" })}
+          />
+          <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-xl flex flex-col animate-in slide-in-from-right duration-300">
+            <div className="flex items-start justify-between px-5 py-4 border-b border-gray-200">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Companion Options</h2>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  Select how you want to continue with companion setup.
+                </p>
+              </div>
+              <button
+                onClick={() => dispatchShareFlow({ type: "RESET" })}
+                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+              <button
+                type="button"
+                onClick={() => dispatchShareFlow({ type: "SET_CHOICE", payload: "existing" })}
+                className={`w-full text-left border rounded-xl p-4 transition-colors ${
+                  shareFlow.choice === "existing"
+                    ? "border-violet-300 bg-violet-50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <p className="text-sm font-semibold text-gray-900">Choose Existing Companion</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Copy an existing companion and inject this plan into it.
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => dispatchShareFlow({ type: "SET_CHOICE", payload: "new" })}
+                className={`w-full text-left border rounded-xl p-4 transition-colors ${
+                  shareFlow.choice === "new"
+                    ? "border-violet-300 bg-violet-50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <p className="text-sm font-semibold text-gray-900">Build New Companion</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Start a new companion with defaults and this plan preloaded.
+                </p>
+              </button>
+
+              {shareFlow.choice === "existing" && (
+                <div className="space-y-2">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Existing Companion
+                  </label>
+                  <select
+                    value={shareFlow.templateId}
+                    onChange={(e) =>
+                      dispatchShareFlow({ type: "SET_TEMPLATE", payload: e.target.value })
+                    }
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-violet-400 focus:border-violet-400"
+                  >
+                    <option value="">Select companion</option>
+                    {companionTemplates.map((template) => (
+                      <option key={template.id} value={template.id}>
+                        {template.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            <div className="px-5 py-4 border-t border-gray-200 bg-gray-50">
+              <div className="flex items-center justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => dispatchShareFlow({ type: "RESET" })}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleCompanionChoiceContinue}
+                  disabled={
+                    !shareFlow.choice ||
+                    (shareFlow.choice === "existing" && !shareFlow.templateId)
+                  }
+                  className="bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-40"
+                >
+                  Save & Open Companion
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
     </div>
+  );
+}
+
+// ── Card Library Side Sheet component ────────────────────────────────────────
+
+interface CardLibrarySideSheetProps {
+  plans: any[];
+  onAdd: (artifacts: Artifact[]) => void;
+  onClose: () => void;
+}
+
+function CardLibrarySideSheet({ plans, onAdd, onClose }: CardLibrarySideSheetProps) {
+  const [search, setSearch] = useState("");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const allCards = useMemo(() => {
+    const result: Artifact[] = [];
+    const seen = new Set();
+    plans.forEach((plan: any) => {
+      (plan.artifacts || []).forEach((art: any) => {
+        // Simple de-dupe by title/type for library feel
+        const key = `${art.type}-${art.title}`;
+        if (!seen.has(key)) {
+          result.push(art as Artifact);
+          seen.add(key);
+        }
+      });
+    });
+    return result;
+  }, [plans]);
+
+  const filtered = allCards.filter((c: Artifact) => {
+    const q = search.toLowerCase();
+    return (
+      c.title.toLowerCase().includes(q) || (c.fileName || "").toLowerCase().includes(q)
+    );
+  });
+
+  const toggleSelection = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
+    );
+  };
+
+  const handleConfirm = () => {
+    const selected = allCards
+      .filter((c: Artifact) => selectedIds.includes(c.id))
+      .map((c: Artifact) => ({
+        ...c,
+        id: `${c.id}-copy-${Date.now()}`, // Create a copy with fresh ID
+      }));
+    onAdd(selected);
+    onClose();
+  };
+
+  return (
+    <>
+      <div className="fixed inset-0 bg-black/20 z-40" onClick={onClose} />
+      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-xl bg-white shadow-xl flex flex-col animate-in slide-in-from-right duration-300">
+        <div className="flex items-start justify-between px-5 py-4 border-b border-gray-200">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 font-display">Add Cards</h2>
+            <p className="text-sm text-gray-500 mt-0.5">Select existing tools and resources from your library.</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="flex border-b border-gray-100 px-5 pt-3 gap-4">
+          <button className="pb-2.5 text-xs font-bold border-b-2 border-gray-900 text-gray-900 transition-colors">
+            Select Existing
+          </button>
+          <button className="pb-2.5 text-xs font-semibold border-b-2 border-transparent text-gray-400 hover:text-gray-600 cursor-not-allowed">
+            Create New
+          </button>
+        </div>
+
+        <div className="px-5 py-4">
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by title or file name…"
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400"
+            />
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-5 pb-6">
+          {filtered.length === 0 ? (
+            <div className="py-20 text-center">
+              <p className="text-sm text-gray-400 font-medium">No results found.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              {filtered.map((card: Artifact) => {
+                const isSelected = selectedIds.includes(card.id);
+                // We use the styles from the parent since they are defined there
+                // BUT we don't have access to getArtifactCardStyle here.
+                // I'll rewrite a simple version for the library.
+                const visualStyle: any = {};
+                if (card.backgroundColor) {
+                  visualStyle.backgroundColor = card.backgroundColor;
+                } else if (card.visualCategory === "colors") {
+                   visualStyle.backgroundColor = "#e2cd65"; // fallback
+                } else {
+                   // Linear gradient fallback for library view cards
+                   visualStyle.backgroundImage = "linear-gradient(135deg, #4b5563, #111827)";
+                }
+
+                return (
+                  <div
+                    key={card.id}
+                    onClick={() => toggleSelection(card.id)}
+                    className={`relative group rounded-2xl overflow-hidden aspect-[1.6/1] cursor-pointer transition-all border-2 ${
+                      isSelected ? "border-indigo-600 ring-2 ring-indigo-600/20 scale-[0.98]" : "border-transparent"
+                    }`}
+                    style={visualStyle}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                    <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/30 backdrop-blur-sm text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">
+                      <ArtifactTypeIcon type={card.type} />
+                      <span className="capitalize">{card.type}</span>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                      <p className="text-white text-xs font-bold leading-snug line-clamp-2 drop-shadow-md">
+                        {card.title}
+                      </p>
+                    </div>
+                    {isSelected && (
+                      <div className="absolute top-2 right-2 h-5 w-5 rounded-full bg-indigo-600 flex items-center justify-center border-2 border-white">
+                        <Check size={10} className="text-white" />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="px-5 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
+          <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+            {selectedIds.length} SELECTED
+          </span>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={onClose} className="rounded-xl px-4">
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              disabled={selectedIds.length === 0}
+              onClick={handleConfirm}
+              className="bg-gray-900 text-white hover:bg-black rounded-xl px-4 disabled:opacity-40"
+            >
+              Add Cards
+            </Button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 

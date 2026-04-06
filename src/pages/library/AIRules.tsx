@@ -52,7 +52,7 @@ export function AIRules({ onAddRule, onEditRule, onCopyRule, onDeleteRule, rules
       <div className="flex items-center justify-end py-3 border-b border-gray-100">
         <Button onClick={onAddRule} size="sm" className="bg-gray-900 hover:bg-gray-800 text-white">
           <Plus size={16} />
-          Add AI Rule
+          Add AI Role
         </Button>
       </div>
 
