@@ -4,10 +4,10 @@ import {
   CheckCircle2,
   ChevronDown,
   Clock,
-  CreditCard,
   Download,
   Lock,
   MessageSquare,
+  Send,
   Shield,
   TrendingUp,
   Users,
@@ -35,12 +35,22 @@ import { Button } from '../../components/ui/Button';
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function BillingStatusBadge({ status }: { status: BillingAccount['billingStatus'] }) {
-  if (status === 'current')
-    return <Badge variant="success">Current</Badge>;
-  if (status === 'payment_failed')
-    return <Badge className="bg-red-100 text-red-700 border-transparent">Payment Failed</Badge>;
+  if (status === 'current') return <Badge variant="success">Active</Badge>;
+  if (status === 'draft') return <Badge className="bg-slate-100 text-slate-700 border-transparent">Draft</Badge>;
+  if (status === 'no_plan' || status === 'pending')
+    return <Badge variant="warning">Pending</Badge>;
+  if (status === 'payment_failed' || status === 'past_due')
+    return <Badge className="bg-red-100 text-red-700 border-transparent">Past Due</Badge>;
+  if (status === 'suspended')
+    return <Badge className="bg-gray-200 text-gray-700 border-transparent">Suspended</Badge>;
+  if (status === 'archived')
+    return <Badge className="bg-slate-200 text-slate-700 border-transparent">Archived</Badge>;
+  if (status === 'cancelled' || status === 'inactive')
+    return <Badge variant="secondary">Cancelled</Badge>;
   if (status === 'whitelist')
     return <Badge className="bg-purple-100 text-purple-700 border-transparent">Whitelist</Badge>;
+  if (status === 'payment_failed')
+    return <Badge className="bg-red-100 text-red-700 border-transparent">Payment Failed</Badge>;
   return <Badge variant="secondary">Inactive</Badge>;
 }
 
@@ -112,19 +122,23 @@ function PlanManagementCard({
   account: BillingAccount;
   onUpdate: (update: Partial<BillingAccount>) => void;
 }) {
-  const currentPlan = getPlanById(account.planId)!;
-  const [selectedPlanId, setSelectedPlanId] = useState(account.planId);
+  const currentPlan = account.planId ? getPlanById(account.planId) : undefined;
+  const [selectedPlanId, setSelectedPlanId] = useState(account.planId || BILLING_PLANS[0].id);
   const [applied, setApplied] = useState(false);
-  const selectedPlan = getPlanById(selectedPlanId)!;
+  const selectedPlan = getPlanById(selectedPlanId);
   const hasChange = selectedPlanId !== account.planId;
 
-  const isUpgrade =
-    selectedPlan.patientCreationAllowance > currentPlan.patientCreationAllowance;
-  const isDowngrade =
-    selectedPlan.patientCreationAllowance < currentPlan.patientCreationAllowance;
+  const isUpgrade = !!(selectedPlan && currentPlan &&
+    selectedPlan.patientCreationAllowance > currentPlan.patientCreationAllowance);
+  const isDowngrade = !!(selectedPlan && currentPlan &&
+    selectedPlan.patientCreationAllowance < currentPlan.patientCreationAllowance);
 
   const handleApply = () => {
-    onUpdate({ planId: selectedPlanId, pendingPlanChange: selectedPlanId });
+    onUpdate({
+      planId: selectedPlanId,
+      pendingPlanChange: selectedPlanId,
+      billingStatus: account.billingStatus === 'no_plan' || account.billingStatus === 'draft' ? 'current' : account.billingStatus,
+    });
     setApplied(true);
     setTimeout(() => setApplied(false), 2500);
   };
@@ -143,12 +157,21 @@ function PlanManagementCard({
       <div className="flex items-center justify-between bg-indigo-50 rounded-xl p-4 border border-indigo-100">
         <div>
           <p className="text-xs text-indigo-500 font-medium uppercase tracking-wide mb-0.5">Active Plan</p>
-          <p className="text-xl font-black text-indigo-900">{currentPlan.name}</p>
-          <p className="text-xs text-indigo-600 mt-0.5">
-            {currentPlan.patientCreationAllowance} patients · {currentPlan.smsAllowance} SMS / month
-          </p>
+          {currentPlan ? (
+            <>
+              <p className="text-xl font-black text-indigo-900">{currentPlan.name}</p>
+              <p className="text-xs text-indigo-600 mt-0.5">
+                {currentPlan.patientCreationAllowance} patients · {currentPlan.smsAllowance} SMS / month
+              </p>
+            </>
+          ) : (
+            <p className="text-lg font-black text-indigo-900">No Plan Assigned</p>
+          )}
         </div>
-        <p className="text-2xl font-black text-indigo-700">{formatEur(currentPlan.monthlyFee)}<span className="text-sm font-normal text-indigo-400">/mo</span></p>
+        <p className="text-2xl font-black text-indigo-700">
+          {formatEur(currentPlan?.monthlyFee || 0)}
+          <span className="text-sm font-normal text-indigo-400">/mo</span>
+        </p>
       </div>
 
       {account.pendingPlanChange && account.pendingPlanChange !== account.planId && (
@@ -184,9 +207,9 @@ function PlanManagementCard({
           <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Plan Comparison</p>
           <div className="grid grid-cols-3 gap-3 text-xs">
             {[
-              { label: 'Monthly Fee', current: formatEur(currentPlan.monthlyFee), next: formatEur(selectedPlan.monthlyFee) },
-              { label: 'Patient Allowance', current: `${currentPlan.patientCreationAllowance}`, next: `${selectedPlan.patientCreationAllowance}` },
-              { label: 'SMS Allowance', current: `${currentPlan.smsAllowance}`, next: `${selectedPlan.smsAllowance}` },
+              { label: 'Monthly Fee', current: formatEur(currentPlan?.monthlyFee || 0), next: formatEur(selectedPlan?.monthlyFee || 0) },
+              { label: 'Patient Allowance', current: `${currentPlan?.patientCreationAllowance || 0}`, next: `${selectedPlan?.patientCreationAllowance || 0}` },
+              { label: 'SMS Allowance', current: `${currentPlan?.smsAllowance || 0}`, next: `${selectedPlan?.smsAllowance || 0}` },
             ].map((row) => (
               <div key={row.label} className="bg-white rounded-lg p-3 border border-gray-100">
                 <p className="text-gray-400 uppercase tracking-wide font-medium mb-1">{row.label}</p>
@@ -342,6 +365,8 @@ function WhitelistCard({
 
 function CommitmentCard({ account }: { account: BillingAccount }) {
   const [showCancelFlow, setShowCancelFlow] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelConfirmText, setCancelConfirmText] = useState('');
   const commitmentDays = daysUntil(account.commitmentEndDate);
   const inCommitment = commitmentDays > 0;
 
@@ -426,8 +451,44 @@ function CommitmentCard({ account }: { account: BillingAccount }) {
               <p className="text-xs text-orange-700">
                 This will cancel the Stripe subscription at the end of the current billing period. Usage data will be retained.
               </p>
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-orange-800">
+                  Cancellation Reason
+                </label>
+                <div className="relative">
+                  <select
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    className="w-full appearance-none px-3 py-2 border border-orange-200 rounded-lg bg-white text-sm text-gray-700"
+                  >
+                    <option value="">Select reason</option>
+                    <option value="too_expensive">Too expensive</option>
+                    <option value="switching_competitor">Switching to competitor</option>
+                    <option value="closing_clinic">Closing clinic</option>
+                    <option value="feature_gaps">Feature gaps</option>
+                    <option value="low_usage">Low usage</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-orange-800">
+                  Type <span className="font-black">CANCEL</span> to confirm
+                </label>
+                <input
+                  type="text"
+                  value={cancelConfirmText}
+                  onChange={(e) => setCancelConfirmText(e.target.value)}
+                  placeholder="CANCEL"
+                  className="w-full px-3 py-2 border border-orange-200 rounded-lg text-sm"
+                />
+              </div>
               <div className="flex gap-2">
-                <Button className="bg-red-600 hover:bg-red-700 text-white text-sm">
+                <Button
+                  className="bg-red-600 hover:bg-red-700 text-white text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled={!cancelReason || cancelConfirmText.trim() !== 'CANCEL'}
+                >
                   Confirm Cancellation
                 </Button>
                 <Button variant="outline" onClick={() => setShowCancelFlow(false)} className="text-sm">
@@ -529,6 +590,46 @@ function UsageSummaryCard({ account, plan }: { account: BillingAccount; plan: Bi
   );
 }
 
+function PaymentFailureCard({
+  account,
+  onUpdate,
+}: {
+  account: BillingAccount;
+  onUpdate: (update: Partial<BillingAccount>) => void;
+}) {
+  if (!(account.billingStatus === 'payment_failed' || account.billingStatus === 'past_due' || account.billingStatus === 'suspended')) {
+    return null;
+  }
+
+  return (
+    <section className="bg-red-50 border border-red-200 rounded-xl p-5 space-y-3">
+      <div className="flex items-start gap-2">
+        <AlertTriangle size={16} className="text-red-600 mt-0.5 shrink-0" />
+        <div>
+          <p className="text-sm font-bold text-red-800">Payment Attention Required</p>
+          <p className="text-xs text-red-700 mt-1">
+            Latest invoice is unpaid. Admin can send a payment update link and move account state after contact.
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white text-xs">
+          <Send size={12} className="mr-1.5" />
+          Send Payment Update Link
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-xs border-red-200 text-red-700"
+          onClick={() => onUpdate({ billingStatus: 'current' })}
+        >
+          Mark Resolved
+        </Button>
+      </div>
+    </section>
+  );
+}
+
 // ─── Invoice History ──────────────────────────────────────────────────────────
 
 function InvoiceHistoryCard({ account }: { account: BillingAccount }) {
@@ -551,10 +652,16 @@ function InvoiceHistoryCard({ account }: { account: BillingAccount }) {
     <section className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
         <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Invoice History</h3>
-        <button className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors">
-          <Download size={12} />
-          Export
-        </button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="h-7 px-2.5 text-xs">
+            <Send size={12} className="mr-1.5" />
+            Send Invoice
+          </Button>
+          <button className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors">
+            <Download size={12} />
+            Export
+          </button>
+        </div>
       </div>
       <table className="w-full">
         <thead>
@@ -618,57 +725,6 @@ function InvoiceHistoryCard({ account }: { account: BillingAccount }) {
   );
 }
 
-// ─── Payment Method Card ──────────────────────────────────────────────────────
-
-function PaymentMethodCard({ account }: { account: BillingAccount }) {
-  return (
-    <section className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
-      <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide flex items-center gap-2">
-        <CreditCard size={15} className="text-gray-500" />
-        Payment Method
-      </h3>
-
-      {account.paymentMethod ? (
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-14 rounded-lg bg-gray-900 flex items-center justify-center">
-              <span className="text-white text-[10px] font-bold uppercase">
-                {account.paymentMethod.brand}
-              </span>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-900">
-                ···· {account.paymentMethod.last4}
-              </p>
-              <p className="text-xs text-gray-400">
-                Expires {account.paymentMethod.expMonth}/{account.paymentMethod.expYear}
-              </p>
-            </div>
-          </div>
-          <Button variant="outline" className="text-xs">Update</Button>
-        </div>
-      ) : (
-        <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-700">
-          <AlertTriangle size={13} />
-          No payment method on file
-          {account.whitelistFlag && (
-            <span className="ml-1 text-purple-600">(Not required for whitelist accounts)</span>
-          )}
-        </div>
-      )}
-
-      {account.billingStatus === 'payment_failed' && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-700 flex items-start gap-2">
-          <AlertTriangle size={13} className="shrink-0 mt-0.5" />
-          <span>
-            Last payment failed. Please update the payment method or contact the clinic to resolve.
-          </span>
-        </div>
-      )}
-    </section>
-  );
-}
-
 // ─── Main Export ──────────────────────────────────────────────────────────────
 
 interface ClinicBillingTabProps {
@@ -680,7 +736,7 @@ export function ClinicBillingTab({ clinicId }: ClinicBillingTabProps) {
     () => mockBillingAccounts[clinicId] ?? mockBillingAccounts['CLN-001']
   );
 
-  const plan = getPlanById(account.planId)!;
+  const plan = account.planId ? getPlanById(account.planId) : undefined;
 
   const handleUpdate = (update: Partial<BillingAccount>) => {
     setAccount((prev) => ({ ...prev, ...update }));
@@ -691,26 +747,38 @@ export function ClinicBillingTab({ clinicId }: ClinicBillingTabProps) {
       <div className="space-y-5">
         <div className="flex items-center gap-3 bg-purple-50 border border-purple-200 rounded-xl p-4">
           <Shield size={18} className="text-purple-500 shrink-0" />
-          <div>
-            <p className="text-sm font-bold text-purple-800">Whitelist Account — Billing Disabled</p>
+        <div>
+          <p className="text-sm font-bold text-purple-800">Whitelist Account — Billing Disabled</p>
             <p className="text-xs text-purple-600 mt-0.5">
               This account does not generate invoices or Stripe charges. Usage is tracked internally only.
             </p>
           </div>
         </div>
         <WhitelistCard account={account} onUpdate={handleUpdate} />
-        <UsageSummaryCard account={account} plan={plan} />
+        {plan ? (
+          <UsageSummaryCard account={account} plan={plan} />
+        ) : (
+          <section className="bg-white rounded-xl border border-gray-200 p-5">
+            <p className="text-sm font-semibold text-gray-700">No plan assigned yet. Usage metrics will appear once billing is active.</p>
+          </section>
+        )}
       </div>
     );
   }
 
   return (
     <div className="space-y-5">
+      <PaymentFailureCard account={account} onUpdate={handleUpdate} />
       <PlanManagementCard account={account} onUpdate={handleUpdate} />
       <WhitelistCard account={account} onUpdate={handleUpdate} />
-      <UsageSummaryCard account={account} plan={plan} />
+      {plan ? (
+        <UsageSummaryCard account={account} plan={plan} />
+      ) : (
+        <section className="bg-white rounded-xl border border-gray-200 p-5">
+          <p className="text-sm font-semibold text-gray-700">No plan assigned yet. Usage metrics will appear once billing is active.</p>
+        </section>
+      )}
       <InvoiceHistoryCard account={account} />
-      <PaymentMethodCard account={account} />
       <CommitmentCard account={account} />
     </div>
   );

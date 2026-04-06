@@ -8,6 +8,7 @@ interface ClinicDetailProps {
     clinic: Clinic;
     onBack: () => void;
     onSave: (data: Partial<Clinic>) => void;
+    initialTab?: 'overview' | 'billing';
 }
 
 const TIMEZONES = [
@@ -27,8 +28,8 @@ const TIMEZONES = [
     { value: 'Australia/Sydney', label: 'Sydney (AEDT/AEST)' },
 ];
 
-export function ClinicDetail({ clinic, onBack, onSave }: ClinicDetailProps) {
-    const [activeTab, setActiveTab] = useState<'overview' | 'billing'>('overview');
+export function ClinicDetail({ clinic, onBack, onSave, initialTab = 'overview' }: ClinicDetailProps) {
+    const [activeTab, setActiveTab] = useState<'overview' | 'billing'>(initialTab);
     const [isEditing, setIsEditing] = useState(false);
     const [clinicName, setClinicName] = useState(clinic.name);
     const [ownerEmail, setOwnerEmail] = useState(clinic.ownerEmail);

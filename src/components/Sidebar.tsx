@@ -7,7 +7,8 @@ import {
   PanelLeftClose,
   Building2,
   Bot,
-  ClipboardList
+  ClipboardList,
+  CreditCard
 } from
   'lucide-react';
 
@@ -107,9 +108,10 @@ export function Sidebar({
       children: [
         { id: 'settings', label: 'Settings' },
         { id: 'users', label: 'Members' },
-        { id: 'billing', label: 'Billing' },
       ]
-    }
+    },
+    { id: 'billing-dashboard', label: 'Dashboard', icon: <ClipboardList size={16} /> },
+    { id: 'billing-payment', label: 'Payment', icon: <CreditCard size={16} /> },
   ];
 
   const adminNavItems: NavItem[] = [
@@ -125,6 +127,7 @@ export function Sidebar({
       ]
     },
     { id: 'plans', label: 'Plans', icon: <ClipboardList size={16} />, children: planChildren },
+    { id: 'billing', label: 'Billing', icon: <CreditCard size={16} /> },
     { id: 'clinics', label: 'Clinics', icon: <Building2 size={16} /> }
   ];
 
@@ -143,12 +146,11 @@ export function Sidebar({
             <button
               key={item.id}
               onClick={() => setActiveView(item.id)}
-              className={`h-9 w-9 flex items-center justify-center rounded-lg transition-colors ${
-                activeView === item.id || item.children?.some(c =>
-                  c.isSubParent ? c.children?.some(gc => gc.id === activeView) : c.id === activeView
-                )
-                  ? 'bg-[#efeffe] text-[#6366f1] shadow-sm'
-                  : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
+              className={`h-9 w-9 flex items-center justify-center rounded-lg transition-colors ${activeView === item.id || item.children?.some(c =>
+                c.isSubParent ? c.children?.some(gc => gc.id === activeView) : c.id === activeView
+              )
+                ? 'bg-[#efeffe] text-[#6366f1] shadow-sm'
+                : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
                 }`}
               title={item.label}
             >
@@ -233,11 +235,10 @@ export function Sidebar({
                       <div key={child.id}>
                         <button
                           onClick={() => toggleSection(child.id)}
-                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-sm transition-colors ${
-                            child.children?.some(gc => gc.id === activeView)
-                              ? 'text-gray-900 font-semibold'
-                              : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                          }`}
+                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-sm transition-colors ${child.children?.some(gc => gc.id === activeView)
+                            ? 'text-gray-900 font-semibold'
+                            : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                            }`}
                         >
                           <span>{child.label}</span>
                           <ChevronRight

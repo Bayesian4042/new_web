@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   CreditCard,
   FileText,
@@ -11,15 +11,14 @@ import {
   MessageSquare,
   Activity,
   ChevronDown,
-  Lock,
   Download,
   RefreshCw,
   Sparkles,
+  X,
 } from 'lucide-react';
 import {
   BillingAccount,
   BillingPlan,
-  BILLING_PLANS,
   COUNTRIES,
   calcEstimatedInvoice,
   calcExtraActivePatients,
@@ -693,7 +692,7 @@ function NoPlanEmptyState({ onGetStarted }: { onGetStarted: () => void }) {
         <div className="space-y-2">
           <h2 className="text-2xl font-black text-gray-900">No active subscription</h2>
           <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
-            Choose a plan to unlock patient activations, SMS messaging, and AI companion features
+            Choose a plan to activate patient billing, SMS usage tracking, and invoice visibility
             for your clinic.
           </p>
         </div>
@@ -709,45 +708,54 @@ function NoPlanEmptyState({ onGetStarted }: { onGetStarted: () => void }) {
           Setup is free · 6-month commitment · No hidden fees
         </p>
       </div>
+    </div>
+  );
+}
 
-      {/* Feature highlights */}
-      <div className="grid grid-cols-3 gap-4">
-        {[
-          {
-            icon: <Users size={18} className="text-indigo-600" />,
-            title: 'Patient Activations',
-            desc: 'Each plan includes a monthly allowance. Extra patients billed at per-unit rates.',
-            bg: 'bg-indigo-50',
-          },
-          {
-            icon: <MessageSquare size={18} className="text-purple-600" />,
-            title: 'SMS Messaging',
-            desc: 'SMS allowance grows dynamically as you activate more patients.',
-            bg: 'bg-purple-50',
-          },
-          {
-            icon: <Activity size={18} className="text-green-600" />,
-            title: 'Usage Tracking',
-            desc: 'Real-time meters track your usage across patients, SMS and active patients.',
-            bg: 'bg-green-50',
-          },
-        ].map((item) => (
-          <div key={item.title} className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
-            <div className={`h-10 w-10 rounded-lg ${item.bg} flex items-center justify-center`}>
-              {item.icon}
-            </div>
-            <div>
-              <p className="text-sm font-bold text-gray-900">{item.title}</p>
-              <p className="text-xs text-gray-500 mt-1 leading-relaxed">{item.desc}</p>
-            </div>
+function ActivationChoiceModal({
+  onClose,
+  onMakePayment,
+  onChoosePlan,
+}: {
+  onClose: () => void;
+  onMakePayment: () => void;
+  onChoosePlan: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[1px] flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-xl p-5 space-y-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="text-lg font-black text-gray-900">Activate Billing</h3>
+            <p className="text-sm text-gray-500 mt-1">
+              Choose how you want to continue.
+            </p>
           </div>
-        ))}
-      </div>
+          <button
+            onClick={onClose}
+            className="h-8 w-8 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 flex items-center justify-center"
+          >
+            <X size={16} />
+          </button>
+        </div>
 
-      {/* Locked tabs hint */}
-      <div className="flex items-center gap-2 text-xs text-gray-400">
-        <Lock size={11} />
-        Invoice history and payment settings will be available once you subscribe.
+        <div className="space-y-2">
+          <button
+            onClick={onMakePayment}
+            className="w-full text-left rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 hover:bg-blue-100 transition-colors"
+          >
+            <p className="text-sm font-bold text-blue-900">Make Payment</p>
+            <p className="text-xs text-blue-700 mt-0.5">Go directly to payment and complete activation.</p>
+          </button>
+
+          <button
+            onClick={onChoosePlan}
+            className="w-full text-left rounded-xl border border-gray-200 bg-white px-4 py-3 hover:bg-gray-50 transition-colors"
+          >
+            <p className="text-sm font-bold text-gray-900">Choose Plan</p>
+            <p className="text-xs text-gray-600 mt-0.5">Compare plans first, then proceed to payment.</p>
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -760,12 +768,22 @@ type TabId = 'overview' | 'invoices' | 'payment';
 export function BillingOverview() {
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [showWizard, setShowWizard] = useState(false);
+  const [showActivationChoice, setShowActivationChoice] = useState(false);
+  const [hasAutoOpenedChoice, setHasAutoOpenedChoice] = useState(false);
+  const [wizardInitialStep, setWizardInitialStep] = useState<1 | 3>(1);
   const [account, setAccount] = useState<BillingAccount>(
     () => mockBillingAccounts[DEFAULT_CLINIC_ID]
   );
 
   const isNoPlan = account.billingStatus === 'no_plan';
   const plan = account.planId ? getPlanById(account.planId) : undefined;
+
+  useEffect(() => {
+    if (isNoPlan && !showWizard && !hasAutoOpenedChoice) {
+      setShowActivationChoice(true);
+      setHasAutoOpenedChoice(true);
+    }
+  }, [isNoPlan, showWizard, hasAutoOpenedChoice]);
 
   // Show wizard when clinic clicks "Get Started"
   if (isNoPlan && showWizard) {
@@ -778,6 +796,7 @@ export function BillingOverview() {
         <SubscribeWizard
           clinicId={account.clinicId}
           prefillEmail={account.billingEmail}
+          initialStep={wizardInitialStep}
           onComplete={(newAccount) => {
             setAccount(newAccount);
             setShowWizard(false);
@@ -789,7 +808,26 @@ export function BillingOverview() {
 
   // Show empty state when no plan
   if (isNoPlan) {
-    return <NoPlanEmptyState onGetStarted={() => setShowWizard(true)} />;
+    return (
+      <>
+        <NoPlanEmptyState onGetStarted={() => setShowActivationChoice(true)} />
+        {showActivationChoice && (
+          <ActivationChoiceModal
+            onClose={() => setShowActivationChoice(false)}
+            onMakePayment={() => {
+              setWizardInitialStep(3);
+              setShowActivationChoice(false);
+              setShowWizard(true);
+            }}
+            onChoosePlan={() => {
+              setWizardInitialStep(1);
+              setShowActivationChoice(false);
+              setShowWizard(true);
+            }}
+          />
+        )}
+      </>
+    );
   }
 
   // Normal billing view (plan active)
