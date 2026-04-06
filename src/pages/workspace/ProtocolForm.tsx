@@ -181,7 +181,7 @@ export function ProtocolForm({ onClose, onSave, initialData, userRole }: Protoco
         },
         {
             id: 'ai-rules' as const,
-            label: 'AI Rules',
+            label: 'AI Roles',
             icon: Brain,
             required: true
         },
@@ -728,13 +728,13 @@ export function ProtocolForm({ onClose, onSave, initialData, userRole }: Protoco
                             </div>
                         </section>
 
-                        {/* Section 3: AI Rules */}
+                        {/* Section 3: AI Roles */}
                         <section ref={sectionRefs['ai-rules']} className="scroll-mt-6">
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
                                     <div className="h-10 w-10 rounded-xl bg-amber-100 flex items-center justify-center"><Brain size={18} className="text-amber-600" /></div>
                                     <div>
-                                        <h3 className="text-xl font-semibold text-gray-900">AI Rules</h3>
+                                        <h3 className="text-xl font-semibold text-gray-900">AI Roles</h3>
                                         <p className="text-sm text-gray-500">Clinical logic and behavior</p>
                                     </div>
                                 </div>

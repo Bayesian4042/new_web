@@ -24,7 +24,7 @@ import { DEFAULT_TEXT_BLOCKS } from './lib/textBlocks';
 import type { TextBlock } from './lib/textBlocks';
 import { Button } from './components/ui/Button';
 import { PlanForm } from './pages/otc/PlanForm';
-import { PlanForm2 } from './pages/otc/PlanForm2';
+import { PlanForm2, type CompanionFromPlanPayload } from './pages/otc/PlanForm2';
 import { Clinics, mockClinics, Clinic } from './pages/setup/Clinics';
 import { ClinicForm } from './pages/setup/ClinicForm';
 import { ClinicDetail } from './pages/setup/ClinicDetail';
@@ -521,6 +521,72 @@ export function App() {
     setPlanDraft2(null);
   };
 
+  const handleOpenCompanionFromPlan = (payload: CompanionFromPlanPayload) => {
+    const { mode, existingCompanionId, planData } = payload;
+
+    const existingTemplate =
+      mode === 'existing'
+        ? companions.find((c) => c.id === existingCompanionId)
+        : null;
+
+    const defaultName = planData.name?.trim()
+      ? `${planData.name} Companion`
+      : 'New Companion';
+
+    const mappedPatients = (planData.assignedPatients || []).map((p: any) => ({
+      name: p.name || '',
+      countryCode: '+1',
+      phoneNumber: p.phone || '',
+    }));
+
+    const baseData: any = existingTemplate
+      ? { ...existingTemplate }
+      : {
+        name: defaultName,
+        type: 'general',
+        selectedShortcuts: ['s1', 's2'],
+        selectedDocuments: ['d1'],
+        selectedPlans: [],
+        aiPrompt: planData.name
+          ? `Support the patient through the "${planData.name}" plan with clear and empathetic guidance.`
+          : 'Support the patient with clear and empathetic guidance.',
+        followupMessage: 'Hi! I am here to support your treatment plan and check in on your progress.',
+        frequency: 'daily',
+        duration: '14',
+        preferredTime: '09:00',
+      };
+
+    const planLinkId = `plan-${Date.now()}`;
+    const selectedPlans = Array.from(
+      new Set([
+        ...(baseData.selectedPlans || []),
+        planLinkId,
+      ]),
+    );
+
+    const prefilledCompanion = {
+      ...baseData,
+      id: '',
+      name:
+        mode === 'existing'
+          ? `${baseData.name || 'Companion'} (Plan Copy)`
+          : baseData.name || defaultName,
+      selectedPlans,
+      assignedClinics: planData.assignedClinics || baseData.assignedClinics || [],
+      assignedCategories: planData.assignedCategories || baseData.assignedCategories || [],
+      patients: mappedPatients,
+      source: 'Companion',
+    };
+
+    setEditingCompanion(prefilledCompanion);
+    setCompanionDraft(prefilledCompanion);
+    setShowPlanForm2(false);
+    setEditingPlan2(null);
+    setPlanDraft2(null);
+    setActiveView('companions-list');
+    setShowCompanionForm(true);
+  };
+
   const handleKBSubmit = () => {
     if (!kbDraft) return;
     if (editingKB && editingKB.id) {
@@ -754,7 +820,7 @@ export function App() {
       );
     }
 
-    // Show AI Rule form when active
+    // Show AI Role form when active
     if (showAIRuleForm && activeView === 'ai-rules') {
       return (
         <AIRuleForm
@@ -816,6 +882,9 @@ export function App() {
           userRole={userRole}
           doctorName={CURRENT_DOCTOR_NAME}
           otcLists={otcLists}
+          plans={plans}
+          companionTemplates={companions as any[]}
+          onOpenCompanionFromPlan={handleOpenCompanionFromPlan}
           onSubmit={handlePlanSubmit2}
           onCancel={() => {
             setShowPlanForm2(false);
@@ -1183,8 +1252,8 @@ export function App() {
     // Add logic for other forms if needed
     if (showAIRuleForm && activeView === 'ai-rules') {
       return {
-        title: editingAIRule ? 'Edit AI Rule' : 'New AI Rule',
-        breadcrumb: 'Companions / AI Rules'
+        title: editingAIRule ? 'Edit AI Role' : 'New AI Role',
+        breadcrumb: 'Companions / AI Roles'
       };
     }
 
@@ -1220,7 +1289,7 @@ export function App() {
         breadcrumb: 'Patient Management'
       },
       'ai-rules': {
-        title: 'AI Rules',
+        title: 'AI Roles',
         breadcrumb: 'Companions'
       },
       'shortcut-intents': {
@@ -1368,14 +1437,14 @@ export function App() {
       );
     }
 
-    // Custom header for AI Rule form
+    // Custom header for AI Role form
     if (showAIRuleForm && activeView === 'ai-rules') {
       return (
         <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20 shadow-sm">
           <div className="flex items-center gap-2 text-sm">
             <span className="text-gray-500 font-medium">Companions</span>
             <span className="text-gray-300">/</span>
-            <span className="text-gray-500 font-medium">AI Rules</span>
+            <span className="text-gray-500 font-medium">AI Roles</span>
             <span className="text-gray-300">/</span>
             {editingAIRule ? (
               <>
@@ -1384,7 +1453,7 @@ export function App() {
                 <span className="font-semibold text-gray-900">Edit</span>
               </>
             ) : (
-              <span className="font-semibold text-gray-900">New AI Rule</span>
+              <span className="font-semibold text-gray-900">New AI Role</span>
             )}
           </div>
         </header>);

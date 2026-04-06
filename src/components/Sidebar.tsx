@@ -63,7 +63,7 @@ export function Sidebar({
       label: 'Intelligence',
       isSubParent: true,
       children: [
-        { id: 'ai-rules', label: 'AI Rules' },
+        { id: 'ai-rules', label: 'AI Roles' },
         { id: 'shortcut-intents', label: 'Shortcut Intents' },
         { id: 'knowledge-base', label: 'Knowledge Base' },
         { id: 'followups', label: 'Follow Ups' },
