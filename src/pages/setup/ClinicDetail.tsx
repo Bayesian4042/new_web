@@ -9,6 +9,7 @@ interface ClinicDetailProps {
     onBack: () => void;
     onSave: (data: Partial<Clinic>) => void;
     initialTab?: 'overview' | 'billing';
+    userRole: 'admin' | 'clinic';
 }
 
 const TIMEZONES = [
@@ -28,7 +29,7 @@ const TIMEZONES = [
     { value: 'Australia/Sydney', label: 'Sydney (AEDT/AEST)' },
 ];
 
-export function ClinicDetail({ clinic, onBack, onSave, initialTab = 'overview' }: ClinicDetailProps) {
+export function ClinicDetail({ clinic, onBack, onSave, initialTab = 'overview', userRole }: ClinicDetailProps) {
     const [activeTab, setActiveTab] = useState<'overview' | 'billing'>(initialTab);
     const [isEditing, setIsEditing] = useState(false);
     const [clinicName, setClinicName] = useState(clinic.name);
@@ -158,7 +159,7 @@ export function ClinicDetail({ clinic, onBack, onSave, initialTab = 'overview' }
 
             {/* Billing Tab */}
             {activeTab === 'billing' && (
-                <ClinicBillingTab clinicId={clinic.id} />
+                <ClinicBillingTab clinicId={clinic.id} userRole={userRole} />
             )}
 
             {/* Overview Tab content */}

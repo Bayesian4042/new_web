@@ -14,6 +14,8 @@ import {
   Activity,
   ArrowRight,
   Info,
+  Mail,
+  Phone,
 } from 'lucide-react';
 import {
   BILLING_PLANS,
@@ -363,7 +365,13 @@ function WhitelistCard({
 
 // ─── Commitment Card ──────────────────────────────────────────────────────────
 
-function CommitmentCard({ account }: { account: BillingAccount }) {
+function CommitmentCard({
+  account,
+  canCancel,
+}: {
+  account: BillingAccount;
+  canCancel: boolean;
+}) {
   const [showCancelFlow, setShowCancelFlow] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [cancelConfirmText, setCancelConfirmText] = useState('');
@@ -403,17 +411,25 @@ function CommitmentCard({ account }: { account: BillingAccount }) {
         </div>
       </div>
 
-      <div className="border-t border-gray-100 pt-4">
-        <Button
-          variant="outline"
-          onClick={() => setShowCancelFlow(true)}
-          className="text-sm text-red-600 border-red-200 hover:bg-red-50"
-        >
-          Cancel Subscription
-        </Button>
-      </div>
+      {canCancel ? (
+        <div className="border-t border-gray-100 pt-4">
+          <Button
+            variant="outline"
+            onClick={() => setShowCancelFlow(true)}
+            className="text-sm text-red-600 border-red-200 hover:bg-red-50"
+          >
+            Cancel Subscription
+          </Button>
+        </div>
+      ) : (
+        <div className="border-t border-gray-100 pt-4">
+          <p className="text-xs text-gray-500">
+            Cancellation requests are managed by GEMA Admin. Please contact support.
+          </p>
+        </div>
+      )}
 
-      {showCancelFlow && (
+      {canCancel && showCancelFlow && (
         <div
           className={`rounded-xl border p-4 space-y-3 ${
             inCommitment
@@ -499,6 +515,42 @@ function CommitmentCard({ account }: { account: BillingAccount }) {
           )}
         </div>
       )}
+    </section>
+  );
+}
+
+function ContactAdminCard() {
+  return (
+    <section className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+      <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide flex items-center gap-2">
+        <Shield size={15} className="text-blue-500" />
+        Contact Admin Support
+      </h3>
+
+      <p className="text-sm text-gray-600">
+        Need help with plan changes, cancellation, or billing questions? Contact GEMA Admin support.
+      </p>
+
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-sm text-gray-700">
+          <Mail size={14} className="text-gray-500" />
+          <a
+            href="mailto:billing@gema.ai"
+            className="text-blue-600 hover:text-blue-700 font-medium"
+          >
+            billing@gema.ai
+          </a>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-gray-700">
+          <Phone size={14} className="text-gray-500" />
+          <a
+            href="tel:+1-415-555-0137"
+            className="text-blue-600 hover:text-blue-700 font-medium"
+          >
+            +1 (415) 555-0137
+          </a>
+        </div>
+      </div>
     </section>
   );
 }
@@ -590,6 +642,43 @@ function UsageSummaryCard({ account, plan }: { account: BillingAccount; plan: Bi
   );
 }
 
+function AITokenUsageCard({
+  account,
+}: {
+  account: BillingAccount;
+}) {
+  // Demo token telemetry derived from activity until backend telemetry is wired.
+  const usedTokens = Math.max(
+    0,
+    Math.round(
+      account.usage.smsSentThisCycle * 68 +
+      account.usage.patientsActivatedThisCycle * 1220 +
+      account.usage.activePatientsCurrentCount * 180
+    ),
+  );
+
+  return (
+    <section className="bg-white rounded-xl border border-gray-200 p-5 space-y-5">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide flex items-center gap-2">
+          <Activity size={15} className="text-indigo-500" />
+          AI Usage (Super Admin)
+        </h3>
+        <Badge className="bg-indigo-100 text-indigo-700 border-transparent">No Cost Applied</Badge>
+      </div>
+
+      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">Tokens Used</p>
+        <p className="text-2xl font-black text-gray-900 mt-1">{usedTokens.toLocaleString()}</p>
+      </div>
+
+      <p className="text-xs text-gray-500">
+        Token usage is visible for monitoring only. AI token pricing is currently disabled for this clinic.
+      </p>
+    </section>
+  );
+}
+
 function PaymentFailureCard({
   account,
   onUpdate,
@@ -632,7 +721,13 @@ function PaymentFailureCard({
 
 // ─── Invoice History ──────────────────────────────────────────────────────────
 
-function InvoiceHistoryCard({ account }: { account: BillingAccount }) {
+function InvoiceHistoryCard({
+  account,
+  userRole,
+}: {
+  account: BillingAccount;
+  userRole: 'admin' | 'clinic';
+}) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const sorted = [...account.invoices].sort(
@@ -653,10 +748,12 @@ function InvoiceHistoryCard({ account }: { account: BillingAccount }) {
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
         <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Invoice History</h3>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="h-7 px-2.5 text-xs">
-            <Send size={12} className="mr-1.5" />
-            Send Invoice
-          </Button>
+          {userRole === 'admin' && (
+            <Button variant="outline" size="sm" className="h-7 px-2.5 text-xs">
+              <Send size={12} className="mr-1.5" />
+              Send Invoice
+            </Button>
+          )}
           <button className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors">
             <Download size={12} />
             Export
@@ -729,12 +826,23 @@ function InvoiceHistoryCard({ account }: { account: BillingAccount }) {
 
 interface ClinicBillingTabProps {
   clinicId: string;
+  userRole?: 'admin' | 'clinic';
 }
 
-export function ClinicBillingTab({ clinicId }: ClinicBillingTabProps) {
+export function ClinicBillingTab({ clinicId, userRole = 'admin' }: ClinicBillingTabProps) {
   const [account, setAccount] = useState<BillingAccount>(
     () => mockBillingAccounts[clinicId] ?? mockBillingAccounts['CLN-001']
   );
+  const CLINIC_CANCEL_TEST_IDS = new Set(['CLN-001']);
+  const clinicCancelTestOverride =
+    typeof window !== 'undefined' &&
+    (
+      new URLSearchParams(window.location.search).get('testClinicCancel') === '1' ||
+      window.localStorage.getItem('testClinicCancel') === '1'
+    );
+  const canCancelSubscription =
+    userRole === 'admin' ||
+    (userRole === 'clinic' && (CLINIC_CANCEL_TEST_IDS.has(clinicId) || clinicCancelTestOverride));
 
   const plan = account.planId ? getPlanById(account.planId) : undefined;
 
@@ -778,8 +886,10 @@ export function ClinicBillingTab({ clinicId }: ClinicBillingTabProps) {
           <p className="text-sm font-semibold text-gray-700">No plan assigned yet. Usage metrics will appear once billing is active.</p>
         </section>
       )}
-      <InvoiceHistoryCard account={account} />
-      <CommitmentCard account={account} />
+      {userRole === 'admin' && <AITokenUsageCard account={account} />}
+      <InvoiceHistoryCard account={account} userRole={userRole} />
+      {userRole === 'clinic' && <ContactAdminCard />}
+      <CommitmentCard account={account} canCancel={canCancelSubscription} />
     </div>
   );
 }
