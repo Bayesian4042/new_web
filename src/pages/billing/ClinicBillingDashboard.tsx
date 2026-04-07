@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Activity, AlertTriangle, CheckCircle2, Sparkles, Users, MessageSquare, X } from 'lucide-react';
+import { Activity, AlertTriangle, CheckCircle2, Sparkles, Users, MessageSquare, X, Mail, Phone, Shield } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Progress } from '../../components/ui/Progress';
@@ -153,6 +153,36 @@ function NoPlanState({ onGetStarted }: { onGetStarted: () => void }) {
   );
 }
 
+function ContactAdminCard() {
+  return (
+    <section className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+      <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide flex items-center gap-2">
+        <Shield size={15} className="text-blue-500" />
+        Contact Admin Support
+      </h3>
+
+      <p className="text-sm text-gray-600">
+        Need help with plan changes, cancellation, or billing questions? Contact GEMA Admin support.
+      </p>
+
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-sm text-gray-700">
+          <Mail size={14} className="text-gray-500" />
+          <a href="mailto:billing@gema.ai" className="text-blue-600 hover:text-blue-700 font-medium">
+            billing@gema.ai
+          </a>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-gray-700">
+          <Phone size={14} className="text-gray-500" />
+          <a href="tel:+1-415-555-0137" className="text-blue-600 hover:text-blue-700 font-medium">
+            +1 (415) 555-0137
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function UsagePanel({ account, plan }: { account: BillingAccount; plan: BillingPlan }) {
   const estimate = useMemo(() => calcEstimatedInvoice(account.usage, plan), [account.usage, plan]);
   const extraPatients = calcExtraPatients(account.usage, plan);
@@ -299,6 +329,7 @@ export function ClinicBillingDashboard({ clinicId = DEFAULT_CLINIC_ID }: ClinicB
     return (
       <>
         <NoPlanState onGetStarted={() => setShowActivationChoice(true)} />
+        <ContactAdminCard />
         {showActivationChoice && (
           <ActivationChoiceModal
             onClose={() => setShowActivationChoice(false)}
@@ -379,6 +410,8 @@ export function ClinicBillingDashboard({ clinicId = DEFAULT_CLINIC_ID }: ClinicB
           </p>
         </div>
       ) : null}
+
+      <ContactAdminCard />
 
       {showActivationChoice && (
         <ActivationChoiceModal
