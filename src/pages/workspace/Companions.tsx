@@ -12,6 +12,33 @@ export interface Companion {
   createdBy: string;
   createdOn: string;
   source?: 'Protocol' | 'Companion';
+  patients?: Array<{
+    name: string;
+    countryCode: string;
+    phoneNumber: string;
+  }>;
+  selectedShortcuts?: string[];
+  selectedDocuments?: string[];
+  selectedPlans?: string[];
+  aiPrompt?: string;
+  milestones?: Array<{
+    id: string;
+    title: string;
+    description: string;
+  }>;
+  followupMessage?: string;
+  followupType?: 'periodical' | 'eventual';
+  frequency?: string;
+  duration?: string;
+  preferredTime?: string;
+  scheduledEvents?: Array<{
+    date: string;
+    time: string;
+    content: string;
+  }>;
+  deliveryMethod?: 'sms' | 'sms_email' | 'pdf';
+  assignedClinics?: string[];
+  assignedCategories?: string[];
 }
 
 interface CompanionsProps {

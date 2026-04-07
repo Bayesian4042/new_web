@@ -250,58 +250,135 @@ const INITIAL_COMPANIONS: Companion[] = [
   {
     id: 'CMP-0001',
     name: 'Recovery Coach',
+    type: 'general',
     role: 'Post-Op Support',
     status: 'Active',
     users: 124,
     createdBy: 'Dr. Sarah Smith',
     createdOn: '02-02-2026',
-    source: 'Companion'
+    source: 'Companion',
+    selectedShortcuts: ['s1', 's2'],
+    selectedDocuments: ['d1', 'd3'],
+    selectedPlans: ['p2'],
+    aiPrompt: 'Guide post-op patients with practical recovery instructions, symptom triage, and empathetic reassurance.',
+    milestones: [
+      { id: 'ms-c1-1', title: 'Pain reduced to manageable level', description: 'Target pain score below 4/10 by day 5.' },
+      { id: 'ms-c1-2', title: 'Mobility resumed', description: 'Patient should complete basic walking routine daily.' }
+    ],
+    followupMessage: 'Checking in on your recovery. How is your pain and mobility today?',
+    followupType: 'periodical',
+    frequency: 'daily',
+    duration: '14',
+    preferredTime: '09:00',
+    deliveryMethod: 'sms',
+    assignedClinics: ['clinic-1'],
+    assignedCategories: ['Orthopedics']
   },
   {
     id: 'CMP-0002',
     name: 'Medication Reminder',
+    type: 'general',
     role: 'Adherence',
     status: 'Active',
     users: 856,
     createdBy: 'Nurse Johnson',
     createdOn: '01-02-2026',
-    source: 'Companion'
+    source: 'Companion',
+    selectedShortcuts: ['s2', 's4'],
+    selectedDocuments: ['d2'],
+    selectedPlans: ['p1'],
+    aiPrompt: 'Focus on medication adherence, verify dose timing, and escalate when doses are repeatedly missed.',
+    milestones: [
+      { id: 'ms-c2-1', title: 'No missed doses for 7 days', description: 'Track daily adherence and celebrate streaks.' }
+    ],
+    followupMessage: 'Reminder: please confirm once you have taken your medication.',
+    followupType: 'periodical',
+    frequency: 'daily',
+    duration: '30',
+    preferredTime: '08:00',
+    deliveryMethod: 'sms_email',
+    assignedClinics: ['clinic-1', 'clinic-2'],
+    assignedCategories: ['Chronic Care']
   },
   {
     id: 'CMP-0003',
     name: 'Anxiety Support',
+    type: 'personalized',
     role: 'Mental Health',
     status: 'Draft',
     users: 0,
     createdBy: 'Dr. Mike Wilson',
     createdOn: '31-01-2026',
-    source: 'Companion'
+    source: 'Companion',
+    selectedShortcuts: ['s8'],
+    selectedDocuments: ['d6'],
+    selectedPlans: ['p5'],
+    aiPrompt: 'Use calm, CBT-informed language, encourage grounding exercises, and escalate if risk language appears.',
+    milestones: [
+      { id: 'ms-c3-1', title: 'Daily mood check-ins completed', description: 'Collect 7 consecutive mood logs.' }
+    ],
+    followupMessage: 'How are you feeling right now on a scale from 1 to 10?',
+    followupType: 'periodical',
+    frequency: 'daily',
+    duration: '21',
+    preferredTime: '19:00',
+    deliveryMethod: 'sms'
   },
   {
     id: 'CMP-0004',
     name: 'Dietary Assistant',
+    type: 'general',
     role: 'Nutrition',
     status: 'Archived',
     users: 45,
     createdBy: 'Nutritionist Jane',
     createdOn: '28-01-2026',
-    source: 'Companion'
+    source: 'Companion',
+    selectedShortcuts: ['s6'],
+    selectedDocuments: ['d4'],
+    selectedPlans: ['p3'],
+    aiPrompt: 'Help patients plan meals, track hydration, and make gradual sustainable nutrition changes.',
+    milestones: [
+      { id: 'ms-c4-1', title: 'Meal log consistency', description: 'Patient logs meals at least 5 days per week.' }
+    ],
+    followupMessage: 'Please share your meals for today so we can review your nutrition goals.',
+    followupType: 'periodical',
+    frequency: 'weekly',
+    duration: '56',
+    preferredTime: '18:00',
+    deliveryMethod: 'sms_email'
   },
   {
     id: 'CMP-0005',
     name: 'Symptom Checker',
+    type: 'general',
     role: 'Triage',
     status: 'Active',
     users: 342,
     createdBy: 'Dr. Sarah Smith',
     createdOn: '25-01-2026',
-    source: 'Companion'
+    source: 'Companion',
+    selectedShortcuts: ['s1', 's4', 's5'],
+    selectedDocuments: ['d1', 'd2'],
+    selectedPlans: ['p4'],
+    aiPrompt: 'Capture symptoms with severity and duration, identify warning signs, and route urgent cases quickly.',
+    milestones: [
+      { id: 'ms-c5-1', title: 'Symptom baseline established', description: 'Capture complete symptom baseline in first 3 days.' }
+    ],
+    followupMessage: 'Can you describe your current symptoms and their intensity?',
+    followupType: 'periodical',
+    frequency: 'daily',
+    duration: '14',
+    preferredTime: '10:00',
+    deliveryMethod: 'sms',
+    assignedClinics: ['clinic-1'],
+    assignedCategories: ['General Medicine']
   }
 ];
 
 export function App() {
   const [activeView, setActiveView] = useState('dashboard');
-  const [userRole, setUserRole] = useState<'admin' | 'clinic'>('admin');
+  const [userRole, setUserRole] = useState<'admin' | 'clinic'>('clinic');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showCompanionForm, setShowCompanionForm] = useState(false);
   const [editingCompanion, setEditingCompanion] = useState<any>(null);
@@ -347,6 +424,41 @@ export function App() {
   const [showPatientCompanionForm, setShowPatientCompanionForm] = useState(false);
   const [editingPatientCompanion, setEditingPatientCompanion] = useState<PatientCompanion | null>(null);
   const [patientCompanionDraft, setPatientCompanionDraft] = useState<any>(null);
+
+  const toIdList = (value: any): string[] => {
+    if (!Array.isArray(value)) return [];
+    return value
+      .map((item) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item.id === 'string') return item.id;
+        return null;
+      })
+      .filter((id): id is string => Boolean(id));
+  };
+
+  const normalizeCompanionTemplate = (data: any) => ({
+    ...data,
+    type: data?.type || 'general',
+    role:
+      data?.role ||
+      (data?.type === 'personalized' ? 'Personalized Support' : 'General Support'),
+    patients: Array.isArray(data?.patients) ? data.patients : [],
+    selectedShortcuts: toIdList(data?.selectedShortcuts),
+    selectedDocuments: toIdList(data?.selectedDocuments),
+    selectedPlans: toIdList(data?.selectedPlans),
+    aiPrompt: data?.aiPrompt || '',
+    milestones: Array.isArray(data?.milestones) ? data.milestones : [],
+    followupMessage: data?.followupMessage || '',
+    followupType: data?.followupType || 'periodical',
+    frequency: data?.frequency || 'daily',
+    duration: data?.duration || '7',
+    preferredTime: data?.preferredTime || '09:00',
+    scheduledEvents: Array.isArray(data?.scheduledEvents) ? data.scheduledEvents : [],
+    deliveryMethod: data?.deliveryMethod || 'sms',
+    assignedClinics: Array.isArray(data?.assignedClinics) ? data.assignedClinics : [],
+    assignedCategories: Array.isArray(data?.assignedCategories) ? data.assignedCategories : [],
+    source: 'Companion' as const,
+  });
 
   const handleClinicSubmit = (data: any) => {
     if (editingClinic && !editingClinic.isCopy) {
@@ -559,10 +671,15 @@ export function App() {
         preferredTime: '09:00',
       };
 
-    const planLinkId = `plan-${Date.now()}`;
+    const linkedPlanName = planData.name?.trim();
+    const planLinkId = linkedPlanName
+      ? `plan-link:${encodeURIComponent(linkedPlanName)}`
+      : `plan-link:${Date.now()}`;
+    const selectedShortcuts = toIdList(baseData.selectedShortcuts);
+    const selectedDocuments = toIdList(baseData.selectedDocuments);
     const selectedPlans = Array.from(
       new Set([
-        ...(baseData.selectedPlans || []),
+        ...toIdList(baseData.selectedPlans),
         planLinkId,
       ]),
     );
@@ -574,6 +691,8 @@ export function App() {
         mode === 'existing'
           ? `${baseData.name || 'Companion'} (Plan Copy)`
           : baseData.name || defaultName,
+      selectedShortcuts: selectedShortcuts.length ? selectedShortcuts : ['s1', 's2'],
+      selectedDocuments: selectedDocuments.length ? selectedDocuments : ['d1'],
       selectedPlans,
       assignedClinics: planData.assignedClinics || baseData.assignedClinics || [],
       assignedCategories: planData.assignedCategories || baseData.assignedCategories || [],
@@ -629,17 +748,17 @@ export function App() {
 
   const handleCompanionSubmit = () => {
     if (!companionDraft) return;
+    const normalized = normalizeCompanionTemplate(companionDraft);
     if (editingCompanion && editingCompanion.id) {
-      setCompanions(prev => prev.map(c => c.id === editingCompanion.id ? { ...c, ...companionDraft } : c));
+      setCompanions(prev => prev.map(c => c.id === editingCompanion.id ? { ...c, ...normalized } : c));
     } else {
       const newCompanion: Companion = {
-        ...companionDraft,
+        ...normalized,
         id: `CMP-${(companions.length + 1).toString().padStart(4, '0')}`,
         createdOn: new Date().toISOString().split('T')[0],
         createdBy: 'Super Admin',
         status: 'Active',
         users: 0,
-        role: companionDraft.type || 'General Support'
       };
       setCompanions(prev => [newCompanion, ...prev]);
     }
@@ -696,39 +815,41 @@ export function App() {
             setCompanionDraft(null);
           }}
           onSave={(data) => {
+            const normalized = normalizeCompanionTemplate(data);
             // 1. If patients are assigned, create individual Patient Companions
-            if (data.patients && data.patients.length > 0) {
-              const newInstances = data.patients.map((p: any, idx: number) => ({
+            if (normalized.patients && normalized.patients.length > 0) {
+              const newInstances = normalized.patients.map((p: any, idx: number) => ({
                 id: `PCMP-${Date.now()}-${idx}`,
-                name: `${data.name} - ${p.name || `Patient ${idx + 1}`}`,
-                role: data.role || 'Companion',
+                name: `${normalized.name} - ${p.name || `Patient ${idx + 1}`}`,
+                role: normalized.role || 'Companion',
                 status: 'Active' as const,
                 users: 1,
                 createdBy: userRole === 'admin' ? 'Super Admin' : 'Clinic Staff',
                 createdOn: new Date().toISOString().split('T')[0],
                 patients: [p],
                 // Include ALL configuration data (Exact Copy)
-                companionType: data.type,
-                aiPrompt: data.aiPrompt,
-                selectedShortcuts: data.selectedShortcuts,
-                selectedDocuments: data.selectedDocuments,
-                selectedPlans: data.selectedPlans,
-                followupType: data.followupType,
-                followupMessage: data.followupMessage,
-                frequency: data.frequency,
-                duration: data.duration,
-                preferredTime: data.preferredTime,
-                scheduledEvents: data.scheduledEvents,
-                assignedClinics: data.assignedClinics,
-                assignedCategories: data.assignedCategories,
-                source: data.name // Use template name as source
+                companionType: normalized.type,
+                aiPrompt: normalized.aiPrompt,
+                selectedShortcuts: normalized.selectedShortcuts,
+                selectedDocuments: normalized.selectedDocuments,
+                selectedPlans: normalized.selectedPlans,
+                followupType: normalized.followupType,
+                followupMessage: normalized.followupMessage,
+                frequency: normalized.frequency,
+                duration: normalized.duration,
+                preferredTime: normalized.preferredTime,
+                scheduledEvents: normalized.scheduledEvents,
+                milestones: normalized.milestones,
+                assignedClinics: normalized.assignedClinics,
+                assignedCategories: normalized.assignedCategories,
+                source: normalized.name // Use template name as source
               }));
               setPatientCompanions(prev => [...prev, ...newInstances]);
             }
 
             // 2. Save the companion template but with empty patients
             const templateData = {
-              ...data,
+              ...normalized,
               patients: [], // Clear patients as per user request
               source: 'Companion' as const
             };
@@ -741,7 +862,6 @@ export function App() {
                 id: `CMP-${Date.now()}`,
                 status: 'Active' as const,
                 users: 0,
-                role: data.role || 'Companion',
                 createdBy: userRole === 'admin' ? 'Super Admin' : 'Clinic Staff',
                 createdOn: new Date().toISOString().split('T')[0]
               };
@@ -959,10 +1079,23 @@ export function App() {
                 id: p.id,
                 name: p.name,
                 role: p.category,
+                type: 'general',
                 status: p.status,
                 users: p.enrolled,
                 createdBy: 'Admin',
                 createdOn: p.createdOn,
+                aiPrompt: p.aiRules || '',
+                selectedShortcuts: p.selectedShortcuts || [],
+                selectedDocuments: p.selectedDocuments || [],
+                selectedPlans: p.selectedPlans || [],
+                milestones: [],
+                followupMessage: p.followupMessage || '',
+                followupType: 'periodical' as const,
+                frequency: 'daily',
+                duration: '14',
+                preferredTime: '09:00',
+                assignedClinics: p.assignedClinics || [],
+                assignedCategories: [p.category],
                 source: 'Protocol' as const
               }))
           ];
@@ -1219,6 +1352,7 @@ export function App() {
           }}
           onSave={(data) => handleClinicDetailSave(viewingClinic.id, data)}
           initialTab={clinicDetailInitialTab}
+          userRole={userRole}
         />;
       case 'users':
         return <Users />;

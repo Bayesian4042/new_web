@@ -355,6 +355,21 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
       if (initialData.followupMessage) {
         setFollowupMessage(initialData.followupMessage);
       }
+      if (initialData.followupType) {
+        setFollowupType(initialData.followupType);
+      }
+      if (initialData.frequency) {
+        setFrequency(initialData.frequency);
+      }
+      if (initialData.duration) {
+        setDuration(initialData.duration);
+      }
+      if (initialData.preferredTime) {
+        setPreferredTime(initialData.preferredTime);
+      }
+      if (initialData.scheduledEvents && Array.isArray(initialData.scheduledEvents)) {
+        setScheduledEvents(initialData.scheduledEvents);
+      }
       if (initialData.deliveryMethod) {
         setDeliveryMethod(initialData.deliveryMethod);
       }
@@ -382,16 +397,18 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
       deliveryMethod,
       milestones,
       followupMessage,
+      followupType,
       frequency,
       duration,
       preferredTime,
+      scheduledEvents,
       assignedClinics: selectedClinics,
       assignedCategories: selectedCategories
     });
   }, [
     companionTitle, companionType, patients, selectedShortcuts,
     selectedDocuments, selectedPlans, aiPrompt, deliveryMethod, milestones, followupMessage,
-    frequency, duration, preferredTime, selectedClinics, selectedCategories, onChange
+    followupType, frequency, duration, preferredTime, scheduledEvents, selectedClinics, selectedCategories, onChange
   ]);
 
   const sections = [
@@ -659,8 +676,22 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
     return (
       <div className="space-y-3">
         {ids.map((id) => {
-          const item = getItemById(type, id);
-          if (!item) return null;
+          const linkedPlanPrefix = 'plan-link:';
+          const linkedPlanName = id.startsWith(linkedPlanPrefix)
+            ? decodeURIComponent(id.slice(linkedPlanPrefix.length))
+            : null;
+          const item = getItemById(type, id) || {
+            id,
+            name:
+              type === 'plans'
+                ? (linkedPlanName || 'Linked plan')
+                : id,
+            description:
+              type === 'plans'
+                ? 'Attached from plan assignment'
+                : 'Loaded from saved companion data',
+            category: 'Saved',
+          };
           return (
             <div
               key={id}
@@ -812,9 +843,11 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
                     deliveryMethod,
                     milestones,
                     followupMessage,
+                    followupType,
                     frequency,
                     duration,
                     preferredTime,
+                    scheduledEvents,
                     assignedClinics: selectedClinics,
                     assignedCategories: selectedCategories
                   });
@@ -851,31 +884,6 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
 
             <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Type
-                </label>
-                <div className="inline-flex rounded-lg bg-gray-100 p-1">
-                  <button
-                    onClick={() => setCompanionType('general')}
-                    className={`px-6 py-2.5 text-sm font-medium rounded-md transition-all ${companionType === 'general' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}>
-
-                    General
-                  </button>
-                  <button
-                    onClick={() => setCompanionType('personalized')}
-                    className={`px-6 py-2.5 text-sm font-medium rounded-md transition-all ${companionType === 'personalized' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}>
-
-                    Personalized
-                  </button>
-                </div>
-                <p className="text-xs text-gray-500 mt-3">
-                  {companionType === 'general' ?
-                    'General companions work for all patients' :
-                    'Personalized companions adapt to individual patient data'}
-                </p>
-              </div>
-
-              <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Companion Title <span className="text-red-500">*</span>
                 </label>
@@ -894,330 +902,329 @@ export function CompanionForm({ onClose, onSave, onChange, initialData, userRole
 
           {/* Section: Patient Details */}
           <div className="order-last">
-          <section
-            ref={sectionRefs['patient-details']}
-            className="mb-12 scroll-mt-6">
+            <section
+              ref={sectionRefs['patient-details']}
+              className="mb-12 scroll-mt-6">
 
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                  <UserIcon size={18} className="text-blue-600" />
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                    <UserIcon size={18} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900">
+                      Patient Details {companionType === 'personalized' ? '' : '(Multiple)'}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {companionType === 'personalized'
+                        ? 'Add the specific patient for this companion'
+                        : 'Add patients who will use this companion'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    Patient Details {companionType === 'personalized' ? '' : '(Multiple)'}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {companionType === 'personalized'
-                      ? 'Add the specific patient for this companion'
-                      : 'Add patients who will use this companion'}
-                  </p>
-                </div>
+                {companionType === 'general' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 shadow-sm"
+                    onClick={handleAddPatient}>
+                    <Plus size={14} />
+                    Add Patient
+                  </Button>
+                )}
               </div>
-              {companionType === 'general' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 shadow-sm"
-                  onClick={handleAddPatient}>
-                  <Plus size={14} />
-                  Add Patient
-                </Button>
-              )}
-            </div>
 
-            <div className="space-y-4">
-              {patients.map((patient, index) => {
-                const isEditing = companionType === 'personalized' || editingPatientIndex === index;
+              <div className="space-y-4">
+                {patients.map((patient, index) => {
+                  const isEditing = companionType === 'personalized' || editingPatientIndex === index;
 
-                if (!isEditing) {
-                  return (
-                    <div
-                      key={index}
-                      onClick={() => setEditingPatientIndex(index)}
-                      className="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between group cursor-pointer hover:border-blue-400 hover:shadow-md transition-all animate-in fade-in slide-in-from-top-2 duration-300">
-                      <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 transition-colors group-hover:bg-blue-100">
-                          <UserIcon size={20} />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-gray-900">
-                            {patient.name || `Patient ${index + 1}`}
-                          </p>
-                          <div className="flex items-center gap-3 mt-1">
-                            <span className="flex items-center gap-1 text-xs text-gray-500">
-                              <Phone size={12} />
-                              {patient.countryCode} {patient.phoneNumber || 'No number'}
-                            </span>
-                            {patient.appointment && (
-                              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-[10px] font-bold text-blue-600 uppercase tracking-tighter">
-                                <Calendar size={10} />
-                                Appointment Scheduled
+                  if (!isEditing) {
+                    return (
+                      <div
+                        key={index}
+                        onClick={() => setEditingPatientIndex(index)}
+                        className="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between group cursor-pointer hover:border-blue-400 hover:shadow-md transition-all animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 transition-colors group-hover:bg-blue-100">
+                            <UserIcon size={20} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-gray-900">
+                              {patient.name || `Patient ${index + 1}`}
+                            </p>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="flex items-center gap-1 text-xs text-gray-500">
+                                <Phone size={12} />
+                                {patient.countryCode} {patient.phoneNumber || 'No number'}
                               </span>
-                            )}
+                              {patient.appointment && (
+                                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-[10px] font-bold text-blue-600 uppercase tracking-tighter">
+                                  <Calendar size={10} />
+                                  Appointment Scheduled
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemovePatient(index);
+                            }}
+                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100">
+                            <Trash2 size={16} />
+                          </button>
+                          <div className="p-2 text-gray-400 group-hover:text-blue-600 transition-colors">
+                            <ChevronRight size={20} />
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemovePatient(index);
-                          }}
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100">
-                          <Trash2 size={16} />
-                        </button>
-                        <div className="p-2 text-gray-400 group-hover:text-blue-600 transition-colors">
-                          <ChevronRight size={20} />
+                    );
+                  }
+
+                  return (
+                    <div key={index} className="bg-white rounded-xl border border-gray-200 p-6 relative group transition-all animate-in zoom-in-95 duration-200">
+                      <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-50">
+                        <div className="flex items-center gap-2">
+                          <div className="h-8 w-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400">
+                            <Edit2 size={16} />
+                          </div>
+                          <h4 className="font-semibold text-gray-900">
+                            {companionType === 'personalized' ? 'Patient Information' : 'Patient Details'}
+                          </h4>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {companionType === 'general' && (
+                            <>
+                              {patients.length > 1 && (
+                                <button
+                                  onClick={() => handleRemovePatient(index)}
+                                  className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                  title="Remove patient">
+                                  <Trash2 size={18} />
+                                </button>
+                              )}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setEditingPatientIndex(null)}
+                                className="text-blue-600 border-blue-200 hover:bg-blue-50 font-bold h-9">
+                                Save
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  );
-                }
 
-                return (
-                  <div key={index} className="bg-white rounded-xl border border-gray-200 p-6 relative group transition-all animate-in zoom-in-95 duration-200">
-                    <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-50">
-                      <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400">
-                          <Edit2 size={16} />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Patient Name <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={patient.name}
+                            onChange={(e) => handleUpdatePatient(index, 'name', e.target.value)}
+                            placeholder="Full Name"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all"
+                          />
                         </div>
-                        <h4 className="font-semibold text-gray-900">
-                          {companionType === 'personalized' ? 'Patient Information' : 'Patient Details'}
-                        </h4>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {companionType === 'general' && (
-                          <>
-                            {patients.length > 1 && (
-                              <button
-                                onClick={() => handleRemovePatient(index)}
-                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                title="Remove patient">
-                                <Trash2 size={18} />
-                              </button>
-                            )}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setEditingPatientIndex(null)}
-                              className="text-blue-600 border-blue-200 hover:bg-blue-50 font-bold h-9">
-                              Save
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Patient Name <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={patient.name}
-                          onChange={(e) => handleUpdatePatient(index, 'name', e.target.value)}
-                          placeholder="Full Name"
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Country Code
-                        </label>
-                        <div className="relative">
-                          <select
-                            value={patient.countryCode}
-                            onChange={(e) => handleUpdatePatient(index, 'countryCode', e.target.value)}
-                            className="w-full appearance-none px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 bg-white transition-all">
-                            <option value="+1">+1</option>
-                            <option value="+44">+44</option>
-                            <option value="+91">+91</option>
-                            <option value="+61">+61</option>
-                            <option value="+34">+34</option>
-                            <option value="+52">+52</option>
-                          </select>
-                          <ChevronDown
-                            size={16}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Country Code
+                          </label>
+                          <div className="relative">
+                            <select
+                              value={patient.countryCode}
+                              onChange={(e) => handleUpdatePatient(index, 'countryCode', e.target.value)}
+                              className="w-full appearance-none px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 bg-white transition-all">
+                              <option value="+1">+1</option>
+                              <option value="+44">+44</option>
+                              <option value="+91">+91</option>
+                              <option value="+61">+61</option>
+                              <option value="+34">+34</option>
+                              <option value="+52">+52</option>
+                            </select>
+                            <ChevronDown
+                              size={16}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Phone Number <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="tel"
+                            value={patient.phoneNumber}
+                            onChange={(e) => handleUpdatePatient(index, 'phoneNumber', e.target.value)}
+                            placeholder="123 456 7890"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all"
                           />
                         </div>
                       </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Phone Number <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="tel"
-                          value={patient.phoneNumber}
-                          onChange={(e) => handleUpdatePatient(index, 'phoneNumber', e.target.value)}
-                          placeholder="123 456 7890"
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all"
-                        />
-                      </div>
-                    </div>
 
-                    {/* Appointment Details Section */}
-                    <div className="mt-8 pt-6 border-t border-gray-100">
-                      <div className="flex items-center justify-between mb-4 bg-gray-50/50 p-3 rounded-xl border border-gray-100/50">
-                        <div className="flex items-center gap-3">
-                          <div className={`h-8 w-8 rounded-lg flex items-center justify-center transition-colors ${patient.appointment ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-400'}`}>
-                            <Calendar size={18} />
-                          </div>
-                          <div>
-                            <h4 className="text-sm font-semibold text-gray-900">Appointment Details</h4>
-                            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Optional Information</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className={`text-[10px] font-bold uppercase tracking-wider ${patient.appointment ? 'text-blue-600' : 'text-gray-400'}`}>
-                            {patient.appointment ? 'Enabled' : 'Disabled'}
-                          </span>
-                          <button
-                            onClick={() => toggleAppointment(index)}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 outline-none focus:ring-2 focus:ring-blue-500/20 ${patient.appointment ? 'bg-blue-600' : 'bg-gray-200'}`}>
-                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${patient.appointment ? 'translate-x-6' : 'translate-x-1'}`} />
-                          </button>
-                        </div>
-                      </div>
-
-                      {patient.appointment && (
-                        <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200 mt-4 p-4 bg-gray-50/30 rounded-xl border border-gray-100">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="md:col-span-2">
-                              <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">
-                                Appointment Title
-                              </label>
-                              <input
-                                type="text"
-                                value={patient.appointment.title}
-                                onChange={(e) => handleUpdateAppointment(index, 'title', e.target.value)}
-                                placeholder="e.g. Initial Consultation"
-                                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-white"
-                              />
+                      {/* Appointment Details Section */}
+                      <div className="mt-8 pt-6 border-t border-gray-100">
+                        <div className="flex items-center justify-between mb-4 bg-gray-50/50 p-3 rounded-xl border border-gray-100/50">
+                          <div className="flex items-center gap-3">
+                            <div className={`h-8 w-8 rounded-lg flex items-center justify-center transition-colors ${patient.appointment ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-400'}`}>
+                              <Calendar size={18} />
                             </div>
                             <div>
-                              <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">
-                                Date
-                              </label>
-                              <input
-                                type="date"
-                                value={patient.appointment.date}
-                                onChange={(e) => handleUpdateAppointment(index, 'date', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-white"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">
-                                Time
-                              </label>
-                              <input
-                                type="time"
-                                value={patient.appointment.time}
-                                onChange={(e) => handleUpdateAppointment(index, 'time', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-white"
-                              />
-                            </div>
-                            <div className="md:col-span-2">
-                              <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">
-                                Cancellation Phone Number
-                              </label>
-                              <input
-                                type="tel"
-                                value={patient.appointment.cancellationPhone}
-                                onChange={(e) => handleUpdateAppointment(index, 'cancellationPhone', e.target.value)}
-                                placeholder="Phone for rescheduling"
-                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-white"
-                              />
-                            </div>
-                            <div className="md:col-span-2">
-                              <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">
-                                Instructions
-                              </label>
-                              <textarea
-                                value={patient.appointment.instructions}
-                                onChange={(e) => handleUpdateAppointment(index, 'instructions', e.target.value)}
-                                placeholder="e.g. Please bring your medical records..."
-                                rows={2}
-                                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all resize-none bg-white"
-                              />
+                              <h4 className="text-sm font-semibold text-gray-900">Appointment Details</h4>
+                              <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Optional Information</p>
                             </div>
                           </div>
+                          <div className="flex items-center gap-3">
+                            <span className={`text-[10px] font-bold uppercase tracking-wider ${patient.appointment ? 'text-blue-600' : 'text-gray-400'}`}>
+                              {patient.appointment ? 'Enabled' : 'Disabled'}
+                            </span>
+                            <button
+                              onClick={() => toggleAppointment(index)}
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 outline-none focus:ring-2 focus:ring-blue-500/20 ${patient.appointment ? 'bg-blue-600' : 'bg-gray-200'}`}>
+                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${patient.appointment ? 'translate-x-6' : 'translate-x-1'}`} />
+                            </button>
+                          </div>
                         </div>
-                      )}
+
+                        {patient.appointment && (
+                          <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200 mt-4 p-4 bg-gray-50/30 rounded-xl border border-gray-100">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="md:col-span-2">
+                                <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">
+                                  Appointment Title
+                                </label>
+                                <input
+                                  type="text"
+                                  value={patient.appointment.title}
+                                  onChange={(e) => handleUpdateAppointment(index, 'title', e.target.value)}
+                                  placeholder="e.g. Initial Consultation"
+                                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-white"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">
+                                  Date
+                                </label>
+                                <input
+                                  type="date"
+                                  value={patient.appointment.date}
+                                  onChange={(e) => handleUpdateAppointment(index, 'date', e.target.value)}
+                                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-white"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">
+                                  Time
+                                </label>
+                                <input
+                                  type="time"
+                                  value={patient.appointment.time}
+                                  onChange={(e) => handleUpdateAppointment(index, 'time', e.target.value)}
+                                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-white"
+                                />
+                              </div>
+                              <div className="md:col-span-2">
+                                <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">
+                                  Cancellation Phone Number
+                                </label>
+                                <input
+                                  type="tel"
+                                  value={patient.appointment.cancellationPhone}
+                                  onChange={(e) => handleUpdateAppointment(index, 'cancellationPhone', e.target.value)}
+                                  placeholder="Phone for rescheduling"
+                                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all bg-white"
+                                />
+                              </div>
+                              <div className="md:col-span-2">
+                                <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">
+                                  Instructions
+                                </label>
+                                <textarea
+                                  value={patient.appointment.instructions}
+                                  onChange={(e) => handleUpdateAppointment(index, 'instructions', e.target.value)}
+                                  placeholder="e.g. Please bring your medical records..."
+                                  rows={2}
+                                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-sm transition-all resize-none bg-white"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-
-          <div className="h-8" />
-
-          {/* Section: Delivery Method */}
-          <section
-            ref={sectionRefs['delivery-method']}
-            className="mb-12 scroll-mt-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center">
-                <Send size={18} className="text-indigo-600" />
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900">
-                  Choose Delivery Method <span className="text-red-500">*</span>
-                </h3>
-                <p className="text-sm text-gray-500">
-                  How should this companion be shared with the patient?
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {[
-                  {
-                    id: 'sms' as const,
-                    title: 'Link via SMS',
-                    description: 'Send plan preview link to patient phone'
-                  },
-                  {
-                    id: 'sms_email' as const,
-                    title: 'Link via SMS + Email',
-                    description: 'Send plan preview link via phone and email'
-                  },
-                  {
-                    id: 'pdf' as const,
-                    title: 'Download as PDF',
-                    description: 'Printable PDF with plan details'
-                  }
-                ].map((option) => {
-                  const active = deliveryMethod === option.id;
-                  return (
-                    <button
-                      key={option.id}
-                      type="button"
-                      onClick={() => setDeliveryMethod(option.id)}
-                      className={`text-left border rounded-xl p-4 transition-all ${
-                        active
-                          ? 'border-indigo-300 bg-indigo-50'
-                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      <p className={`text-sm font-semibold ${active ? 'text-indigo-900' : 'text-gray-900'}`}>
-                        {option.title}
-                      </p>
-                      <p className={`text-xs mt-1 ${active ? 'text-indigo-600' : 'text-gray-500'}`}>
-                        {option.description}
-                      </p>
-                    </button>
                   );
                 })}
               </div>
-            </div>
-          </section>
+            </section>
 
-          <div className="h-8" />
+            <div className="h-8" />
+
+            {/* Section: Delivery Method */}
+            <section
+              ref={sectionRefs['delivery-method']}
+              className="mb-12 scroll-mt-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+                  <Send size={18} className="text-indigo-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    Choose Delivery Method <span className="text-red-500">*</span>
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    How should this companion be shared with the patient?
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {[
+                    {
+                      id: 'sms' as const,
+                      title: 'Link via SMS',
+                      description: 'Send plan preview link to patient phone'
+                    },
+                    {
+                      id: 'sms_email' as const,
+                      title: 'Link via SMS + Email',
+                      description: 'Send plan preview link via phone and email'
+                    },
+                    {
+                      id: 'pdf' as const,
+                      title: 'Download as PDF',
+                      description: 'Printable PDF with plan details'
+                    }
+                  ].map((option) => {
+                    const active = deliveryMethod === option.id;
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => setDeliveryMethod(option.id)}
+                        className={`text-left border rounded-xl p-4 transition-all ${active
+                          ? 'border-indigo-300 bg-indigo-50'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                          }`}
+                      >
+                        <p className={`text-sm font-semibold ${active ? 'text-indigo-900' : 'text-gray-900'}`}>
+                          {option.title}
+                        </p>
+                        <p className={`text-xs mt-1 ${active ? 'text-indigo-600' : 'text-gray-500'}`}>
+                          {option.description}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
+
+            <div className="h-8" />
           </div>
 
           {/* Section 2: Intent Shortcut */}
