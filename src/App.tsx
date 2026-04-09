@@ -40,6 +40,7 @@ import { PatientCompanionForm } from './pages/workspace/PatientCompanionForm';
 import { AdminBillingOverview } from './pages/billing/AdminBillingOverview';
 import { ClinicBillingDashboard } from './pages/billing/ClinicBillingDashboard';
 import { ClinicBillingPaymentPage } from './pages/billing/ClinicBillingPaymentPage';
+import { AvailablePlans } from './pages/billing/AvailablePlans';
 
 const INITIAL_RULES: AIRule[] = [
   {
@@ -1385,6 +1386,15 @@ export function App() {
           );
         }
         return <ClinicBillingPaymentPage />;
+      case 'available-plans':
+        if (userRole === 'admin') {
+          return (
+            <div className="p-8 pb-[100px]">
+              <AvailablePlans />
+            </div>
+          );
+        }
+        return <Dashboard />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-[60vh] text-gray-400">
@@ -1535,6 +1545,10 @@ export function App() {
       'billing-payment': {
         title: 'Payment',
         breadcrumb: 'Billing / Dashboard'
+      },
+      'available-plans': {
+        title: 'Plan Tiers',
+        breadcrumb: 'Billing / Available Plans'
       }
     };
     return (

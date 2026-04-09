@@ -128,6 +128,7 @@ export function Sidebar({
     },
     { id: 'plans', label: 'Plans', icon: <ClipboardList size={16} />, children: planChildren },
     { id: 'billing', label: 'Billing', icon: <CreditCard size={16} /> },
+    { id: 'available-plans', label: 'Plan Tiers', icon: <ClipboardList size={16} /> },
     { id: 'clinics', label: 'Clinics', icon: <Building2 size={16} /> }
   ];
 

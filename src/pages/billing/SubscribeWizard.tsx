@@ -24,7 +24,7 @@ import { Button } from '../../components/ui/Button';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Step = 1 | 2 | 3 | 'success';
+type Step = 1 | 2 | 'success';
 
 interface WizardState {
   selectedPlanId: string;
@@ -51,9 +51,8 @@ interface SubscribeWizardProps {
 
 function StepIndicator({ current }: { current: Step }) {
   const steps = [
-    { n: 1, label: 'Choose Plan' },
-    { n: 2, label: 'Billing Details' },
-    { n: 3, label: 'Payment' },
+    { n: 1, label: 'Billing Details' },
+    { n: 2, label: 'Payment' },
   ];
 
   return (
@@ -97,136 +96,16 @@ function StepIndicator({ current }: { current: Step }) {
   );
 }
 
-// ─── Step 1: Choose Plan ──────────────────────────────────────────────────────
+// ─── Step 1: Billing Details ──────────────────────────────────────────────────
 
-const RECOMMENDED_PLAN = 'starter';
-
-function PlanCard({
-  plan,
-  selected,
-  onSelect,
-}: {
-  plan: BillingPlan;
-  selected: boolean;
-  onSelect: () => void;
-}) {
-  const isRecommended = plan.id === RECOMMENDED_PLAN;
-
-  return (
-    <button
-      onClick={onSelect}
-      className={`relative w-full text-left rounded-xl border-2 p-4 transition-all ${
-        selected
-          ? 'border-indigo-600 bg-indigo-50/60 shadow-sm'
-          : 'border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/20'
-      }`}
-    >
-      {isRecommended && (
-        <span className="absolute -top-2.5 left-4 flex items-center gap-1 bg-indigo-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">
-          <Star size={9} fill="white" />
-          Recommended
-        </span>
-      )}
-
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <p className="text-base font-black text-gray-900">{plan.name}</p>
-          <p className="text-xs text-gray-500 mt-0.5">{plan.patientCreationAllowance} patients / mo</p>
-        </div>
-        <div className="text-right">
-          <p className="text-xl font-black text-indigo-700">{formatEur(plan.monthlyFee)}</p>
-          <p className="text-[10px] text-gray-400">/month</p>
-        </div>
-      </div>
-
-      <div className="space-y-1.5 text-xs text-gray-600">
-        <div className="flex items-center gap-2">
-          <Users size={11} className="text-indigo-400 shrink-0" />
-          <span>{plan.patientCreationAllowance} patient activations / cycle</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <MessageSquare size={11} className="text-indigo-400 shrink-0" />
-          <span>{plan.smsAllowance} SMS included</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Zap size={11} className="text-indigo-400 shrink-0" />
-          <span>
-            {formatEur(plan.extraPatientPrice)} / extra patient
-            {plan.isTbdXL && <span className="text-amber-500 ml-1">(TBD)</span>}
-          </span>
-        </div>
-      </div>
-
-      {selected && (
-        <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-indigo-600 flex items-center justify-center">
-          <CheckCircle2 size={12} className="text-white" />
-        </div>
-      )}
-    </button>
-  );
-}
-
-function Step1ChoosePlan({
-  selectedPlanId,
-  onSelect,
-  onNext,
-}: {
-  selectedPlanId: string;
-  onSelect: (id: string) => void;
-  onNext: () => void;
-}) {
-  return (
-    <div className="space-y-5">
-      <div>
-        <h2 className="text-xl font-bold text-gray-900">Choose your plan</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          All plans include a 6-month minimum commitment. Setup is free.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-3 gap-3">
-        {BILLING_PLANS.map((plan) => (
-          <PlanCard
-            key={plan.id}
-            plan={plan}
-            selected={selectedPlanId === plan.id}
-            onSelect={() => onSelect(plan.id)}
-          />
-        ))}
-      </div>
-
-      <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-700">
-        <Info size={13} className="shrink-0" />
-        Usage beyond your plan allowances (patients, SMS, active patients) is billed at per-unit
-        overage rates at the end of each cycle.
-      </div>
-
-      <div className="flex justify-end pt-2">
-        <Button
-          onClick={onNext}
-          disabled={!selectedPlanId}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6"
-        >
-          Continue
-          <ChevronRight size={15} className="ml-1.5" />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// ─── Step 2: Billing Details ──────────────────────────────────────────────────
-
-function Step2BillingDetails({
+function Step1BillingDetails({
   state,
   onChange,
   onNext,
-  onBack,
 }: {
   state: WizardState;
   onChange: (patch: Partial<WizardState>) => void;
   onNext: () => void;
-  onBack: () => void;
 }) {
   const plan = BILLING_PLANS.find((p) => p.id === state.selectedPlanId)!;
   const canContinue = state.billingEmail && state.line1 && state.city && state.country;
@@ -359,11 +238,7 @@ function Step2BillingDetails({
         today. Early cancellation policy is subject to platform terms.
       </div>
 
-      <div className="flex justify-between pt-2">
-        <Button variant="outline" onClick={onBack}>
-          <ArrowLeft size={14} className="mr-1.5" />
-          Back
-        </Button>
+      <div className="flex justify-end pt-2">
         <Button
           onClick={onNext}
           disabled={!canContinue}
@@ -397,9 +272,9 @@ function detectBrand(val: string): string | null {
   return null;
 }
 
-// ─── Step 3: Payment Method ───────────────────────────────────────────────────
+// ─── Step 2: Payment Method ───────────────────────────────────────────────────
 
-function Step3Payment({
+function Step2Payment({
   state,
   onChange,
   onSubmit,
@@ -675,7 +550,7 @@ export function SubscribeWizard({
   const [step, setStep] = useState<Step>(initialStep);
   const [loading, setLoading] = useState(false);
   const [wizardState, setWizardState] = useState<WizardState>({
-    selectedPlanId: RECOMMENDED_PLAN,
+    selectedPlanId: BILLING_PLANS[Math.floor(Math.random() * BILLING_PLANS.length)].id,
     billingEmail: prefillEmail,
     line1: '',
     city: '',
@@ -753,26 +628,18 @@ export function SubscribeWizard({
       <StepIndicator current={step} />
 
       {step === 1 && (
-        <Step1ChoosePlan
-          selectedPlanId={wizardState.selectedPlanId}
-          onSelect={(id) => patch({ selectedPlanId: id })}
+        <Step1BillingDetails
+          state={wizardState}
+          onChange={patch}
           onNext={() => setStep(2)}
         />
       )}
       {step === 2 && (
-        <Step2BillingDetails
-          state={wizardState}
-          onChange={patch}
-          onNext={() => setStep(3)}
-          onBack={() => setStep(1)}
-        />
-      )}
-      {step === 3 && (
-        <Step3Payment
+        <Step2Payment
           state={wizardState}
           onChange={patch}
           onSubmit={handleSubmit}
-          onBack={() => setStep(initialStep === 3 ? 1 : 2)}
+          onBack={() => setStep(initialStep === 2 ? 1 : 1)}
           loading={loading}
         />
       )}

@@ -288,7 +288,7 @@ export function ClinicBillingDashboard({ clinicId = DEFAULT_CLINIC_ID }: ClinicB
   const [showWizard, setShowWizard] = useState(false);
   const [showActivationChoice, setShowActivationChoice] = useState(false);
   const [hasAutoOpenedChoice, setHasAutoOpenedChoice] = useState(false);
-  const [wizardInitialStep, setWizardInitialStep] = useState<1 | 3>(1);
+  const [wizardInitialStep, setWizardInitialStep] = useState<1 | 2>(1);
   const [account, setAccount] = useState<BillingAccount>(
     () => mockBillingAccounts[clinicId] ?? mockBillingAccounts[DEFAULT_CLINIC_ID]
   );
@@ -334,7 +334,7 @@ export function ClinicBillingDashboard({ clinicId = DEFAULT_CLINIC_ID }: ClinicB
           <ActivationChoiceModal
             onClose={() => setShowActivationChoice(false)}
             onMakePayment={() => {
-              setWizardInitialStep(3);
+              setWizardInitialStep(2);
               setShowActivationChoice(false);
               setShowWizard(true);
             }}
@@ -417,7 +417,7 @@ export function ClinicBillingDashboard({ clinicId = DEFAULT_CLINIC_ID }: ClinicB
         <ActivationChoiceModal
           onClose={() => setShowActivationChoice(false)}
           onMakePayment={() => {
-            setWizardInitialStep(3);
+            setWizardInitialStep(2);
             setShowActivationChoice(false);
             setShowWizard(true);
           }}
