@@ -5,10 +5,11 @@ export interface BillingPlan {
   name: string;
   patientCreationAllowance: number;
   monthlyFee: number; // EUR
-  smsAllowance: number; // = patientCreationAllowance × 5
+  smsAllowance: number; 
   extraPatientPrice: number; // EUR per extra patient
   extraSmsPrice: number; // EUR per extra SMS
-  extraActivePatientPrice: number; // EUR per extra active patient (constant: 0.10)
+  activePatientLimit: number; // New field from PRD
+  extraActivePatientPrice: number; // EUR per extra active patient
   isTbdXL?: boolean; // flag XL overage prices as TBD
 }
 
@@ -83,12 +84,13 @@ export const BILLING_PLANS: BillingPlan[] = [
   {
     id: 'lite',
     name: 'Lite',
-    patientCreationAllowance: 20,
-    monthlyFee: 60,
-    smsAllowance: 100,
-    extraPatientPrice: 5.0,
-    extraSmsPrice: 0.55,
-    extraActivePatientPrice: 0.1,
+    patientCreationAllowance: 30,
+    monthlyFee: 90,
+    smsAllowance: 150,
+    extraPatientPrice: 3.0,
+    extraSmsPrice: 0.50,
+    activePatientLimit: 200,
+    extraActivePatientPrice: 0.18,
   },
   {
     id: 'starter',
@@ -96,9 +98,10 @@ export const BILLING_PLANS: BillingPlan[] = [
     patientCreationAllowance: 50,
     monthlyFee: 150,
     smsAllowance: 250,
-    extraPatientPrice: 4.5,
-    extraSmsPrice: 0.5,
-    extraActivePatientPrice: 0.1,
+    extraPatientPrice: 2.75,
+    extraSmsPrice: 0.46,
+    activePatientLimit: 500,
+    extraActivePatientPrice: 0.16,
   },
   {
     id: 'growth',
@@ -106,9 +109,10 @@ export const BILLING_PLANS: BillingPlan[] = [
     patientCreationAllowance: 100,
     monthlyFee: 300,
     smsAllowance: 500,
-    extraPatientPrice: 4.0,
-    extraSmsPrice: 0.45,
-    extraActivePatientPrice: 0.1,
+    extraPatientPrice: 2.50,
+    extraSmsPrice: 0.42,
+    activePatientLimit: 1000,
+    extraActivePatientPrice: 0.14,
   },
   {
     id: 'clinic',
@@ -116,9 +120,10 @@ export const BILLING_PLANS: BillingPlan[] = [
     patientCreationAllowance: 250,
     monthlyFee: 750,
     smsAllowance: 1250,
-    extraPatientPrice: 3.5,
-    extraSmsPrice: 0.4,
-    extraActivePatientPrice: 0.1,
+    extraPatientPrice: 2.25,
+    extraSmsPrice: 0.38,
+    activePatientLimit: 2500,
+    extraActivePatientPrice: 0.12,
   },
   {
     id: 'scale',
@@ -126,9 +131,10 @@ export const BILLING_PLANS: BillingPlan[] = [
     patientCreationAllowance: 500,
     monthlyFee: 1500,
     smsAllowance: 2500,
-    extraPatientPrice: 3.0,
-    extraSmsPrice: 0.35,
-    extraActivePatientPrice: 0.1,
+    extraPatientPrice: 2.00,
+    extraSmsPrice: 0.36,
+    activePatientLimit: 5000,
+    extraActivePatientPrice: 0.10,
   },
   {
     id: 'xl',
@@ -136,11 +142,20 @@ export const BILLING_PLANS: BillingPlan[] = [
     patientCreationAllowance: 1000,
     monthlyFee: 3000,
     smsAllowance: 5000,
-    extraPatientPrice: 2.5, // TBD — assumed from pricing trend
-    extraSmsPrice: 0.3, // TBD — assumed from pricing trend
-    extraActivePatientPrice: 0.1,
-    isTbdXL: true,
+    extraPatientPrice: 1.75,
+    extraSmsPrice: 0.32,
+    activePatientLimit: 10000,
+    extraActivePatientPrice: 0.08,
   },
+];
+
+export const LICENSE_PLANS: BillingPlan[] = [
+  { id: 'full-kit-license', name: 'Full Kit License', patientCreationAllowance: 10, monthlyFee: 50, smsAllowance: -1, extraPatientPrice: 5.0, extraSmsPrice: 0, activePatientLimit: -1, extraActivePatientPrice: 0 },
+  { id: 'shared-kit-license', name: 'Shared Kit License', patientCreationAllowance: 10, monthlyFee: 100, smsAllowance: -1, extraPatientPrice: 10.0, extraSmsPrice: 0, activePatientLimit: -1, extraActivePatientPrice: 0 },
+  { id: 'no-kit-license', name: 'No Kit License', patientCreationAllowance: 10, monthlyFee: 250, smsAllowance: -1, extraPatientPrice: 25.0, extraSmsPrice: 0, activePatientLimit: -1, extraActivePatientPrice: 0 },
+  { id: 'full-kit-service', name: 'Full Kit Service', patientCreationAllowance: 10, monthlyFee: 150, smsAllowance: -1, extraPatientPrice: 15.0, extraSmsPrice: 0, activePatientLimit: -1, extraActivePatientPrice: 0 },
+  { id: 'shared-kit-service', name: 'Shared Kit Service', patientCreationAllowance: 10, monthlyFee: 300, smsAllowance: -1, extraPatientPrice: 30.0, extraSmsPrice: 0, activePatientLimit: -1, extraActivePatientPrice: 0 },
+  { id: 'no-kit-service', name: 'No Kit Service', patientCreationAllowance: 10, monthlyFee: 450, smsAllowance: -1, extraPatientPrice: 45.0, extraSmsPrice: 0, activePatientLimit: -1, extraActivePatientPrice: 0 },
 ];
 
 export function getPlanById(id: string): BillingPlan | undefined {
